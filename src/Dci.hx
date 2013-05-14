@@ -119,8 +119,8 @@ class Dci
 							//var typePath = TPath({ pack : ["contexts"], name : typeName, params : [], sub : null });
 							//var typePath = macro $i("contexts." + typeName);
 							//var typePath = EConst(CIdent(typeName + "Roles"));
-							//var typePath = Context.toComplexType(Context.getType(typeName));
-							exprs.unshift(macro var context = dci.ContextStorage.current);
+							var typePath = Context.toComplexType(Context.getType(typeName));
+							exprs.unshift(macro var context : $typePath = dci.ContextStorage.current);
 							//var contextType : ComplexType = macro : $typePath
 							
 						default:
