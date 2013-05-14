@@ -49,7 +49,9 @@ class Dci
 		switch(e.expr)
 		{
 			case EReturn(e):
+				// No need to set the context after returning
 			case ECall(e2, params):
+				// Set context after calling another method.
 				var array = new Array<Expr>();
 				array.push({expr: e.expr, pos: e.pos});
 				array.push(macro dci.Context.Current = this);
@@ -60,27 +62,83 @@ class Dci
 		}
 	}
 	
-	@:macro public static function role(typeExpr) : Array<Field>
+	@:macro public static function role(typeExpr : Expr) : Array<Field>
 	{
 		var pos = Context.currentPos();
         var fields = Context.getBuildFields();
-		
+
 		var typeName = getTypeName(typeExpr);
 		var contextType = Context.getType(typeName);
 		
-		var getField = function(fieldName) { macro return Reflect.field(dci.Context.Current, fieldName); };
+		//var setContext = function(type : Null<ComplexType>) { return macro var context : $type = dci.Context.Current; };		
+		//trace(macro var b = cast(a, Float));
 		
-		for (field in getRoleFields(Context.getType(typeName)))
-		{
-			trace("Adding " + field.name + " to role for " + typeName);
+		/*
+		{ expr => EVars([ 
+			{ expr => 
+				{ expr => EField( 
+					{ expr => EField( 
+						{ expr => EConst(CIdent(dci)), pos => #pos }
+						, Context)
+					, pos => #pos }, Current)
+				, pos => #pos }
+			, name => b
+			, type => TPath( { name => Adler32, pack => [haxe, crypto], params => [] } ) 
+			} ])
+		, pos => #pos }
+		
+		trace(macro var b : haxe.crypto.Adler32 = dci.Context.Current);
+		
+		var setContextVar = EVars([{ 
+			name: "context", 
+			type: Context.toComplexType(Context.getType(typeName + "Roles")),
+			expr: macro dci.Context.Current
+		}]);
+		*/
+		
+		for (field in fields)
+		{	
+			if (field.name == "new" || field.name == "_new")
+				continue;
+
+			switch(field.kind)
+			{
+				case FFun(f):
+					if (f.expr == null) continue;
+
+					trace("Inject Context field on RoleMethods" + field.name);
+					
+					switch(f.expr.expr)
+					{					
+						case EBlock(exprs):
+							//var typePath = TPath({ pack : ["contexts"], name : typeName + "Roles", params : [], sub : null });
+							var typePath = Context.toComplexType(Context.getType(typeName + "Roles"));
+							//var typePath = EConst(CIdent(typeName + "Roles"));
+							exprs.unshift(macro var context : $typePath = dci.Context.Current);
+							//exprs.unshift(referenceContext(contextType));
+							
+						default:
+					}
+					
+				default:
+			}
 		}
 		
-        var tint = TPath({ pack : [], name : typeName, params : [], sub : null });
-        fields.push({ name : "context", doc : null, meta : [], access : [APrivate], kind : FVar(tint,null), pos : pos });
+        //var tint = TPath({ pack : [], name : typeName + "Roles", params : [], sub : null });
+        //fields.push({ name : "context", doc : null, meta : [], access : [APrivate], kind : FVar(tint,null), pos : pos });
         
 		return fields;
 	}
 	
+	/*
+	static function referenceContext(contextType : Type)
+	{
+		var context : ComplexType = Context.toComplexType(contextType);
+		return macro var context : contexts.MoneyTransferRoles = dci.Context.Current;
+	}
+	*/
+	
+	// Future usage: Auto-generate a TypeDef based on the roles.
 	@macro static function getRoleFields(typeName : Type) : Array<ClassField>
 	{
 		var output = new Array<ClassField>();

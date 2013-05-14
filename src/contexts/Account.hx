@@ -1,6 +1,11 @@
 package contexts;
 import data.Ledger;
 
+typedef AccountRoles = 
+{
+	private var ledgers : Ledgers;
+}
+
 @:build(Dci.context())
 class Account
 {

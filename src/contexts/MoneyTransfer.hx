@@ -11,6 +11,8 @@ typedef DestinationAccountInterface =
 	function Deposit(amount : Float) : Void;
 }
 
+// In the future, generate this typedef automatically
+// based on the Context Roles.
 typedef MoneyTransferRoles =
 {
 	private var sourceAccount : SourceAccount;
@@ -21,7 +23,8 @@ typedef MoneyTransferRoles =
 @:build(Dci.context())
 class MoneyTransfer
 {
-	// Roles
+	// The @role metadata is for future usage when building
+	// the MoneyTransferRoles typedef automatically.
 	@role var sourceAccount : SourceAccount;
 	@role var destinationAccount : DestinationAccount;
 	@role var amount : Amount;
@@ -56,7 +59,7 @@ class MoneyTransfer
 }
 
 @:build(Dci.role(MoneyTransfer))
-private abstract Amount(Float) to Float
+private abstract Amount(Float) from Float to Float
 {
 	public inline function new(amount)
 	{
@@ -74,8 +77,8 @@ private abstract SourceAccount(SourceAccountInterface)
 	
 	public function Transfer()
 	{
-		var context : MoneyTransferRoles = Context.Current;
-		
+		// Gets Autocomplete, context doesn't:
+		// var context2 : MoneyTransferRoles = Context.Current; 
 		this.Withdraw(context.amount);
 		context.destinationAccount.Deposit(context.amount);
 	}
