@@ -8,6 +8,7 @@ using haxe.macro.ExprTools;
 
 class Dci
 {
+	#if macro
 	@macro public static function context() : Array<Field>
 	{
         var fields : Array<Field> = Context.getBuildFields();
@@ -44,7 +45,7 @@ class Dci
 					switch(f.expr.expr)
 					{
 						case EBlock(exprs):
-							exprs.unshift(Dci.setCurrentContext());
+							exprs.unshift(setCurrentContext());
 							
 						default:
 					}
@@ -77,7 +78,7 @@ class Dci
 					{					
 						case EBlock(exprs):
 							var typePath : Null<ComplexType> = Context.toComplexType(contextType);
-							exprs.unshift(macro var context : $typePath = dci.ContextStorage.current);
+							exprs.unshift(macro var context : $typePath = Dci.currentContext);
 							
 						default:
 					}
@@ -91,7 +92,7 @@ class Dci
 
 	static function setCurrentContext()
 	{
-		return macro dci.ContextStorage.current = this;
+		return macro Dci.currentContext = this;
 	}
 
 	static function injectSetter(e : Expr)
@@ -104,7 +105,7 @@ class Dci
 				// Set context after calling another method.
 				var array = new Array<Expr>();
 				array.push({expr: e.expr, pos: e.pos});
-				array.push(Dci.setCurrentContext());
+				array.push(setCurrentContext());
 				
 				e.expr = EBlock(array);
 				
@@ -131,4 +132,7 @@ class Dci
 		Context.error("Type identifier expected.", type.pos);
 		return null;
 	}
+	#else
+	public static var currentContext(default, default) : Dynamic;
+	#end
 }
