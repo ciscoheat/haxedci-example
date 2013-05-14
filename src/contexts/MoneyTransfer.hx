@@ -1,6 +1,6 @@
 package contexts;
-import dci.Context;
-import dci.ContextStorage;
+
+// TODO: Auto-generate interfaces from Roles
 
 typedef SourceAccountInterface = 
 {
