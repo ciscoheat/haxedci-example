@@ -2,7 +2,6 @@ package ;
 import contexts.Account;
 import contexts.MoneyTransfer;
 import data.Ledger;
-import js.Lib;
 
 /**
  * ...
