@@ -39,6 +39,7 @@ class Account
 	public inline function new(ledgers : Array<Ledger>)
 	{
 		this = ledgers;
+		
 	}
 	
 	// Required for iteration of an abstract type:

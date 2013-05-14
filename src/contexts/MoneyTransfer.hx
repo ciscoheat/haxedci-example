@@ -1,4 +1,6 @@
 package contexts;
+import dci.Context;
+import dci.ContextStorage;
 
 typedef SourceAccountInterface = 
 {
@@ -10,23 +12,11 @@ typedef DestinationAccountInterface =
 	function Deposit(amount : Float) : Void;
 }
 
-// In the future, generate this typedef automatically
-// based on the Context Roles.
-typedef MoneyTransferRoles =
+class MoneyTransfer implements dci.Context
 {
-	private var sourceAccount : SourceAccount;
-	private var destinationAccount : DestinationAccount;
-	private var amount : Amount;
-}
-
-@:build(Dci.context())
-class MoneyTransfer
-{
-	// The @role metadata is for future usage when building
-	// the MoneyTransferRoles typedef automatically.
-	@role var sourceAccount : SourceAccount;
-	@role var destinationAccount : DestinationAccount;
-	@role var amount : Amount;
+	@role @:allow(contexts) var sourceAccount : SourceAccount;
+	@role @:allow(contexts) var destinationAccount : DestinationAccount;
+	@role @:allow(contexts) var amount : Amount;
 
 	public function new(source, destination, amount)
 	{
@@ -76,10 +66,17 @@ private abstract SourceAccount(SourceAccountInterface)
 	
 	public function Transfer()
 	{
-		// Gets Autocomplete, context doesn't:
-		// var context2 : MoneyTransferRoles = Context.Current; 
+		// First one gets Autocomplete, second one and "context" doesn't?
+		//var context2 : MoneyTransfer = dci.ContextStorage.current;
+		//var context2 = cast(ContextStorage.current, MoneyTransfer);
+		
 		this.Withdraw(context.amount);
 		context.destinationAccount.Deposit(context.amount);
+	}
+	
+	public function Withdraw(amount : Float)
+	{
+		this.Withdraw(amount);
 	}
 }
 

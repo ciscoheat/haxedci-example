@@ -8,11 +8,19 @@ using haxe.macro.ExprTools;
 
 class Dci
 {
+	static function setCurrentContext()
+	{
+		return macro dci.ContextStorage.current = this;
+	}
+	
 	@macro public static function context() : Array<Field>
 	{
-		trace("Creating context... " + Context.getLocalType());
+		//trace("Creating context... " + Context.getLocalType());
 		
         var fields = Context.getBuildFields();
+		
+		var name = typeNameFromType(Context.getLocalType());		
+		var contextVarName = name.substr(name.lastIndexOf(".")+1);
 		
 		for (field in fields)
 		{
@@ -24,15 +32,15 @@ class Dci
 				case FFun(f):
 					if (f.expr == null) continue;
 
-					trace("Inject Context setter after method calls in Interaction " + field.name);
+					//trace("Inject Context setter after method calls in Interaction " + field.name);
 					//trace(f.expr.expr);
 					
-					f.expr.iter(injectSetter);
+					injectSetter(f.expr);
 					
 					switch(f.expr.expr)
 					{
 						case EBlock(exprs):
-							exprs.unshift(macro dci.Context.Current = this);
+							exprs.unshift(Dci.setCurrentContext());
 							
 						default:
 					}
@@ -54,7 +62,7 @@ class Dci
 				// Set context after calling another method.
 				var array = new Array<Expr>();
 				array.push({expr: e.expr, pos: e.pos});
-				array.push(macro dci.Context.Current = this);
+				array.push(Dci.setCurrentContext());
 				
 				e.expr = EBlock(array);
 				
@@ -62,16 +70,13 @@ class Dci
 		}
 	}
 	
-	@:macro public static function role(typeExpr : Expr) : Array<Field>
+	@macro public static function role(typeExpr : Expr) : Array<Field>
 	{
 		var pos = Context.currentPos();
         var fields = Context.getBuildFields();
 
 		var typeName = getTypeName(typeExpr);
 		var contextType = Context.getType(typeName);
-		
-		//var setContext = function(type : Null<ComplexType>) { return macro var context : $type = dci.Context.Current; };		
-		//trace(macro var b = cast(a, Float));
 		
 		/*
 		{ expr => EVars([ 
@@ -106,16 +111,17 @@ class Dci
 				case FFun(f):
 					if (f.expr == null) continue;
 
-					trace("Inject Context field on RoleMethods" + field.name);
+					//trace("Inject Context field on RoleMethods" + field.name);
 					
 					switch(f.expr.expr)
 					{					
 						case EBlock(exprs):
-							//var typePath = TPath({ pack : ["contexts"], name : typeName + "Roles", params : [], sub : null });
-							var typePath = Context.toComplexType(Context.getType(typeName + "Roles"));
+							//var typePath = TPath({ pack : ["contexts"], name : typeName, params : [], sub : null });
+							//var typePath = macro $i("contexts." + typeName);
 							//var typePath = EConst(CIdent(typeName + "Roles"));
-							exprs.unshift(macro var context : $typePath = dci.Context.Current);
-							//exprs.unshift(referenceContext(contextType));
+							//var typePath = Context.toComplexType(Context.getType(typeName));
+							exprs.unshift(macro var context = dci.ContextStorage.current);
+							//var contextType : ComplexType = macro : $typePath
 							
 						default:
 					}
@@ -130,16 +136,8 @@ class Dci
 		return fields;
 	}
 	
-	/*
-	static function referenceContext(contextType : Type)
-	{
-		var context : ComplexType = Context.toComplexType(contextType);
-		return macro var context : contexts.MoneyTransferRoles = dci.Context.Current;
-	}
-	*/
-	
 	// Future usage: Auto-generate a TypeDef based on the roles.
-	@macro static function getRoleFields(typeName : Type) : Array<ClassField>
+	macro static function getRoleFields(typeName : Type) : Array<ClassField>
 	{
 		var output = new Array<ClassField>();
 		
@@ -161,7 +159,20 @@ class Dci
 		return output;
 	}
 	
-	@macro static function getTypeName(type) : String
+	static function typeNameFromType(type : Type) : String
+	{
+		switch(type)
+		{
+			case TInst(cls, _):
+				return cls.get().module;
+				
+			default:
+				Context.error("No Type found.", Context.currentPos());
+				return null;
+		}
+	}
+	
+	static function getTypeName(type) : String
 	{
 		switch(type.expr)
 		{
