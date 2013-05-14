@@ -14,9 +14,9 @@ typedef DestinationAccountInterface =
 
 class MoneyTransfer implements dci.Context
 {
-	@role @:allow(contexts) var sourceAccount : SourceAccount;
-	@role @:allow(contexts) var destinationAccount : DestinationAccount;
-	@role @:allow(contexts) var amount : Amount;
+	@role var sourceAccount : SourceAccount;
+	@role var destinationAccount : DestinationAccount;
+	@role var amount : Amount;
 
 	public function new(source, destination, amount)
 	{

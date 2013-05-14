@@ -17,14 +17,26 @@ class Dci
 	{
 		//trace("Creating context... " + Context.getLocalType());
 		
-        var fields = Context.getBuildFields();
-		
-		var name = typeNameFromType(Context.getLocalType());		
-		var contextVarName = name.substr(name.lastIndexOf(".")+1);
+        var fields : Array<Field> = Context.getBuildFields();
 		
 		for (field in fields)
 		{
-			if (field.name == "new" || !Lambda.exists(field.access, function(a) { return a == Access.APublic; } ))
+			if (field.name == "new")
+				continue;
+
+			// Add @:allow(currentPackage) to fields annotated with @role
+			if (Lambda.exists(field.meta, function(m) { return m.name == "role"; }))
+			{
+				if (Lambda.exists(field.access, function(a) { return a == Access.APublic; } ))
+					Context.error("A Context Role cannot be public.", field.pos);
+				
+				var c = Context.getLocalClass().get();
+				var pack = macro $p{c.pack};
+				
+				field.meta.push({name: ":allow", params: [pack], pos: Context.currentPos()});
+			}
+			
+			if (!Lambda.exists(field.access, function(a) { return a == Access.APublic; } ))
 				continue;
 			
 			switch(field.kind)
@@ -73,7 +85,7 @@ class Dci
 	@macro public static function role(typeExpr : Expr) : Array<Field>
 	{
 		var pos = Context.currentPos();
-        var fields = Context.getBuildFields();
+        var fields : Array<Field> = Context.getBuildFields();
 
 		var typeName = getTypeName(typeExpr);
 		var contextType = Context.getType(typeName);
@@ -105,12 +117,12 @@ class Dci
 		{	
 			if (field.name == "new" || field.name == "_new")
 				continue;
-
+								
 			switch(field.kind)
 			{
 				case FFun(f):
 					if (f.expr == null) continue;
-
+														
 					//trace("Inject Context field on RoleMethods" + field.name);
 					
 					switch(f.expr.expr)
@@ -137,7 +149,7 @@ class Dci
 	}
 	
 	// Future usage: Auto-generate a TypeDef based on the roles.
-	macro static function getRoleFields(typeName : Type) : Array<ClassField>
+	@macro static function getRoleFields(typeName : Type) : Array<ClassField>
 	{
 		var output = new Array<ClassField>();
 		
@@ -147,9 +159,7 @@ class Dci
 				for(field in t.get().fields.get())
 				{
 					if (field.meta.has("role"))
-					{
 						output.push(field);
-					}
 				}
 				
 			default:
@@ -158,7 +168,7 @@ class Dci
 		
 		return output;
 	}
-	
+
 	static function typeNameFromType(type : Type) : String
 	{
 		switch(type)
