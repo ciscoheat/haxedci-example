@@ -15,30 +15,60 @@ class Main
 {
 	static var neoAccount : Account;
 	static var bills : Array<Creditor>;
-	
+		
+	static function main() 
+	{
+		setupAccountsAndBills();
+		setupConsoleCommunication();
+		
+		var totalToPay = Lambda.fold(bills, function(cr, a) { return cr.amountOwed + a; }, 0.0);
+				
+		type("Hello Neo...", 1000)
+		.then(type.bind("It's time to pay your bills, Neo.", 500))
+		.then(newline)
+		.then(newline)
+		.then(type.bind("Current account balance: " + neoAccount.balance()))
+		.then(type.bind('1 - Pay bills ($totalToPay)'))
+		.then(newline);
+	}
+
 	static function testinput(i : String)
 	{
-		if (i.length == 0) return;
-		
-		if (i != '1') 
+		switch(i)
 		{
-			type("Try again, Neo.");
-			return;
-		}
-			
-		try 
-		{
-			new PayBills(neoAccount, bills).pay();
-			
-			type("Account balance after paying bills: " + neoAccount.balance());
-		}
-		catch (e : String)
-		{
-			type(e);
+			case '':
+			case '1':
+				try 
+				{
+					new PayBills(neoAccount, bills).pay();			
+					type("Account balance after paying bills: " + neoAccount.balance());
+				}
+				catch (e : String)
+				{
+					type(e);
+				}				
+			case _:
+				type("Try again, Neo.");
 		}			
 	}
 	
-	static function main() 
+	static function setupConsoleCommunication()
+	{
+		var input = new JQuery("#input");
+
+		input.focus().keyup(function(e) {
+			if (e.which == 13) 
+			{
+				var i = new JQuery(e.target).val();
+				new JQuery(e.target).val("");
+				testinput(i);
+			}
+		});		
+
+		new JQuery("#screen").on('click', input.focus);		
+	}
+	
+	static function setupAccountsAndBills()
 	{
 		var ledger = new Ledger();
 		ledger.message = "Initial balance";
@@ -54,42 +84,22 @@ class Main
 		foodBill.amountOwed = 300;
 		foodBill.name = "Food bill";
 		
-		bills = [foodBill];
-		
-		var total = Lambda.fold(bills, function(cr, a) { return cr.amountOwed + a; }, 0.0);
-		
-		type("Hello Neo...")
-		.then(function() {
-			var p = new Deferred();
-			Timer.delay(function() { type("It's time to pay your bills, Neo.").then(p.resolve); }, 1000);
-			return p;
-		})
-		.then(function() { return newline(); } )
-		.then(function() { return newline(); } )
-		.then(function() { return type("Current account balance: " + neoAccount.balance()); } )
-		.then(function() { return type('1 - Pay bills ($total)'); } )
-		.then(newline);
-		
-		new JQuery("#screen").on('click', function() {
-			new JQuery("#input").focus();
-		});
-		
-		new JQuery("#input").focus().keydown(function(e) {
-			if (e.which == 13)
-			{				
-				var i = new JQuery(e.target).val();
-				new JQuery(e.target).val("");
-				testinput(i);
-			}
-		});
+		bills = [foodBill];		
 	}
-	
-	static function newline() : Promise
+
+	static function type(txt : String, delay = 0)
 	{
-		return type(""); 
+		var p = new Deferred();
+		typeString(txt).then(function() { Timer.delay(function() { p.resolve(); }, delay); } );
+		return p.promise();
 	}
 	
-	static function type(txt : String) : Promise
+	static function newline(delay = 0) : Promise
+	{
+		return type("", delay);
+	}
+	
+	static function typeString(txt : String) : Promise
 	{
 		var el = new JQuery("#content");
 		var lines = el.find('div').length;
@@ -118,12 +128,13 @@ class Main
 			timeOut = Timer.delay(function() 
 			{
 				var type = txt.substr(char++, 1);
+				var currentText = el.text().substr(0, el.text().length - 1);
 				
-				el.text(el.text().substr(0, el.text().length-1) + type + '|');
+				el.text(currentText + type + '|');
 
 				if (char == txtLen) 
 				{
-					el.text(el.text().substr(0, el.text().length - 1));
+					el.text(currentText + type);
 					def.resolve();
 				}
 				else
