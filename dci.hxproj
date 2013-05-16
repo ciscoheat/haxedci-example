@@ -4,7 +4,7 @@
   <output>
     <movie outputType="Application" />
     <movie input="" />
-    <movie path="bin\JsTest.js" />
+    <movie path="bin\dci.js" />
     <movie fps="0" />
     <movie width="0" />
     <movie height="0" />
@@ -21,7 +21,7 @@
   <build>
     <option directives="" />
     <option flashStrict="False" />
-    <option mainClass="Main" />
+    <option mainClass="dci.examples.Main" />
     <option enabledebug="False" />
     <option additional="" />
   </build>
@@ -31,7 +31,7 @@
   </haxelib>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
-    <compile path="src\Main.hx" />
+    <compile path="src\dci\examples\Main.hx" />
   </compileTargets>
   <!-- Paths to exclude from the Project Explorer tree -->
   <hiddenPaths>

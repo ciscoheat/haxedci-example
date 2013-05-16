@@ -1,4 +1,4 @@
-package ;
+package dci.examples;
 import dci.examples.moneytransfer.contexts.Account;
 import dci.examples.moneytransfer.contexts.MoneyTransfer;
 import dci.examples.moneytransfer.contexts.PayBills;
