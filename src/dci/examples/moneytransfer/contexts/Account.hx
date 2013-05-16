@@ -1,17 +1,14 @@
 package dci.examples.moneytransfer.contexts;
 import dci.examples.moneytransfer.data.Ledger;
 
-typedef AccountRoles = 
-{
-	private var ledgers : Ledgers;
-}
+typedef ILedgers = Array<Ledger>;
 
 @:build(Dci.context())
 class Account
 {
 	@role var ledgers : Ledgers;
 	
-	public function new(ledgers : Array<Ledger>)
+	public function new(ledgers : ILedgers)
 	{
 		this.ledgers = new Ledgers(ledgers);
 	}	
@@ -33,7 +30,7 @@ class Account
 }
 
 @:build(Dci.role(Account))
-@:arrayAccess private abstract Ledgers(Array<Ledger>)
+@:arrayAccess private abstract Ledgers(ILedgers)
 {
 	// Required for iteration of an abstract type:
 	public var length(get, never) : Int;

@@ -51,8 +51,7 @@ class MoneyTransfer implements dci.Context
 
 @:build(Dci.role(MoneyTransfer))
 private abstract Amount(IAmount) from IAmount to IAmount
-{
-}
+{}
 
 @:build(Dci.role(MoneyTransfer))
 private abstract SourceAccount(ISourceAccount)
