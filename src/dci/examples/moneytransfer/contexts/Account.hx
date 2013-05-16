@@ -16,7 +16,7 @@ class Account
 		this.ledgers = new Ledgers(ledgers);
 	}	
 	
-	public function balance()
+	public function balance() : Float
 	{
 		return ledgers.balance();
 	}

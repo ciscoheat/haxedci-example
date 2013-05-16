@@ -63,7 +63,7 @@ private abstract Source(ISource) from ISource to ISource
 		
 		if (surplus < 0)
 		{
-			throw 'Not enough money to pay all bills, $$${Math.abs(surplus)} more is needed.';
+			throw 'Not enough money to pay all bills, ${Math.abs(surplus)} more is needed.';
 		}
 		
 		for (creditor in c.creditors)

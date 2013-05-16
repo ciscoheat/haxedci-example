@@ -3,9 +3,49 @@
 <head>
 	<meta charset="utf-8"/>
 	<title>DCI</title>
-	<meta name="description" content="" />
+	<style type="text/css">
+		body {
+			background: url(binding_dark.png);
+		}
+		#screen {
+			top: 50%;
+			margin: 200px auto;
+			font-family: Consolas, 'Lucida Console', Monaco, monospace;
+			font-size: 13px;
+			color: #2e2;
+			border: 2px solid #333;
+			background-color: black;
+			height: 400px;
+			width: 600px;
+			-moz-border-radius: 35px;
+			border-radius: 35px;
+			padding: 20px;
+		}
+		
+		#content {
+			height: 360px;
+			width: 600px;
+			max-height: 360px;
+		}
+		
+		#input {
+			font-family: Consolas, 'Lucida Console', Monaco, monospace;
+			font-size: 13px;
+			color: #2e2;
+			border: 1px solid black;
+			background-color: black;
+			width: 560px;
+			outline: none !important;
+			margin-top: -1px;
+			margin-left: -5px;
+		}
+	</style>
 </head>
 <body>	
+	<div id="screen">
+		<div id="content"></div>
+		<div><div style="float:left;">C:\&gt;&nbsp;</div><input type="text" id="input"></div>
+	</div>
 	<div id="haxe:trace"></div>
 	<script src="jquery-1.9.1.min.js"></script>
 	<script src="dci.js"></script>
