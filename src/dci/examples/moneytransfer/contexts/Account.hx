@@ -35,12 +35,6 @@ class Account
 @:build(Dci.role(Account))
 @:arrayAccess private abstract Ledgers(Array<Ledger>)
 {
-	public inline function new(ledgers : Array<Ledger>)
-	{
-		this = ledgers;
-		
-	}
-	
 	// Required for iteration of an abstract type:
 	public var length(get, never) : Int;
 	function get_length() return this.length;

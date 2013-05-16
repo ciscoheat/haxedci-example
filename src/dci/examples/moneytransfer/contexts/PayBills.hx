@@ -35,11 +35,6 @@ class PayBills implements Context
 @:build(Dci.role(PayBills))
 private abstract Creditors(ICreditors) from ICreditors to ICreditors
 {
-	public inline function new(creditors)
-	{
-		this = creditors;
-	}
-	
 	function iterator()
 	{
 		return this.iterator();
@@ -49,11 +44,6 @@ private abstract Creditors(ICreditors) from ICreditors to ICreditors
 @:build(Dci.role(PayBills))
 private abstract Source(ISource) from ISource to ISource
 {
-	public inline function new(source)
-	{
-		this = source;
-	}
-	
 	public function payBills()
 	{
 		var c : PayBills = context;

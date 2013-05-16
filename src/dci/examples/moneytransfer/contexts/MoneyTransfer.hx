@@ -50,22 +50,13 @@ class MoneyTransfer implements dci.Context
 }
 
 @:build(Dci.role(MoneyTransfer))
-private abstract Amount(Float) from Float to Float
+private abstract Amount(IAmount) from IAmount to IAmount
 {
-	public inline function new(amount)
-	{
-		this = amount;
-	}	
 }
 
 @:build(Dci.role(MoneyTransfer))
 private abstract SourceAccount(SourceAccountInterface)
 {
-	public inline function new(account)
-	{
-		this = account;
-	}
-	
 	public function Transfer()
 	{
 		// First one gets Autocomplete, second one and "context" doesn't?
@@ -85,11 +76,6 @@ private abstract SourceAccount(SourceAccountInterface)
 @:build(Dci.role(MoneyTransfer))
 private abstract DestinationAccount(DestinationAccountInterface)
 {
-	public inline function new(account)
-	{
-		this = account;
-	}
-	
 	public function deposit(amount : Float)
 	{
 		this.deposit(amount);

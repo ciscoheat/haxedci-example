@@ -62,17 +62,23 @@ class Dci
 		
 		return fields;
 	}
-	
+		
 	@macro public static function role(typeExpr : Expr) : Array<Field>
 	{
         var fields : Array<Field> = Context.getBuildFields();
 		var contextName = getTypeName(typeExpr);
 		var contextType : Type = Context.getType(contextName);
-						
+		
+		//var roleConstructorBody = Context.parse("public inline function new(rolePlayer) { this = rolePlayer; }", Context.currentPos());
+		
 		for (field in fields)
-		{	
+		{				
 			if (field.name == "new" || field.name == "_new")
+			{
+				trace('Constructor: ${field.name} for ${contextType}');
+				trace(field);
 				continue;
+			}
 								
 			switch(field.kind)
 			{
@@ -93,9 +99,40 @@ class Dci
 			}
 		}
 		
+		// Determine underlying type of abstract type
+		var returnType = switch(fields.length)
+		{
+			case 0: null;
+			case _:
+				// Test first field of class
+				switch(fields[0].kind)
+				{
+					// If a function, it's expressed as the type of the first argument.
+					case FFun(f): f.args[0].type;
+					case _: 
+						// If not a function, it has a "from T to T" definition and the second
+						// argument should contain the type.
+						switch(fields[1].kind)
+						{
+							case FFun(f): f.args[0].type;
+							case _:
+								trace(fields);
+								throw "Class body for abstract type expected, instead: " + Context.getLocalType();
+						}
+				}
+		}		
+		
+		// fields[0] is the class body
+		//var returnType = getAbstractUnderlyingType(f);
+		var funcArg = { value : null, type : null, opt : false, name : "rolePlayer" };
+		var kind = FFun( { ret : returnType, expr : macro return rolePlayer, params : [], args : [funcArg] } );
+		
+        fields.push( { name : "_new", doc : null, meta : [], access : [AStatic, AInline, APublic], kind : kind, pos : Context.currentPos() } );
+		
+		
 		return fields;
 	}
-
+	
 	static function setCurrentContext()
 	{
 		return macro Dci.currentContext = this;
