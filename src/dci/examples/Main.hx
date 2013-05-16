@@ -34,7 +34,7 @@ class Main
 
 	static function testinput(i : String)
 	{
-		switch(i)
+		switch(i.toLowerCase())
 		{
 			case '':
 			case '1':
@@ -46,7 +46,9 @@ class Main
 				catch (e : String)
 				{
 					type(e);
-				}				
+				}
+			case 'dir':
+				type("Maybe in the next version of Matrix.");
 			case _:
 				type("Try again, Neo.");
 		}			
@@ -72,7 +74,7 @@ class Main
 	{
 		var ledger = new Ledger();
 		ledger.message = "Initial balance";
-		ledger.amount = 2000;
+		ledger.amount = 1000;
 		
 		var ledgers = new Array<Ledger>();
 		ledgers.push(ledger);

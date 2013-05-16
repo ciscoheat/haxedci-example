@@ -58,7 +58,7 @@ private abstract Source(ISource) from ISource to ISource
 		
 		for (creditor in c.creditors)
 		{
-			new MoneyTransfer(this, creditor.account, creditor.amountOwed).Execute();
+			new MoneyTransfer(this, creditor.account, creditor.amountOwed).execute();
 		}
 	}
 }

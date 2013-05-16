@@ -6,6 +6,8 @@ import haxe.macro.Context;
 
 using haxe.macro.ExprTools;
 
+typedef Test = { function a() : Void; };
+
 class Dci
 {	
 	#if macro
@@ -68,12 +70,12 @@ class Dci
 		
 		// Inject context local variable in RoleMethods.
 		for (field in fields)
-		{				
+		{
 			switch(field.kind)
 			{
 				case FFun(f):
 					if (f.expr == null) continue;
-
+					
 					switch(f.expr.expr)
 					{					
 						case EBlock(exprs):
@@ -86,29 +88,86 @@ class Dci
 				case _:
 			}
 		}
-		
+
 		// Determine underlying type of abstract type
-		var returnType = switch(fields.length)
-		{
-			case 0: null;
-			case _:
-				// Test first field of class
-				switch(fields[0].kind)
-				{
-					// If a function, it's expressed as the type of the first argument.
-					case FFun(f): f.args[0].type;
-					case _: 
-						// If not a function, it has a "from T to T" definition and the second
-						// argument should contain the type.
-						switch(fields[1].kind)
+		var returnType = getUnderlyingTypeForAbstractClass(fields);
+
+		/*
+		if (returnType == null)
+			trace("No typedef for abstract type " + Context.getLocalClass());
+
+		if (returnType != null)
+		{			
+			switch(cast(returnType, ComplexType))
+			{
+				// If a typepath, get its fields.
+				case TPath(p):
+					trace("Implementing typedef " + p.name + " on abstract type " + Context.getLocalClass());
+					
+					var typeDefFields = getTypedefFields(p);
+					if (typeDefFields != null)
+					{
+						for (field in typeDefFields)
 						{
-							case FFun(f): f.args[0].type;
-							case _:
-								throw "Class body for abstract type expected, instead: " + Context.getLocalType();
+							switch(field.kind)
+							{
+								// Convert each typedef method to a method in the abstract type, 
+								// implementing its interface.
+								case FMethod(k):
+									if (k != MethNormal) throw "Unsupported method type: " + k;
+
+									var args1;
+									var ret1 : Type; 
+									var methodBody : Expr;
+									
+									switch(field.type)
+									{
+										case TFun(args, ret):
+											args1 = args;
+											ret1 = ret;
+											
+										case _:
+											throw "Unsupported method construct.";
+									}
+									
+									trace("Injecting field " + field.name);
+									
+									var allArgs = Lambda.array(Lambda.map(args1, function(a) { return a.name; } )).join(",");									
+									var fieldName = field.name;
+									
+									if (returnsVoid(ret1))
+									{
+										methodBody = macro this.$fieldName(allArgs);
+									}
+									else
+									{
+										methodBody = macro return this.$fieldName(allArgs);
+									}
+									
+									fields.push({
+										name : field.name,
+										doc : null,
+										meta : null,
+										access : [APublic],
+										kind : FFun({
+											ret: Context.toComplexType(ret1),
+											expr: methodBody,
+											args: toFunctionArgs(args1),
+											params: []
+										}),
+										pos: Context.currentPos()
+									});
+									
+								case _: throw "Unsupported typedef field.";
+							}
 						}
-				}
+					}
+					
+				case _: throw "Unsupported typedef path.";
+			}
 		}
-		
+		*/
+				
 		// Add the abstract type constructor to the class.
 		var funcArg = { value : null, type : null, opt : false, name : "rolePlayer" };
 		var kind = FFun( { ret : returnType, expr : macro return rolePlayer, params : [], args : [funcArg] } );
@@ -116,6 +175,76 @@ class Dci
         fields.push( { name : "_new", doc : null, meta : [], access : [AStatic, AInline, APublic], kind : kind, pos : Context.currentPos() } );
 
 		return fields;
+	}
+	
+	static function returnsVoid(type : Type)
+	{
+		return switch(type)
+		{
+			case TAbstract(t, _):
+				return t.get().name == "Void";
+				
+			case _: throw "Unsupported method argument type";
+		}
+		
+	}
+	
+	static function toFunctionArgs(args : Array<{ t : Type, opt : Bool, name : String }> ) : Array<FunctionArg>
+	{
+		var output = new Array<FunctionArg>();
+		
+		for(a in args)
+		{
+			var t = {
+				value: macro null,
+				type: Context.toComplexType(a.t),
+				opt: a.opt,
+				name: a.name
+			};
+			
+			output.push(t);
+		}
+		
+		return output;
+	}
+	
+	static function getTypedefFields(path : TypePath) : Array<ClassField>
+	{
+		var t : Type = Context.getType(path.name);
+		return switch(t)
+		{
+			case TType(def, _):
+				switch(def.get().type)
+				{
+					case TAnonymous(a):	a.get().fields;
+					case _: null;
+				}
+				
+			case _: null;
+		}
+		
+	}
+	
+	static function getUnderlyingTypeForAbstractClass(fields : Array<Field>) : Null<ComplexType>
+	{
+		if (fields.length == 0)
+			return null;
+		
+		// Test first field of class
+		return switch(fields[0].kind)
+		{
+			// If a function, it's expressed as the type of the first argument.
+			case FFun(f): 
+				return f.args[0].type;
+			case _: 
+				// If not a function, it has a "from T to T" definition and the second
+				// argument should contain the type.
+				switch(fields[1].kind)
+				{
+					case FFun(f): f.args[0].type;
+					case _:	throw "Class body for abstract type expected, instead: " + Context.getLocalType();
+				}
+		}
 	}
 	
 	static function setCurrentContext()

@@ -1,7 +1,5 @@
 package dci.examples.moneytransfer.contexts;
 
-// TODO: Auto-generate interfaces from Roles
-
 typedef ISourceAccount = 
 {
 	function withdraw(amount : Float) : Void;
@@ -43,9 +41,9 @@ class MoneyTransfer implements dci.Context
 	}
 	
 	// Interaction
-	public function Execute()
+	public function execute()
 	{
-		sourceAccount.Transfer();
+		sourceAccount.transfer();
 	}
 }
 
@@ -56,16 +54,16 @@ private abstract Amount(IAmount) from IAmount to IAmount
 @:build(Dci.role(MoneyTransfer))
 private abstract SourceAccount(ISourceAccount)
 {
-	public function Transfer()
+	public function transfer()
 	{
-		// First one gets Autocomplete, second one and "context" doesn't?
-		//var context2 : MoneyTransfer = dci.ContextStorage.current;
-		//var context2 = cast(ContextStorage.current, MoneyTransfer);
+		// Until autocompletion works for injected local vars, define it yourself:
+		var c : MoneyTransfer = context;
 		
-		this.withdraw(context.amount);
-		context.destinationAccount.deposit(context.amount);
+		this.withdraw(c.amount);
+		c.destinationAccount.deposit(c.amount);
 	}
 	
+	// Until the automatic RoleInterface implementation is done, this definition is needed.
 	public function withdraw(amount : Float)
 	{
 		this.withdraw(amount);
@@ -75,6 +73,7 @@ private abstract SourceAccount(ISourceAccount)
 @:build(Dci.role(MoneyTransfer))
 private abstract DestinationAccount(IDestinationAccount)
 {
+	// Until the automatic RoleInterface implementation is done, this definition is needed.
 	public function deposit(amount : Float)
 	{
 		this.deposit(amount);
