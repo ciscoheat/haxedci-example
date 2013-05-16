@@ -1,11 +1,5 @@
 package ;
 
-/* 
- TODO: 
- - Figure out where autocompletion breaks down (use other project)
- - Use ACL for Dci.currentContext? Only contexts can use it.
- */
-
 import haxe.macro.Expr;
 import haxe.macro.Type;
 import haxe.macro.Context;
@@ -13,11 +7,11 @@ import haxe.macro.Context;
 using haxe.macro.ExprTools;
 
 class Dci
-{
+{	
 	#if macro
 	@macro public static function context() : Array<Field>
 	{
-        var fields : Array<Field> = Context.getBuildFields();
+        var fields : Array<Field> = Context.getBuildFields();		
 		
 		for (field in fields)
 		{
@@ -69,33 +63,24 @@ class Dci
 		var contextName = getTypeName(typeExpr);
 		var contextType : Type = Context.getType(contextName);
 		
-		//var roleConstructorBody = Context.parse("public inline function new(rolePlayer) { this = rolePlayer; }", Context.currentPos());
-		
+		// Inject context local variable in RoleMethods.
 		for (field in fields)
 		{				
-			if (field.name == "new" || field.name == "_new")
-			{
-				trace('Constructor: ${field.name} for ${contextType}');
-				trace(field);
-				continue;
-			}
-								
 			switch(field.kind)
 			{
 				case FFun(f):
 					if (f.expr == null) continue;
 
-					// Inject context var in RoleMethods.
 					switch(f.expr.expr)
 					{					
 						case EBlock(exprs):
 							var typePath : Null<ComplexType> = Context.toComplexType(contextType);
 							exprs.unshift(macro var context : $typePath = Dci.currentContext);
 							
-						default:
+						case _:
 					}
 					
-				default:
+				case _:
 			}
 		}
 		
@@ -116,20 +101,17 @@ class Dci
 						{
 							case FFun(f): f.args[0].type;
 							case _:
-								trace(fields);
 								throw "Class body for abstract type expected, instead: " + Context.getLocalType();
 						}
 				}
-		}		
+		}
 		
-		// fields[0] is the class body
-		//var returnType = getAbstractUnderlyingType(f);
+		// Add the abstract type constructor to the class.
 		var funcArg = { value : null, type : null, opt : false, name : "rolePlayer" };
 		var kind = FFun( { ret : returnType, expr : macro return rolePlayer, params : [], args : [funcArg] } );
 		
         fields.push( { name : "_new", doc : null, meta : [], access : [AStatic, AInline, APublic], kind : kind, pos : Context.currentPos() } );
-		
-		
+
 		return fields;
 	}
 	

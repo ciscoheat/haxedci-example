@@ -2,12 +2,12 @@ package dci.examples.moneytransfer.contexts;
 
 // TODO: Auto-generate interfaces from Roles
 
-typedef SourceAccountInterface = 
+typedef ISourceAccount = 
 {
 	function withdraw(amount : Float) : Void;
 }
 
-typedef DestinationAccountInterface = 
+typedef IDestinationAccount = 
 {
 	function deposit(amount : Float) : Void;
 }
@@ -20,7 +20,7 @@ class MoneyTransfer implements dci.Context
 	@role var destinationAccount : DestinationAccount;
 	@role var amount : Amount;
 
-	public function new(source : SourceAccountInterface, destination : DestinationAccountInterface, amount : IAmount)
+	public function new(source : ISourceAccount, destination : IDestinationAccount, amount : IAmount)
 	{
 		bindRoles(source, destination, amount);
 	}
@@ -55,7 +55,7 @@ private abstract Amount(IAmount) from IAmount to IAmount
 }
 
 @:build(Dci.role(MoneyTransfer))
-private abstract SourceAccount(SourceAccountInterface)
+private abstract SourceAccount(ISourceAccount)
 {
 	public function Transfer()
 	{
@@ -74,7 +74,7 @@ private abstract SourceAccount(SourceAccountInterface)
 }
 
 @:build(Dci.role(MoneyTransfer))
-private abstract DestinationAccount(DestinationAccountInterface)
+private abstract DestinationAccount(IDestinationAccount)
 {
 	public function deposit(amount : Float)
 	{
