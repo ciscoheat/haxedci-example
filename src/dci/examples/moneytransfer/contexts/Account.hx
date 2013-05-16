@@ -1,5 +1,5 @@
-package contexts;
-import data.Ledger;
+package dci.examples.moneytransfer.contexts;
+import dci.examples.moneytransfer.data.Ledger;
 
 typedef AccountRoles = 
 {
@@ -9,7 +9,6 @@ typedef AccountRoles =
 @:build(Dci.context())
 class Account
 {
-	// Roles
 	@role var ledgers : Ledgers;
 	
 	public function new(ledgers : Array<Ledger>)
@@ -17,19 +16,19 @@ class Account
 		this.ledgers = new Ledgers(ledgers);
 	}	
 	
-	public function Balance()
+	public function balance()
 	{
-		return ledgers.Balance();
+		return ledgers.balance();
 	}
 	
-	public function Deposit(amount : Float)
+	public function deposit(amount : Float)
 	{
-		ledgers.AddEntry("Depositing", amount);
+		ledgers.addEntry("Depositing", amount);
 	}
 	
-	public function Withdraw(amount : Float)
+	public function withdraw(amount : Float)
 	{
-		ledgers.AddEntry("Withdrawing", -amount);
+		ledgers.addEntry("Withdrawing", -amount);
 	}	
 }
 
@@ -46,16 +45,16 @@ class Account
 	public var length(get, never) : Int;
 	function get_length() return this.length;
 	
-	public function Balance()
+	public function balance()
 	{
-		return Lambda.fold(this, function(a, b) { return a.Amount + b; }, 0.0); 
+		return Lambda.fold(this, function(a, b) { return a.amount + b; }, 0.0); 
 	}
 	
-	public function AddEntry(message, amount)
+	public function addEntry(message, amount)
 	{		
 		var ledger = new Ledger();
-		ledger.Message = message;
-		ledger.Amount = amount;
+		ledger.message = message;
+		ledger.amount = amount;
 		
 		this.push(ledger);
 	}

@@ -1,32 +1,32 @@
 package ;
-import contexts.Account;
-import contexts.MoneyTransfer;
-import data.Ledger;
-
-/**
- * ...
- * @author Andreas
- */
+import dci.examples.moneytransfer.contexts.Account;
+import dci.examples.moneytransfer.contexts.MoneyTransfer;
+import dci.examples.moneytransfer.contexts.PayBills;
+import dci.examples.moneytransfer.data.Creditor;
+import dci.examples.moneytransfer.data.Ledger;
 
 class Main 
 {
 	static function main() 
 	{
 		var ledger = new Ledger();
-		ledger.Message = "Initial balance";
-		ledger.Amount = 2000;
+		ledger.message = "Initial balance";
+		ledger.amount = 2000;
 		
 		var ledgers = new Array<Ledger>();
 		ledgers.push(ledger);
 		
-		var source = new Account(ledgers);
-		var destination = new Account(new Array<Ledger>());
+		var myAccount = new Account(ledgers);		
 		
-		var transfer = new MoneyTransfer(source, destination, 500);
+		var foodBill = new Creditor();
+		foodBill.account = new Account(new Array<Ledger>());
+		foodBill.amountOwed = 300;
+		foodBill.name = "Food bill";
 		
-		transfer.Execute();
+		trace("Source balance: $" + myAccount.balance());
 		
-		trace("Source balance: " + source.Balance());
-		trace("Destination balance: " + destination.Balance());
+		new PayBills(myAccount, [foodBill]).pay();
+						
+		trace("Source balance after paying bills: $" + myAccount.balance());
 	}
 }

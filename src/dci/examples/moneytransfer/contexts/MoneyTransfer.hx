@@ -1,16 +1,18 @@
-package contexts;
+package dci.examples.moneytransfer.contexts;
 
 // TODO: Auto-generate interfaces from Roles
 
 typedef SourceAccountInterface = 
 {
-	function Withdraw(amount : Float) : Void;
+	function withdraw(amount : Float) : Void;
 }
 
 typedef DestinationAccountInterface = 
 {
-	function Deposit(amount : Float) : Void;
+	function deposit(amount : Float) : Void;
 }
+
+typedef IAmount = Float;
 
 class MoneyTransfer implements dci.Context
 {
@@ -18,7 +20,7 @@ class MoneyTransfer implements dci.Context
 	@role var destinationAccount : DestinationAccount;
 	@role var amount : Amount;
 
-	public function new(source, destination, amount)
+	public function new(source : SourceAccountInterface, destination : DestinationAccountInterface, amount : IAmount)
 	{
 		bindRoles(source, destination, amount);
 	}
@@ -70,13 +72,13 @@ private abstract SourceAccount(SourceAccountInterface)
 		//var context2 : MoneyTransfer = dci.ContextStorage.current;
 		//var context2 = cast(ContextStorage.current, MoneyTransfer);
 		
-		this.Withdraw(context.amount);
-		context.destinationAccount.Deposit(context.amount);
+		this.withdraw(context.amount);
+		context.destinationAccount.deposit(context.amount);
 	}
 	
-	public function Withdraw(amount : Float)
+	public function withdraw(amount : Float)
 	{
-		this.Withdraw(amount);
+		this.withdraw(amount);
 	}
 }
 
@@ -88,8 +90,8 @@ private abstract DestinationAccount(DestinationAccountInterface)
 		this = account;
 	}
 	
-	public function Deposit(amount : Float)
+	public function deposit(amount : Float)
 	{
-		this.Deposit(amount);
+		this.deposit(amount);
 	}
 }

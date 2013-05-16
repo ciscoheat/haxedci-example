@@ -1,5 +1,11 @@
 package ;
 
+/* 
+ TODO: 
+ - Figure out where autocompletion breaks down (use other project)
+ - Use ACL for Dci.currentContext? Only contexts can use it.
+ */
+
 import haxe.macro.Expr;
 import haxe.macro.Type;
 import haxe.macro.Context;
