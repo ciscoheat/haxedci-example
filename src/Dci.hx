@@ -31,8 +31,11 @@ class Dci
 			}
 			
 			// Only interactions need context setter.
-			if (!Lambda.exists(field.access, function(a) { return a == Access.APublic; } ))
+			if (!Lambda.exists(field.access, function(a) { return a == Access.APublic; } ) || 
+				Lambda.exists(field.access, function(a) { return a == Access.AStatic; } ))
+			{
 				continue;
+			}
 			
 			switch(field.kind)
 			{
