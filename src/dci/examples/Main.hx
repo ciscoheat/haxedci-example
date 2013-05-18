@@ -18,6 +18,11 @@ class Main
 		
 	static function main() 
 	{
+		new JQuery(initializeMatrix);		
+	}
+	
+	static function initializeMatrix()
+	{
 		setupAccountsAndBills();
 		setupConsoleCommunication();
 		
@@ -29,7 +34,7 @@ class Main
 		.then(newline)
 		.then(type.bind("Current account balance: " + neoAccount.balance()))
 		.then(type.bind('1 - Pay bills ($totalToPay)'))
-		.then(newline);
+		.then(newline);		
 	}
 
 	static function testinput(i : String)
@@ -67,7 +72,7 @@ class Main
 			}
 		});		
 
-		new JQuery("#screen").on('click', input.focus);		
+		new JQuery("#screen").on('click', input.focus.bind());
 	}
 	
 	static function setupAccountsAndBills()
