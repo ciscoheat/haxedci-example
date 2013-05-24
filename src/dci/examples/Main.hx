@@ -45,7 +45,7 @@ class Main
 			case '1':
 				try 
 				{
-					new PayBills(neoAccount, bills).pay();			
+					new PayBills(neoAccount, bills).payBills();
 					type("Account balance after paying bills: " + neoAccount.balance());
 				}
 				catch (e : String)

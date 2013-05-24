@@ -2,7 +2,7 @@ package dci.examples.moneytransfer.contexts;
 import dci.Context;
 import dci.examples.moneytransfer.data.Creditor;
 
-typedef ISource =
+typedef IAccount =
 {
 	function withdraw(amount : Float) : Void;
 	function balance() : Float;
@@ -12,24 +12,24 @@ typedef ICreditors = Iterable<Creditor>
 
 class PayBills implements Context
 {
-	@role var source : Source;
+	@role var account : Account;
 	@role var creditors : Creditors;
 	
-	public function new(source : ISource, creditors : ICreditors)
+	public function new(account : IAccount, creditors : ICreditors)
 	{
-		bindRoles(source, creditors);
+		bindRoles(account, creditors);
 	}
 	
-	function bindRoles(source, creditors)
+	function bindRoles(account, creditors)
 	{
-		this.source = new Source(source);
+		this.account = new Account(account);
 		this.creditors = new Creditors(creditors);
 	}
-	
-	public function pay()
+		
+	public function payBills()
 	{
-		source.payBills();
-	}
+		account.payBills();
+	}	
 }
 
 @:build(Dci.role(PayBills))
@@ -42,15 +42,16 @@ private abstract Creditors(ICreditors) from ICreditors to ICreditors
 }
 
 @:build(Dci.role(PayBills))
-private abstract Source(ISource) from ISource to ISource
+private abstract Account(IAccount) from IAccount to IAccount
 {
 	public function payBills()
 	{
 		var c : PayBills = context;
 		
-		// If not enough money, don't pay anything.
-		var surplus = this.balance() - Lambda.fold(c.creditors, function(cr, a) { return cr.amountOwed + a; }, 0.0);
+		var owed = Lambda.fold(c.creditors, function(cr, a) { return cr.amountOwed + a; }, 0.0);
+		var surplus = this.balance() - owed;
 		
+		// If not enough money, don't pay anything.
 		if (surplus < 0)
 		{
 			throw 'Not enough money to pay all bills, ${Math.abs(surplus)} more is needed.';
