@@ -6,14 +6,14 @@ import haxe.macro.Context;
 
 using haxe.macro.ExprTools;
 
-typedef Test = { function a() : Void; };
-
 class Dci
 {	
 	#if macro
 	@macro public static function context() : Array<Field>
 	{
-        var fields : Array<Field> = Context.getBuildFields();		
+        var fields : Array<Field> = Context.getBuildFields();
+		var isPublic = function(a) { return a == Access.APublic; };
+		var isStatic = function(a) { return a == Access.AStatic; };
 		
 		for (field in fields)
 		{
@@ -23,7 +23,7 @@ class Dci
 			// Add @:allow(currentPackage) to fields annotated with @role
 			if (Lambda.exists(field.meta, function(m) { return m.name == "role"; }))
 			{
-				if (Lambda.exists(field.access, function(a) { return a == Access.APublic; } ))
+				if (Lambda.exists(field.access, isPublic))
 					Context.error("A Context Role cannot be public.", field.pos);
 				
 				var c = Context.getLocalClass().get();
@@ -32,9 +32,8 @@ class Dci
 				field.meta.push({name: ":allow", params: [pack], pos: Context.currentPos()});
 			}
 			
-			// Only interactions need context setter.
-			if (!Lambda.exists(field.access, function(a) { return a == Access.APublic; } ) || 
-				Lambda.exists(field.access, function(a) { return a == Access.AStatic; } ))
+			// Only interactions (public instance methods) need a context setter.
+			if (!Lambda.exists(field.access, isPublic) || Lambda.exists(field.access, isStatic))
 			{
 				continue;
 			}

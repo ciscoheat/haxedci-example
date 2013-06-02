@@ -72,7 +72,7 @@ class Main
 			}
 		});		
 
-		new JQuery("#screen").on('click', input.focus.bind());
+		new JQuery("#screen").on('click', function() { input.focus(); } );
 	}
 	
 	static function setupAccountsAndBills()
