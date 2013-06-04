@@ -60,7 +60,7 @@ class Dci
 		
 		return fields;
 	}
-		
+	
 	@macro public static function role(typeExpr : Expr) : Array<Field>
 	{
         var fields : Array<Field> = Context.getBuildFields();

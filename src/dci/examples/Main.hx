@@ -1,4 +1,5 @@
 package dci.examples;
+import dci.examples.contexts.Console;
 import dci.examples.moneytransfer.contexts.Account;
 import dci.examples.moneytransfer.contexts.MoneyTransfer;
 import dci.examples.moneytransfer.contexts.PayBills;
@@ -10,23 +11,39 @@ import jQuery.Deferred;
 import jQuery.JQuery;
 import jQuery.JQueryStatic;
 import jQuery.Promise;
+import js.Lib;
 
 class Main 
 {
 	static var neoAccount : Account;
 	static var bills : Array<Creditor>;
-		
+	
+	static var console : Console;
+	
 	static function main() 
 	{
-		new JQuery(initializeMatrix);		
+		new JQuery(initializeMatrix);
+		//new JQuery(visitRestaurant);
+	}
+
+	static function setupConsole(testInput : String -> Void)
+	{
+		console = new Console(new JQuery("#content"), new JQuery("#input"), testInput);
+	}
+	
+	static function visitRestaurant()
+	{
+		
 	}
 	
 	static function initializeMatrix()
 	{
+		setupConsole(testMatrixInput);
 		setupAccountsAndBills();
-		setupConsoleCommunication();
 		
 		var totalToPay = Lambda.fold(bills, function(cr, a) { return cr.amountOwed + a; }, 0.0);
+		var type = console.output;
+		var newline = console.newline;
 				
 		type("Hello Neo...", 1000)
 		.then(type.bind("It's time to pay your bills, Neo.", 500))
@@ -34,10 +51,10 @@ class Main
 		.then(newline)
 		.then(type.bind("Current account balance: " + neoAccount.balance()))
 		.then(type.bind('1 - Pay bills ($totalToPay)'))
-		.then(newline);		
+		.then(newline);
 	}
 
-	static function testinput(i : String)
+	static function testMatrixInput(i : String)
 	{
 		switch(i.toLowerCase())
 		{
@@ -46,33 +63,17 @@ class Main
 				try 
 				{
 					new PayBills(neoAccount, bills).payBills();
-					type("Account balance after paying bills: " + neoAccount.balance());
+					console.output("Account balance after paying bills: " + neoAccount.balance());
 				}
 				catch (e : String)
 				{
-					type(e);
+					console.output(e);
 				}
 			case 'dir':
-				type("Maybe in the next version of Matrix.");
+				console.output("Maybe in the next version of Matrix.");
 			case _:
-				type("Try again, Neo.");
-		}			
-	}
-	
-	static function setupConsoleCommunication()
-	{
-		var input = new JQuery("#input");
-
-		input.focus().keyup(function(e) {
-			if (e.which == 13) 
-			{
-				var i = new JQuery(e.target).val();
-				new JQuery(e.target).val("");
-				testinput(i);
-			}
-		});		
-
-		new JQuery("#screen").on('click', function() { input.focus(); } );
+				console.output("Try again, Neo.");
+		}
 	}
 	
 	static function setupAccountsAndBills()
@@ -92,66 +93,5 @@ class Main
 		foodBill.name = "Food bill";
 		
 		bills = [foodBill];		
-	}
-
-	static function type(txt : String, delay = 0)
-	{
-		var p = new Deferred();
-		typeString(txt).then(function() { Timer.delay(function() { p.resolve(); }, delay); } );
-		return p.promise();
-	}
-	
-	static function newline(delay = 0) : Promise
-	{
-		return type("", delay);
-	}
-	
-	static function typeString(txt : String) : Promise
-	{
-		var el = new JQuery("#content");
-		var lines = el.find('div').length;
-		
-		if (lines > 22)
-			el.find('div:first').remove();
-		
-		var timeOut;
-		var txtLen = txt.length;
-		var char = 0;
-		var typeIt = null;
-		
-		var def : Deferred = new Deferred();
-		
-		el = new JQuery("<div />").appendTo(el);
-		
-		if (txt.length == 0) 
-		{
-			el.html("&nbsp;");
-			return def.resolve().promise();
-		}
-		
-		(typeIt = function() 
-		{
-			var humanize = Math.round(Math.random() * (50 - 30)) + 30;
-			timeOut = Timer.delay(function() 
-			{
-				var type = txt.substr(char++, 1);
-				var currentText = el.text().substr(0, el.text().length - 1);
-				
-				el.text(currentText + type + '|');
-
-				if (char == txtLen) 
-				{
-					el.text(currentText + type);
-					def.resolve();
-				}
-				else
-				{
-					typeIt();
-				}
-
-			}, humanize);
-		})();
-		
-		return def.promise();
 	}
 }
