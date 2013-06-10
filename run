@@ -1,0 +1,4 @@
+#!/bin/sh
+
+haxe ./compile.hxml
+xdg-open ./bin/index.html
