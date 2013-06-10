@@ -28,9 +28,9 @@ class Console implements Context
 		this.screen.on('click', function() { input.focus(); } );
 	}
 	
-	public function start(process : IProcess)
+	public function start(process : IProcess) : Deferred
 	{
-		processes.start(process);
+		return processes.start(process);
 	}
 	
 	public function output(msg : String, delay = 0) : Promise
@@ -55,14 +55,14 @@ class Console implements Context
 	public function push(process : IProcess) { this.push(process); }	
 	public function pop() { this.pop(); }
 	
-	public function start(process : IProcess)
+	public function start(process : IProcess) : Deferred
 	{
 		var c : Console = context;
 		
 		c.inputDev.isBusy(true);
 		push(process);
 		
-		process.start()
+		return process.start()
 		.progress(function() {
 			c.inputDev.isBusy(false);
 			c.inputDev.focus();

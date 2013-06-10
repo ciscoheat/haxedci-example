@@ -146,9 +146,28 @@ class Dci
 							exprs.iter(cb);
 							
 						case _: 
+							// Should not come here.
 							f.expr.iter(cb);
 					}
 				}
+				
+			/*
+			case ECall(e2, params):
+				switch(e2.expr)
+				{
+					case EField(e3, field):
+						if (field == "bind")
+						{
+							var dynType = TPath( { sub: null, params: [], pack: [], name: "Dynamic" } );							
+						}
+						else
+						{
+							e3.iter(cb);
+						}
+							
+					case _: e2.iter(cb);
+				}
+			*/
 				
 			case _: e.iter(cb);
 		}
