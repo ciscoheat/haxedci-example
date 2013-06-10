@@ -15,7 +15,7 @@ Clone this repository or [download it](https://github.com/ciscoheat/haxedci-exam
 A Hello World example is not too informative, since the power of DCI is shown when having a large number of communicating objects, but here it is anyway:
 
 #### Greeter.hx
-```Haxe
+```actionscript
 package ;
 import dci.Context;
 
@@ -54,7 +54,7 @@ private abstract Message(IMessage)
 ```
 
 #### Main.hx
-```Haxe
+```actionscript
 package ;
 
 class Main 
