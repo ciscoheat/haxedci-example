@@ -8,45 +8,31 @@ import jQuery.JQuery;
 
 class Main 
 {
-	static var neoAccount : Account;
-	static var bills : Array<Creditor>;
-	
-	static var console : Console;
-	
 	static function main() 
 	{
+		// Start when jQuery is ready.
 		new JQuery(initializeMatrix);
-	}
-
-	static function visitRestaurant()
-	{
-		
 	}
 	
 	static function initializeMatrix()
 	{		
-		setupAccountsAndBills();
-		
-		console = new Console(new JQuery("#content"), new JQuery("#input"));
-		console.start(new Matrix(console, bills, neoAccount));
-	}
-	
-	static function setupAccountsAndBills()
-	{
+		// Create an Account with initial balance of $1000
 		var ledger = new Ledger();
 		ledger.message = "Initial balance";
 		ledger.amount = 1000;
 		
-		var ledgers = new Array<Ledger>();
-		ledgers.push(ledger);
+		var neoAccount = new Account([ledger]);
 		
-		neoAccount = new Account(ledgers);
-		
+		// Create bills that must be payed.
 		var foodBill = new Creditor();
-		foodBill.account = new Account(new Array<Ledger>());
+		foodBill.account = new Account([]);
 		foodBill.amountOwed = 300;
 		foodBill.name = "Food bill";
 		
-		bills = [foodBill];		
-	}
+		var bills = [foodBill];
+		
+		// Create a new console and start a "Matrix" process on it.
+		var console = new Console(new JQuery("#content"), new JQuery("#input"));
+		console.start(new Matrix(console, bills, neoAccount));
+	}	
 }

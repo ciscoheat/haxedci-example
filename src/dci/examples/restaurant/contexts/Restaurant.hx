@@ -82,7 +82,7 @@ class Restaurant implements dci.Context
 					try
 					{
 						food.guestsPaying(account)
-						.then(console.output.bind('Goodbye, have a nice evening sir.'))
+						.then(function() { console.output('Goodbye, have a nice evening sir.'); })
 						.then(console.newline)
 						.then(process.resolve);						
 					}

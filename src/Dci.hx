@@ -12,15 +12,20 @@ class Dci
 	@macro public static function context() : Array<Field>
 	{
         var fields : Array<Field> = Context.getBuildFields();
-		var isPublic = function(a) { return a == Access.APublic; };
+		
 		var isStatic = function(a) { return a == Access.AStatic; };
+		var isPublic = function(a) { return a == Access.APublic; };
+		var hasRole = function(m) { return m.name == "role"; };
 		
 		var thisMacro = macro this;
 		
 		for (field in fields)
 		{
+			// Only interactions (instance methods) need a context setter.
+			if (Lambda.exists(field.access, isStatic)) continue;
+
 			// Add @:allow(currentPackage) to fields annotated with @role
-			if (Lambda.exists(field.meta, function(m) { return m.name == "role"; }))
+			if (Lambda.exists(field.meta, hasRole))
 			{
 				if (Lambda.exists(field.access, isPublic))
 					Context.error("A Context Role cannot be public.", field.pos);
@@ -30,13 +35,7 @@ class Dci
 				
 				field.meta.push({name: ":allow", params: [pack], pos: Context.currentPos()});
 			}
-			
-			// Only interactions (public instance methods) need a context setter.
-			if (!Lambda.exists(field.access, isPublic) || Lambda.exists(field.access, isStatic))
-			{
-				continue;
-			}
-			
+					
 			switch(field.kind)
 			{
 				case FFun(f):
@@ -53,7 +52,7 @@ class Dci
 						case _:
 					}
 					
-				default:
+				case _:
 			}
 		}
 		
@@ -98,7 +97,14 @@ class Dci
 		var funcArg = { value : null, type : null, opt : false, name : "rolePlayer" };
 		var kind = FFun( { ret : returnType, expr : macro return rolePlayer, params : [], args : [funcArg] } );
 		
-        fields.push( { name : "_new", doc : null, meta : [], access : [AStatic, AInline, APublic], kind : kind, pos : Context.currentPos() } );
+        fields.push({
+			name : "_new", 
+			doc : null, 
+			meta : [], 
+			access : [AStatic, AInline, APublic], 
+			kind : kind, 
+			pos : Context.currentPos() 
+		});
 
 		return fields;
 	}
@@ -112,8 +118,7 @@ class Dci
 		return switch(fields[0].kind)
 		{
 			// If a function, it's expressed as the type of the first argument.
-			case FFun(f): 
-				return f.args[0].type;
+			case FFun(f): return f.args[0].type;
 			case _: 
 				// If not a function, it has a "from T to T" definition and the second
 				// argument should contain the type.
@@ -145,9 +150,7 @@ class Dci
 							exprs.unshift(setCurrentContext(field));
 							exprs.iter(cb);
 							
-						case _: 
-							// Should not come here.
-							f.expr.iter(cb);
+						case _: f.expr.iter(cb);
 					}
 				}
 				
@@ -160,34 +163,30 @@ class Dci
 							exprs.unshift(setCurrentContext(field));
 							exprs.iter(cb);
 							
-						case _:
-							// Should not come here.
-							c.expr.iter(cb);
+						case _: c.expr.iter(cb);
 					}
 				}
 				
-			/*
 			case ECall(e2, params):
 				switch(e2.expr)
 				{
 					case EField(e3, field):
 						if (field == "bind")
 						{
-							var dynType = TPath( { sub: null, params: [], pack: [], name: "Dynamic" } );							
+							var warning = "Usage of 'bind' can have side-effects when calling another role " +
+										  "method or context. Use an anonymous function instead to be safe.";
+							Context.warning(warning, e3.pos);
 						}
 						else
-						{
 							e3.iter(cb);
-						}
 							
 					case _: e2.iter(cb);
 				}
-			*/
 				
 			case _: e.iter(cb);
 		}
 	}
-
+	
 	static function getTypeName(type) : String
 	{
 		switch(type.expr)
@@ -195,19 +194,20 @@ class Dci
 			case EConst(c):
 				switch(c)
 				{
-					case CIdent(s):
-						return s;
-						
-					default:
+					case CIdent(s): return s;
+					case _:
 				}
 				
-			default:
+			case _:
 		}
 		
 		Context.error("Type identifier expected.", type.pos);
 		return null;
 	}
 	#else
+	/**
+	 * Current context storage. Shouldn't be tampered with.
+	 */ 
 	public static var currentContext(default, default) : Dynamic;
 	#end
 }

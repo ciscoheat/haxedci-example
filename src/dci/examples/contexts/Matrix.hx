@@ -28,7 +28,7 @@ class Matrix implements dci.Context
 		var newline = this.console.newline;
 
 		type("Hello Neo...", 1000)
-		.then(type.bind("It's time to pay your bills, Neo.", 500))
+		.then(function() { return type("It's time to pay your bills, Neo.", 500); })
 		.then(newline)
 		.then(newline)
 		.then(menu)
@@ -45,8 +45,8 @@ class Matrix implements dci.Context
 		var def = new Deferred();
 		
 		type("Current account balance: " + neoAccount.balance())
-		.then(type.bind('1 - Pay bills ($totalToPay)'))
-		.then(type.bind('2 - Order some food'))
+		.then(function() { return type('1 - Pay bills ($totalToPay)'); })
+		.then(function() { return type('2 - Order some food'); })
 		.then(def.resolve);
 		
 		return def;

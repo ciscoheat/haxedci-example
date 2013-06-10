@@ -150,9 +150,9 @@ private abstract Guests(IGuests) from IGuests to IGuests
 	public function tell(name : String) : Promise
 	{
 		return this.output('Good evening, my name is $name, I\'ll be your waiter.')
-		.then(output.bind("This is on the menu for tonight:"))
-		.then(output.bind(""))
-		.then(function() { context.menu.display(); } );
+		.then(function() { return this.output("This is on the menu for tonight:"); })
+		.then(function() { this.output(""); })
+		.then(function() { context.menu.display(); });
 	}
 	
 	public function serve(food : String, bill : Int)
@@ -162,7 +162,7 @@ private abstract Guests(IGuests) from IGuests to IGuests
 		c.bill += bill;
 
 		this.output("You are served " + food)
-		.then(output.bind('That will be $$$bill, sir. You can pay when you leave.'));
+		.then(function() { return this.output('That will be $$$bill, sir. You can pay when you leave.'); });
 	}
 }
 
@@ -207,6 +207,6 @@ private abstract Waiter(IWaiter) from IWaiter to IWaiter
 		.then(function() {
 			new MoneyTransfer(account, restaurantAccount, c.bill).executeAndDeclineIfNotEnough();
 		})
-		.then(c.guests.output.bind("Thank you very much, sir."));
+		.then(function() { return c.guests.output("Thank you very much, sir."); });
 	}
 }
