@@ -3,6 +3,7 @@ package dci.examples.moneytransfer.contexts;
 typedef ISourceAccount = 
 {
 	function withdraw(amount : Float) : Void;
+	function balance() : Float;
 }
 
 typedef IDestinationAccount = 
@@ -16,7 +17,7 @@ class MoneyTransfer implements dci.Context
 {
 	@role var sourceAccount : SourceAccount;
 	@role var destinationAccount : DestinationAccount;
-	@role var amount : Amount;
+	@role var amount : IAmount;
 
 	public function new(source : ISourceAccount, destination : IDestinationAccount, amount : IAmount)
 	{
@@ -27,7 +28,7 @@ class MoneyTransfer implements dci.Context
 	{
 		sourceAccount = new SourceAccount(source);
 		destinationAccount = new DestinationAccount(destination);
-		amount = new Amount(amt);
+		amount = amt;
 		
 		// Object identity assertions
 		if (untyped sourceAccount != source)
@@ -45,11 +46,15 @@ class MoneyTransfer implements dci.Context
 	{
 		sourceAccount.transfer();
 	}
+	
+	public function executeAndDeclineIfNotEnough()
+	{
+		if (sourceAccount.balance() < amount)
+			throw "Declined: Not enough money in account.";
+		else
+			execute();
+	}
 }
-
-@:build(Dci.role(MoneyTransfer))
-private abstract Amount(IAmount) from IAmount to IAmount
-{}
 
 @:build(Dci.role(MoneyTransfer))
 private abstract SourceAccount(ISourceAccount)
@@ -67,6 +72,11 @@ private abstract SourceAccount(ISourceAccount)
 	public function withdraw(amount : Float)
 	{
 		this.withdraw(amount);
+	}
+	
+	public function balance()
+	{
+		return this.balance();
 	}
 }
 

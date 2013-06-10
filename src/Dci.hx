@@ -151,6 +151,21 @@ class Dci
 					}
 				}
 				
+			case ETry(e, catches):
+				for (c in catches)
+				{
+					switch(c.expr.expr)
+					{
+						case EBlock(exprs):
+							exprs.unshift(setCurrentContext(field));
+							exprs.iter(cb);
+							
+						case _:
+							// Should not come here.
+							c.expr.iter(cb);
+					}
+				}
+				
 			/*
 			case ECall(e2, params):
 				switch(e2.expr)

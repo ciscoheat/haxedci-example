@@ -201,9 +201,12 @@ private abstract Waiter(IWaiter) from IWaiter to IWaiter
 		var c : ServeFood = context;
 		
 		// Just create a temp account.
-		var restaurantAccount = new Account([]);
+		var restaurantAccount = new Account([]);		
 		
-		new MoneyTransfer(account, restaurantAccount, c.bill).execute();
-		return c.guests.output('Your total is $$${c.bill}. Thank you very much, sir.');
+		return c.guests.output('Your total is $$${c.bill}.')
+		.then(function() {
+			new MoneyTransfer(account, restaurantAccount, c.bill).executeAndDeclineIfNotEnough();
+		})
+		.then(c.guests.output.bind("Thank you very much, sir."));
 	}
 }

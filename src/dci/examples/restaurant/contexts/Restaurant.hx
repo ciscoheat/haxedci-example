@@ -46,7 +46,7 @@ class Restaurant implements dci.Context
 		var menu = new Array<String>();
 		menu.push("Peking Duck");
 		menu.push("Shepherds Pie");
-		menu.push("Crab Cakes");
+		menu.push("Crab Cake");
 		menu.push("Roast Beef");
 		
 		this.menu = menu;
@@ -74,15 +74,22 @@ class Restaurant implements dci.Context
 		{
 			console.output("Sorry sir, we don't have that on the menu tonight.");
 		}
-		else if (msg == 'quit' || msg == 'exit' || msg == "leave" || msg == "goodbye" || msg == "bye")
+		else
 		{
 			switch(msg.toLowerCase())
 			{
-				case "quit", "exit", "leave", "goodbye", "bye":
-					food.guestsPaying(account)
-					.then(console.output.bind('Goodbye, have a nice evening sir.'))
-					.then(console.newline)
-					.then(process.resolve);
+				case "quit", "exit", "leave", "goodbye", "bye", "pay", "go home", "go back":
+					try
+					{
+						food.guestsPaying(account)
+						.then(console.output.bind('Goodbye, have a nice evening sir.'))
+						.then(console.newline)
+						.then(process.resolve);						
+					}
+					catch (e : String)
+					{
+						console.output("Sorry sir, your card was declined.");
+					}
 					
 				case _:
 					var name = Std.random(10) == 9 ? "Neo" : "sir";
