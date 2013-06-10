@@ -50,7 +50,9 @@ class ServeFood implements Context
 	
 	public function guestsPaying(account : Account) : Promise
 	{
-		return waiter.pay(account);
+		return bill > 0 
+			? waiter.pay(account)
+			: new Deferred().resolve().promise();
 	}
 }
 
@@ -151,8 +153,8 @@ private abstract Guests(IGuests) from IGuests to IGuests
 	{
 		return this.output('Good evening, my name is $name, I\'ll be your waiter.')
 		.then(function() { return this.output("This is on the menu for tonight:"); })
-		.then(function() { this.output(""); })
-		.then(function() { context.menu.display(); });
+		.then(function() { return this.output(""); })
+		.then(function() { return context.menu.display(); });
 	}
 	
 	public function serve(food : String, bill : Int)
@@ -196,7 +198,7 @@ private abstract Waiter(IWaiter) from IWaiter to IWaiter
 		c.guests.serve(food, bill);
 	}
 	
-	public function pay(account : Account)
+	public function pay(account : Account) : Promise
 	{
 		var c : ServeFood = context;
 		

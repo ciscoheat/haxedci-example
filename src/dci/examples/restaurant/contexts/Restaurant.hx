@@ -1,5 +1,5 @@
 package dci.examples.restaurant.contexts;
-import dci.examples.contexts.Console;
+import dci.examples.matrix.Console;
 import dci.examples.moneytransfer.contexts.Account;
 import dci.examples.restaurant.data.Employee;
 import jQuery.Deferred;
@@ -13,7 +13,7 @@ class Restaurant implements dci.Context
 	@role var process : Deferred;
 	@role var menu : IMenu;
 	
-	var food : ServeFood;
+	var order : ServeFood;
 	var account : Account;
 
 	public function new(console : Console, account : Account) 
@@ -55,9 +55,9 @@ class Restaurant implements dci.Context
 	public function start() : Deferred
 	{
 		process = new Deferred();
-		food = new ServeFood(waiter, chef, menu, console);
+		order = new ServeFood(waiter, chef, menu, console);
 		
-		food.guestsArriving().then(process.notify);
+		order.guestsArriving().then(process.notify);
 		return process;
 	}
 	
@@ -68,7 +68,7 @@ class Restaurant implements dci.Context
 		
 		if (choice != null && choice > 0 && choice <= menu.length)
 		{
-			return food.guestsOrdering(choice);
+			return order.guestsOrdering(choice);
 		}
 		else if (choice != null)
 		{
@@ -81,10 +81,10 @@ class Restaurant implements dci.Context
 				case "quit", "exit", "leave", "goodbye", "bye", "pay", "go home", "go back":
 					try
 					{
-						food.guestsPaying(account)
-						.then(function() { console.output('Goodbye, have a nice evening sir.'); })
+						order.guestsPaying(account)
+						.then(function() { return console.output('Goodbye, have a nice evening sir.'); })
 						.then(console.newline)
-						.then(process.resolve);						
+						.then(process.resolve);
 					}
 					catch (e : String)
 					{

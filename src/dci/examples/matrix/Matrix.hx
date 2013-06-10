@@ -1,4 +1,4 @@
-package dci.examples.contexts;
+package dci.examples.matrix;
 import dci.examples.moneytransfer.contexts.Account;
 import dci.examples.moneytransfer.contexts.PayBills;
 import dci.examples.moneytransfer.data.Creditor;
@@ -27,6 +27,7 @@ class Matrix implements dci.Context
 		var type = this.console.output;
 		var newline = this.console.newline;
 
+		// Some asynchronous niceness
 		type("Hello Neo...", 1000)
 		.then(function() { return type("It's time to pay your bills, Neo.", 500); })
 		.then(newline)
@@ -38,18 +39,14 @@ class Matrix implements dci.Context
 		return process;
 	}
 	
-	function menu() : Deferred
+	function menu() : Promise
 	{
 		var totalToPay = Lambda.fold(bills, function(cr, a) { return cr.amountOwed + a; }, 0.0);
 		var type = this.console.output;
-		var def = new Deferred();
 		
-		type("Current account balance: " + neoAccount.balance())
+		return type("Current account balance: " + neoAccount.balance())
 		.then(function() { return type('1 - Pay bills ($totalToPay)'); })
-		.then(function() { return type('2 - Order some food'); })
-		.then(def.resolve);
-		
-		return def;
+		.then(function() { return type('2 - Order some food'); });
 	}
 	
 	public function input(msg : String) : Promise
@@ -76,8 +73,7 @@ class Matrix implements dci.Context
 			case 'dir':
 				console.output("Maybe in the next version of Matrix.");
 			case 'exit':
-				console.output("Goodbye, Neo.");
-				process.resolve();
+				console.output("Goodbye, Neo.").then(console.turnOff).then(process.resolve);
 			case _:
 				console.output("Try again, Neo.");
 		}

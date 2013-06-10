@@ -26,7 +26,7 @@ class Account
 	public function withdraw(amount : Float)
 	{
 		ledgers.addEntry("Withdrawing", -amount);
-	}	
+	}
 }
 
 @:build(Dci.role(Account))

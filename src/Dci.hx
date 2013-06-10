@@ -111,8 +111,7 @@ class Dci
 	
 	static function getUnderlyingTypeForAbstractClass(fields : Array<Field>) : Null<ComplexType>
 	{
-		if (fields.length == 0)
-			return null;
+		if (fields.length == 0)	return null;
 		
 		// Test first field of class
 		return switch(fields[0].kind)
@@ -148,9 +147,8 @@ class Dci
 					{
 						case EBlock(exprs):
 							exprs.unshift(setCurrentContext(field));
-							exprs.iter(cb);
 							
-						case _: f.expr.iter(cb);
+						case _:
 					}
 				}
 				
@@ -161,9 +159,8 @@ class Dci
 					{
 						case EBlock(exprs):
 							exprs.unshift(setCurrentContext(field));
-							exprs.iter(cb);
 							
-						case _: c.expr.iter(cb);
+						case _:
 					}
 				}
 				
@@ -177,14 +174,14 @@ class Dci
 										  "method or context. Use an anonymous function instead to be safe.";
 							Context.warning(warning, e3.pos);
 						}
-						else
-							e3.iter(cb);
 							
-					case _: e2.iter(cb);
+					case _:
 				}
 				
-			case _: e.iter(cb);
+			case _:
 		}
+		
+		e.iter(cb);
 	}
 	
 	static function getTypeName(type) : String

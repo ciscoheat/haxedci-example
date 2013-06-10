@@ -2,8 +2,7 @@ package dci.examples.moneytransfer.contexts;
 import dci.Context;
 import dci.examples.moneytransfer.data.Creditor;
 
-typedef IAccount =
-{
+typedef IAccount = {
 	function withdraw(amount : Float) : Void;
 	function balance() : Float;
 }
@@ -38,7 +37,12 @@ private abstract Creditors(ICreditors) from ICreditors to ICreditors
 	function iterator()
 	{
 		return this.iterator();
-	}	
+	}
+	
+	public function owed() : Float
+	{
+		return Lambda.fold(this, function(cr, a) { return cr.amountOwed + a; }, 0.0);
+	}
 }
 
 @:build(Dci.role(PayBills))
@@ -48,10 +52,9 @@ private abstract Account(IAccount) from IAccount to IAccount
 	{
 		var c : PayBills = context;
 		
-		var owed = Lambda.fold(c.creditors, function(cr, a) { return cr.amountOwed + a; }, 0.0);
-		var surplus = this.balance() - owed;
+		var surplus = this.balance() - c.creditors.owed();
 		
-		// If not enough money, don't pay anything.
+		// If not enough money, don't pay any bills.
 		if (surplus < 0)
 		{
 			throw 'Not enough money to pay all bills, ${Math.abs(surplus)} more is needed.';

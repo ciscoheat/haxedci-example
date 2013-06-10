@@ -59,33 +59,23 @@ class MoneyTransfer implements dci.Context
 @:build(Dci.role(MoneyTransfer))
 private abstract SourceAccount(ISourceAccount)
 {
+	// RoleInterface
+	public function withdraw(amount) { this.withdraw(amount); }
+	public function balance() { return this.balance(); }
+	
 	public function transfer()
 	{
-		// Until autocompletion works for injected local vars, define it yourself:
+		// Until autocompletion works for injected local vars, define the Context like this:
 		var c : MoneyTransfer = context;
 		
 		this.withdraw(c.amount);
 		c.destinationAccount.deposit(c.amount);
-	}
-	
-	// Until the automatic RoleInterface implementation is done, this definition is needed.
-	public function withdraw(amount : Float)
-	{
-		this.withdraw(amount);
-	}
-	
-	public function balance()
-	{
-		return this.balance();
 	}
 }
 
 @:build(Dci.role(MoneyTransfer))
 private abstract DestinationAccount(IDestinationAccount)
 {
-	// Until the automatic RoleInterface implementation is done, this definition is needed.
-	public function deposit(amount : Float)
-	{
-		this.deposit(amount);
-	}
+	// RoleInterface
+	public function deposit(amount)	{ this.deposit(amount);	}
 }

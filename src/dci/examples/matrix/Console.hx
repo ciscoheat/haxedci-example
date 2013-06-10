@@ -1,19 +1,24 @@
-package dci.examples.contexts;
+package dci.examples.matrix;
 import jQuery.Promise;
 import jQuery.JQuery;
 import jQuery.Deferred;
 import haxe.Timer;
 
+// RoleInterfaces
+
 typedef IScreen = JQuery;
 typedef IInput = JQuery;
+
 typedef IProcess = {
 	function start() : Deferred;
 	function input(msg : String) : Promise;
 }
+
 typedef IProcesses = List<IProcess>;
 
 class Console implements Context
 {
+	// Roles in a Context are annotated with the @role metadata.
 	@role var screen : Screen;
 	@role var inputDev : Input;
 	@role var processes : Processes;
@@ -27,6 +32,8 @@ class Console implements Context
 		this.inputDev.sendInputToActiveProcess();		
 		this.screen.on('click', function() { input.focus(); } );
 	}
+	
+	// Interactions
 	
 	public function start(process : IProcess) : Deferred
 	{
@@ -42,21 +49,31 @@ class Console implements Context
 	{
 		return screen.newline(delay);
 	}
+	
+	public function turnOff() : Promise
+	{
+		var def = new Deferred();
+		screen.fadeTo(3500, 0);
+		inputDev.fadeTo(3500, 0, function() { def.resolve(); });
+		return def;
+	}
 }
+
+// A Role is using the @:build macro for Dci.role() with the Context type as argument.
+// It should be a private abstract class that uses its RoleInterface.
 
 @:build(Dci.role(Console))
 @:arrayAccess private abstract Processes(IProcesses) from IProcesses to IProcesses
 {
-	// Required for iteration of an abstract type:
-	public var length(get, never) : Int;
-	function get_length() return this.length;
-	
+	// Implementing the RoleInterface, the form required for an object to play this Role.
 	public function current() { return this.first(); }
 	public function push(process : IProcess) { this.push(process); }	
 	public function pop() { this.pop(); }
 	
+	// RoleMethods, implementing the functionality.
 	public function start(process : IProcess) : Deferred
 	{
+		// Current Context is accessed with the 'context' identifier.
 		var c : Console = context;
 		
 		c.inputDev.isBusy(true);
@@ -76,7 +93,9 @@ class Console implements Context
 	public function input(i : String)
 	{
 		var c : Console = context;
-		var self = c.processes;
+		
+		// A quick way to get the 'self' role:
+		var self = c.processes;		
 		var currentProcess = self.current();
 		
 		c.inputDev.isBusy(true);
@@ -92,6 +111,12 @@ class Console implements Context
 @:build(Dci.role(Console))
 private abstract Input(IInput)
 {
+	// RoleInterface (form)
+	public function focus() { return this.focus(); }
+	public function fadeTo(duration : Dynamic, opacity : Int, ?complete : Void -> Void) { return this.fadeTo(duration, opacity, complete); }
+
+	// RoleMethods (function)
+	
 	public function isBusy(?state : Bool)
 	{
 		if (state == null) 
@@ -124,26 +149,18 @@ private abstract Input(IInput)
 			
 			c.processes.input(msg);
 		});		
-	}
-	
-	public function focus()
-	{
-		return this.focus();
-	}
+	}	
 }
 
 @:build(Dci.role(Console))
 private abstract Screen(IScreen) from IScreen to IScreen
 {
-	public function on(events, ?selector, ?data)
-	{
-		return this.on(events, selector, data);
-	}
+	// RoleInterface	
+	public function on(events, ?selector, ?data) { return this.on(events, selector, data); }
+	public function find(selector) { return this.find(selector); }
+	public function fadeTo(duration : Dynamic, opacity : Int, ?complete : Void -> Void) { return this.fadeTo(duration, opacity, complete); }
 	
-	public function find(selector)
-	{
-		return this.find(selector);
-	}
+	// RoleMethods
 	
 	public function type(txt : String, delay = 0) : Promise
 	{
