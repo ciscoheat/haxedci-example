@@ -1,15 +1,12 @@
 # DCI in Haxe
-[Haxe](http://haxe.org) is a nice multiplatform language which in its third release (May 2013), enables a complete DCI implementation. If you don't know what DCI is, go to [fulloo.info](http://fulloo.info) for documentation, details, overview and more. Or keep reading to scratch the surface a little.
+[Haxe](http://haxe.org) is a nice multiplatform language which in its third release (May 2013), enables a complete DCI implementation. This repository is a supplement to the [haxedci](https://github.com/ciscoheat/haxedci) library, giving a small introduction in this readme file, and having a larger example ready for download.
+
+If you don't know what DCI is, go to [fulloo.info](http://fulloo.info) for documentation, details, overview and more. Or keep reading to scratch the surface a little.
 
 ## Short introduction
 DCI stands for Data, Context, Interaction. One of the key aspects of DCI is to separate what a system *is* (form, class properties) from what it *does* (function, methods). Form and function has very different rates of change so they should be separated, not as it currently is, put in classes together.
 
 A Context rounds up Data objects that take on the part as Roles, then an Interaction takes place as a flow of messages through the Roles. The Roles define a network of communicating objects and the Role methods force the objects to collaborate according to the distributed interaction algorithm.
-
-([fulloo.info](http://fulloo.info) is your friend if this sounds confusing)
-
-## How to use
-Clone this repository or [download it](https://github.com/ciscoheat/haxedci-example/archive/master.zip), then open the FlashDevelop project file or just execute run.bat (or run if you're on Linux).
 
 ## Simple example
 A Hello World example is not too informative, since the power of DCI is shown when having a large number of communicating objects, but here it is anyway:
@@ -82,7 +79,7 @@ To execute this `Greeter` Context, we use an *Interaction* to trigger it. As you
 Catching on the concept? Don't be put down if you think it's a lot to grasp. DCI is a whole new paradigm, which forces the mind in different directions than the normal OO-thinking.
 
 ## Next steps
-Download or clone this repository, and look at a more advanced example! 
+Clone this repository or [download it](https://github.com/ciscoheat/haxedci-example/archive/master.zip), then open the [FlashDevelop](http://www.flashdevelop.org/) project file, or just execute run.bat (or the "run" script if you're on Linux), too see an advanced example in action:
 
 * A much larger network of communicating objects
 * Nested Contexts
