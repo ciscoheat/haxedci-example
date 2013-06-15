@@ -70,7 +70,7 @@ class Main
 {	
 	static function main() 
 	{
-		new Greeting("world", "Hello").greet();
+		new Greeting({name: "World"}, "Hello").greet();
 	}	
 }
 ```
