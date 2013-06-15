@@ -80,7 +80,7 @@ So what's going on here? There are three classes:
 * Someone (abstract)
 * Message (abstract)
 
-The `Greeting` class is a *Context*, based on a mental model that a Greeting is "**Someone** being sent a **Message**". Note that these are the two other classes, and they are also present as *Roles* in the `Greeting` class. The exact name match is very important, because DCI is about mapping the end users mental model to code. (The haxedci library enforces that roles have the same field names (camelStyled) in the Context class as the abstract class name.)
+The `Greeting` class is a *Context*, based on a mental model that a Greeting is " **Someone** being sent a **Message** ". Note that these are the two other classes, and they are also present as *Roles* in the `Greeting` class. The exact name match is very important, because DCI is about mapping the end users mental model to code. (The haxedci library enforces that roles have the same field names (camelStyled) in the Context class as the abstract class name.)
 
 Let's look at the `Someone` class. It implements its *RoleInterface* `ISomeone` ... What is a RoleInterface? Look at the top of the file, there are two typedefs, `ISomeone` and `IMessage`. In this case they are quite simple, but for more complex roles they will specify a more advanced type required to play the Role. The implementation is simple, just invoke and return the same method on `this`, since `this` is refering to the underlying object playing the Role.
 
