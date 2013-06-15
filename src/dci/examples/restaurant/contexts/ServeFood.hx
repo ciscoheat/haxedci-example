@@ -40,12 +40,12 @@ class ServeFood implements Context
 	
 	public function guestsArriving() : Promise
 	{
-		return guests.tell(waiter.name);
+		return waiter.guestsArriving();
 	}
 	
 	public function guestsOrdering(choice : Int) : Promise
 	{
-		return waiter.order(choice);
+		return waiter.takeOrder(choice);
 	}
 	
 	public function guestsPaying(account : Account) : Promise
@@ -89,7 +89,6 @@ private abstract Chef(IChef)
 	public function cook(choice : Int) 
 	{
 		var c : ServeFood = context;
-		var self : Chef = c.chef;
 		
 		var def = new Deferred();
 		var points = 2;
@@ -144,20 +143,14 @@ private abstract Chef(IChef)
 @:build(Dci.role(ServeFood))
 private abstract Guests(IGuests) from IGuests to IGuests
 {
-	public function output(msg : String, ?delay : Int)
+	public function output(msg : String, ?delay : Int) { return this.output(msg, delay); }
+
+	public function selectFood()
 	{
-		return this.output(msg, delay);
+		context.menu.display();
 	}
 	
-	public function tell(name : String) : Promise
-	{
-		return this.output('Good evening, my name is $name, I\'ll be your waiter.')
-		.then(function() { return this.output("This is on the menu for tonight:"); })
-		.then(function() { return this.output(""); })
-		.then(function() { return context.menu.display(); });
-	}
-	
-	public function serve(food : String, bill : Int)
+	public function eat(food : String, bill : Int)
 	{
 		var c : ServeFood = context;
 
@@ -174,28 +167,38 @@ private abstract Waiter(IWaiter) from IWaiter to IWaiter
 	public var name(get, never) : String;
 	public function get_name() { return this.name; }
 
-	public function order(choice : Int) : Promise
+	public function guestsArriving() : Promise
 	{
 		var c : ServeFood = context;
-		var self : Waiter = c.waiter;
+		var output = c.guests.output;
+		
+		return output('Good evening, my name is ${self.name}, I\'ll be your waiter.')
+		.then(function() { return output("This is on the menu for tonight:"); })
+		.then(function() { return output(""); })
+		.then(function() { c.guests.selectFood(); });
+	}
+	
+	public function takeOrder(choice : Int) : Promise
+	{
+		var c : ServeFood = context;
 		
 		var text = c.menu.choice(choice) + ", an excellent choice. I'll be right back.";
 		
 		return c.guests.output(text)
 		.then(function() { return c.chef.cook(choice); })
 		.then(
-			function(food) { self.deliver(food); },
+			function(food) { self.serve(food); },
 			null,
 			function(msg) { c.guests.output(msg); }
 		);
 	}
 	
-	public function deliver(food : String)
+	public function serve(food : String)
 	{
 		var c : ServeFood = context;
 		var bill = Std.random(90) + 10;
 		
-		c.guests.serve(food, bill);
+		c.guests.eat(food, bill);
 	}
 	
 	public function pay(account : Account) : Promise

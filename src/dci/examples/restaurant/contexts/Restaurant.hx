@@ -113,7 +113,6 @@ private abstract Chef(IChef) from IChef to IChef
 	public function roleMethod() 
 	{
 		var c : Restaurant = context;
-		var self : IChef = c.chef;
 		
 	}
 }
@@ -128,7 +127,6 @@ private abstract Waiter(IWaiter) from IWaiter to IWaiter
 	public function roleMethod() 
 	{
 		var c : Restaurant = context;
-		var self : IWaiter = c.waiter;
 		
 	}
 }

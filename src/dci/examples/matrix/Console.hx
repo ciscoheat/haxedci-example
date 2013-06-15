@@ -20,16 +20,16 @@ class Console implements Context
 {
 	// Roles in a Context are annotated with the @role metadata.
 	@role var screen : Screen;
-	@role var inputDev : Input;
+	@role var input : Input;
 	@role var processes : Processes;
 	
 	public function new(screen : IScreen, input : IInput)
 	{
 		this.screen = new Screen(screen);
-		this.inputDev = new Input(input);
+		this.input = new Input(input);
 		this.processes = new Processes(new List<IProcess>());
 		
-		this.inputDev.sendInputToActiveProcess();		
+		this.input.sendInputToActiveProcess();		
 		this.screen.on('click', function() { input.focus(); } );
 	}
 	
@@ -54,7 +54,7 @@ class Console implements Context
 	{
 		var def = new Deferred();
 		screen.fadeTo(3500, 0);
-		inputDev.fadeTo(3500, 0, function() { def.resolve(); });
+		input.fadeTo(3500, 0, function() { def.resolve(); });
 		return def;
 	}
 }
@@ -76,34 +76,31 @@ class Console implements Context
 		// Current Context is accessed with the 'context' identifier.
 		var c : Console = context;
 		
-		c.inputDev.isBusy(true);
+		c.input.isBusy(true);
 		push(process);
 		
 		return process.start()
 		.progress(function() {
-			c.inputDev.isBusy(false);
-			c.inputDev.focus();
+			c.input.isBusy(false);
+			c.input.focus();
 		})
 		.done(function() {
 			this.pop();
-			c.inputDev.isBusy(true);
+			c.input.isBusy(true);
 		});
 	}
 	
 	public function input(i : String)
 	{
-		var c : Console = context;
-		
-		// A quick way to get the 'self' role:
-		var self = c.processes;		
+		var c : Console = context;		
 		var currentProcess = self.current();
 		
-		c.inputDev.isBusy(true);
+		c.input.isBusy(true);
 		
 		this.first().input(i).done(function() {
 			// Check if still in same process
 			if(self.current() == currentProcess)
-				c.inputDev.isBusy(false);
+				c.input.isBusy(false);
 		});
 	}
 }
@@ -136,13 +133,13 @@ private abstract Input(IInput)
 		var c : Console = context;
 		
 		this.keydown(function(e) {
-			if (c.inputDev.isBusy())
+			if (c.input.isBusy())
 				e.preventDefault();
 		});
 		
 		this.keyup(function(e) 
 		{
-			if (e.which != 13 || c.inputDev.isBusy()) return;
+			if (e.which != 13 || c.input.isBusy()) return;
 
 			var msg = this.val();
 			this.val("");

@@ -8,20 +8,23 @@ DCI stands for Data, Context, Interaction. One of the key aspects of DCI is to s
 
 A Context rounds up Data objects that take on the part as Roles, then an Interaction takes place as a flow of messages through the Roles. The Roles define a network of communicating objects and the Role methods force the objects to collaborate according to the distributed interaction algorithm.
 
-## Simple example
-A Hello World example is not too informative, since the power of DCI is shown when having a large number of communicating objects, but here it is anyway:
+## Hello World
+A Hello World example is not too informative, since the power of DCI is shown when having a large number of communicating objects, but it can be useful to get familiar with the concepts, so here it is:
 
-#### Greeter.hx
+#### contexts/Greeting.hx
 ```actionscript
-package ;
+package contexts;
 import dci.Context;
 
-typedef ISomeone = String;
+// RoleInterfaces
+typedef ISomeone = {name: String};
 typedef IMessage = String;
 
-class Greeter implements Context
+// Context
+class Greeting implements Context
 {
-    @role var someone : Someone;
+    // Roles (field name = type name camelCased)
+	@role var someone : Someone;
 	@role var message : Message;
 	
 	public function new(someone : ISomeone, message : IMessage)
@@ -30,22 +33,30 @@ class Greeter implements Context
 		this.message = new Message(message);
 	}
 	
+	// Interaction
 	public function greet()
 	{
-		trace(message + " " + someone.name() + "!");
+		someone.greet();
 	}
 }
 
-@:build(Dci.role(Greeter))
+// Role
+@:build(Dci.role(Greeting))
 private abstract Someone(ISomeone)
 {
-	public function name()
+	// RoleInterface implementation
+	public function name() { return this.name; }
+	
+	// RoleMethod
+	public function greet()
 	{
-		return this;
+        var c : Greeting = context;
+		trace(c.message + " " + self.name() + "!");
 	}
 }
 
-@:build(Dci.role(Greeter))
+// Role
+@:build(Dci.role(Greeting))
 private abstract Message(IMessage)
 {}
 ```
@@ -53,41 +64,46 @@ private abstract Message(IMessage)
 #### Main.hx
 ```actionscript
 package ;
+import contexts.Greeting
 
 class Main 
 {	
 	static function main() 
 	{
-		new Greeter("world", "Hello").greet();
+		new Greeting("world", "Hello").greet();
 	}	
 }
 ```
 So what's going on here? There are three classes:
 
-* Greeter
+* Greeting
 * Someone (abstract)
 * Message (abstract)
 
-The `Greeter` class is based on a mental model that **Someone** is being sent a **Message**. Note that these are the two other classes, and they are also present as Roles in the `Greeter` class. The exact name match is very important, because DCI is about mapping the end users mental model to code.
+The `Greeting` class is a *Context*, based on a mental model that a Greeting is "**Someone** being sent a **Message**". Note that these are the two other classes, and they are also present as *Roles* in the `Greeting` class. The exact name match is very important, because DCI is about mapping the end users mental model to code. (The haxedci library enforces that roles have the same field names (camelStyled) in the Context class as the abstract class name.)
 
-The mental model states that **Someone** has a name, so this will be indicated by a so-called *RoleMethod* in the `Someone` class. Naturally that method is called `Someone.name`.
+Let's look at the `Someone` class. It implements its *RoleInterface* `ISomeone` ... What is a RoleInterface? Look at the top of the file, there are two typedefs, `ISomeone` and `IMessage`. In this case they are quite simple, but for more complex roles they will specify a more advanced type required to play the Role. The implementation is simple, just invoke and return the same method on `this`, since `this` is refering to the underlying object playing the Role.
 
-The **Message** class is nothing more than its *RoleInterface*... What is that then? Look at the top of the file, there are two typedefs, `ISomeone` and `IMessage`. In this case they are simply strings, but for more complex roles they will specify a more advanced type (or form) required to play the Role. But in this simple case, they will be strings since nothing more is required of those objects.
+To execute this `Greeting` Context, we use an *Interaction* to trigger it. As you see in Main.hx, it's a simple method invocation on the instantiated Context. All the interaction does is kicking off a *RoleMethod*, where the Roles start communicating with each other. For doing this, there are two keywords: `context` and `self` injected in each RoleMethod. `context` is the current Context, where the Role has access to other roles for communication. `self` is a reference to the Role itself. Haxe is currently a bit too good in optimizing, so the type information is lost on `context`, hence the `var c : Greeting = context;` declaration in the RoleMethod, to get autocompletion.
 
-To execute this `Greeter` Context, we use an *Interaction* to trigger it. As you see in Main.hx, it's a simple method invocation on the instantiated Context. Inside the interaction, the objects sent to the constructor now takes their Role as **Someone** and **Message**, and are outputted as a greeting.
+**A note about "this":** It's not recommended to use `this` in RoleMethods, since it gives access to the whole underlying class, and we're only interested in what the Roles can do in the current Context. This is called "Full OO", a powerful concept that you can read more about [here](https://groups.google.com/d/msg/object-composition/umY_w1rXBEw/hyAF-jPgFn4J).
 
-Catching on the concept? Don't be put down if you think it's a lot to grasp. DCI is a whole new paradigm, which forces the mind in different directions than the normal OO-thinking.
+So when the Interaction is started, the objects passed to the Context constructor now takes on their Role as **Someone** and **Message**, and a greeting is sent to **Someone** as stated in the mental model. We're finished!
+
+Catching on the concept? Don't be put down if it feels like a lot to grasp. DCI is a new paradigm, which forces the mind in different directions than the normal OO-thinking, which is really class-oriented when you think about it, since functionality are put in classes, not in Roles. DCI on the other hand is separating form (RoleInterfaces) from function (RoleMethods), which is a good mind-exercise, and a beautiful system architecture as a result! No polymorphism, no intergalactic GOTOs (or virtual methods as they are also called), everything is kept where it should, in Context.
 
 ## Next steps
-Clone this repository or [download it](https://github.com/ciscoheat/haxedci-example/archive/master.zip), then open the [FlashDevelop](http://www.flashdevelop.org/) project file, or just execute run.bat (or the "run" script if you're on Linux), too see an advanced example in action:
+Clone this repository or [download it](https://github.com/ciscoheat/haxedci-example/archive/master.zip), then open the [FlashDevelop](http://www.flashdevelop.org/) project file, or just execute run.bat (or the "run" script if you're on Linux), to see an advanced example in action:
 
 * A much larger network of communicating objects
 * Nested Contexts
 * Bank Account transfers
 * Restaurant visits
 * An asynchronous DOS console
-* ...and more! 
+* ...and more!
  
-Then you can start looking at [fulloo.info](http://fulloo.info) for information, and if you need help you can ask on [stackoverflow](http://stackoverflow.com/questions/tagged/dci), tagging the question with **dci**. There is also a google group called [object-composition](https://groups.google.com/forum/?fromgroups#!forum/object-composition). Send me (ciscoheat) a message here on github or gmail if you like too, I'm happy to answer any questions when I have some time to spare.
+Then you can start looking at [fulloo.info](http://fulloo.info) for information, and if you need help you can ask on [stackoverflow](http://stackoverflow.com/questions/tagged/dci), tagging the question with **dci**. There is also a google group called [object-composition](https://groups.google.com/forum/?fromgroups#!forum/object-composition) for lengthier discussions. You can also send me (ciscoheat) a message here on github or gmail if you like too, I'm happy to answer any questions when I have some time to spare.
 
 Good luck, and have fun!!
+
+(PS. Because of a limitation with the Haxe `@:allow` metadata, contexts must have a package, in case you're wondering about that in the Hello World example.)
