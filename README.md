@@ -24,7 +24,7 @@ typedef IMessage = String;
 class Greeting implements Context
 {
     // Roles (field name = type name camelCased)
-	@role var someone : Someone;
+    @role var someone : Someone;
 	@role var message : Message;
 	
 	public function new(someone : ISomeone, message : IMessage)
@@ -80,13 +80,13 @@ So what's going on here? There are three classes:
 * Someone (abstract)
 * Message (abstract)
 
-The `Greeting` class is a *Context*, based on a mental model that a Greeting is " **Someone** being sent a **Message** ". Note that these are the two other classes, and they are also present as *Roles* in the `Greeting` class. The exact name match is very important, because DCI is about mapping the end users mental model to code. (The haxedci library enforces that roles have the same field names (camelStyled) in the Context class as the abstract class name.)
+The `Greeting` class is a *Context*, based on a mental model that a Greeting is " **Someone** being sent a **Message** ". Note that these are the two other classes, and they are also present as *Roles* in the `Greeting` class. The exact name match is very important, because DCI is about mapping the end users mental model to code. (The haxedci library enforces that roles have the same field names (camelCased) in the Context class as the abstract class name.)
 
-Let's look at the `Someone` class. It implements its *RoleInterface* `ISomeone` ... What is a RoleInterface? Look at the top of the file, there are two typedefs, `ISomeone` and `IMessage`. In this case they are quite simple, but for more complex roles they will specify a more advanced type required to play the Role. The implementation is simple, just invoke and return the same method on `this`, since `this` is refering to the underlying object playing the Role.
+Let's look at the `Someone` class. It takes the `ISomeone` typedef as underlying type, which is called a *RoleInterface*. At the top of the file there are two typedefs, `ISomeone` and `IMessage`, specifying what is required to play each Role. The implementation is simple, just invoke and return the same method on `this`, since `this` is refering to the underlying object playing the Role. For **Message** it's even simpler since the Role has no methods to implement.
 
-To execute this `Greeting` Context, we use an *Interaction* to trigger it. As you see in Main.hx, it's a simple method invocation on the instantiated Context. All the interaction does is kicking off a *RoleMethod*, where the Roles start communicating with each other. For doing this, there are two keywords: `context` and `self` injected in each RoleMethod. `context` is the current Context, where the Role has access to other roles for communication. `self` is a reference to the Role itself. Haxe is currently a bit too good in optimizing, so the type information is lost on `context`, hence the `var c : Greeting = context;` declaration in the RoleMethod, to get autocompletion.
+To execute this `Greeting` Context, we use an *Interaction* to trigger it. As you see in Main.hx, it's a simple method invocation on the instantiated Context. All the interaction does is kicking off a *RoleMethod*, where the Roles start communicating with each other. For doing this, there are two keywords: `context` and `self` injected in each RoleMethod. `context` is the current Context, where the Role has access to other roles for communication. `self` is a reference to the Role itself. Haxe is currently a bit too good in optimizing, so the type information is lost on `context`, hence the `var c : Greeting = context` declaration in the RoleMethod, to get autocompletion. The same can be done with `self` if required.
 
-**A note about "this":** It's not recommended to use `this` in RoleMethods, since it gives access to the whole underlying class, and we're only interested in what the Roles can do in the current Context. This is called "Full OO", a powerful concept that you can read more about [here](https://groups.google.com/d/msg/object-composition/umY_w1rXBEw/hyAF-jPgFn4J).
+> **A note about "this":** It's not recommended to use `this` in RoleMethods, since it gives access to the whole underlying class, and we're only interested in what the Roles can do in the current Context. This is called "Full OO", a powerful concept that you can read more about [here](https://groups.google.com/d/msg/object-composition/umY_w1rXBEw/hyAF-jPgFn4J).
 
 So when the Interaction is started, the objects passed to the Context constructor now takes on their Role as **Someone** and **Message**, and a greeting is sent to **Someone** as stated in the mental model. We're finished!
 
