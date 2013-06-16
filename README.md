@@ -102,8 +102,10 @@ Clone this repository or [download it](https://github.com/ciscoheat/haxedci-exam
 * An asynchronous DOS console
 * ...and more!
  
-Then you can start looking at [fulloo.info](http://fulloo.info) for information, and if you need help you can ask on [stackoverflow](http://stackoverflow.com/questions/tagged/dci), tagging the question with **dci**. There is also a google group called [object-composition](https://groups.google.com/forum/?fromgroups#!forum/object-composition) for lengthier discussions. You can also send me (ciscoheat) a message here on github or gmail if you like too, I'm happy to answer any questions when I have some time to spare.
+Then you can start looking at [fulloo.info](http://fulloo.info) for information, and if you need help you can ask on [stackoverflow](http://stackoverflow.com/questions/tagged/dci), tagging the question with **dci**. There is also a google group called [object-composition](https://groups.google.com/forum/?fromgroups#!forum/object-composition) for lengthier discussions. 
 
-Good luck, and have fun!!
+A FAQ is started in the [wiki](https://github.com/ciscoheat/haxedci-example/wiki) of this repository, you can send me (ciscoheat) a message here on github or gmail if you have a question that you'd like me to include there.
+
+Good luck with DCI, and have fun!!
 
 (PS. Because of a limitation with the Haxe `@:allow` metadata, contexts must have a package, in case you're wondering about that in the Hello World example.)
