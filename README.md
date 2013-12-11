@@ -4,12 +4,12 @@
 If you don't know what DCI is, go to [fulloo.info](http://fulloo.info) for documentation, details, overview and more. Or keep reading to scratch the surface a little.
 
 ## Short introduction
-DCI stands for Data, Context, Interaction. One of the key aspects of DCI is to separate what a system *is* (data, class properties) from what it *does* (function, communication with other objects). Data and function has very different rates of change so they should be separated, not as it currently is in object-orientation, put together in classes.
+DCI stands for Data, Context, Interaction. One of the key aspects of DCI is to separate what a system *is* (data, class properties) from what it *does* (function, communication with other objects). Data and function has very different rates of change so they should be separated, not as it currently is in object-orientation, put together in classes. The classes also gets bloated with functions from all parts of the system, making it difficult to follow and reason about specific functionality. DCI aims to improve this situation.
 
-The foundation is that a Context rounds up Data objects that take on the part as Roles, then an Interaction takes place as a flow of messages through the Roles. The Roles define a network of communicating objects and the Role methods force the objects to collaborate according to the distributed interaction algorithm.
+Basically, a Context rounds up Data objects that take on the part as Roles, then an Interaction takes place as a flow of messages through the Roles. The Roles define a network of communicating objects and the Role methods force the objects to collaborate according to the distributed interaction algorithm. Keep reading for an explanation of those terms.
 
 ## Hello World
-A Hello World example is not too informative, since the power of DCI is shown when having a large number of communicating objects, but it can be useful to get familiar with the concepts, so here it is:
+A Hello World example is not too informative, since the power of DCI is shown when having a larger number of communicating objects, but it can be useful to get familiar with the concepts, so here it is:
 
 #### contexts/Greeting.hx
 ```actionscript
@@ -80,7 +80,7 @@ So what's going on here? There are three classes:
 * Someone (abstract)
 * Message (abstract)
 
-The `Greeting` class is a *Context*, based on a mental model that a Greeting is " **Someone** being sent a **Message** ". Note that these are the two other classes, and they are also present as *Roles* in the `Greeting` class. The exact name match is very important, because DCI is about mapping the end users mental model to code. (The haxedci library enforces that roles have the same field names (camelCased) in the Context class as the abstract class name.)
+The `Greeting` class is a *Context*, based on a mental model that a Greeting is " **Someone** being announced a **Message** ". These are the two other classes, and they are also present as *Roles* in the `Greeting` class. The exact name match is very important, because DCI is about mapping the end users mental model to code. (The haxedci library enforces that roles have the same field names (camelCased) in the Context class as the abstract class name.)
 
 Let's look at the `Someone` class. It takes the `ISomeone` typedef as underlying type, which is called a *RoleInterface*. At the top of the file there are two typedefs, `ISomeone` and `IMessage`, specifying what is required to play each Role. The implementation is simple, just invoke and return the same method on `this`, since `this` is refering to the underlying object playing the Role. For **Message** it's even simpler since the Role has no methods to implement.
 
