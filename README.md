@@ -58,7 +58,7 @@ class Main
 ```
 The `Greeting` class is a *Context*, based on the idea that a Greeting is " **someone** being greeted with a **message** ". Someone and message are present as *Roles* in the `Greeting` class. The name match is important, because DCI is about mapping the end users mental model to code. We want to use the terms that matters to the user.
 
-Let's look at the `someone` role. First it has a *RoleInterface*, which describes the required fields for any object to play this role. In this case, a name is needed to be greeted. Then we have a *RoleMethod* called `greet`. A RoleMethod is a function defined in a role, which will be attached to the object playing the Role when the object is executing inside the Context. But only inside, because the RoleMethods are only meaningful within a Context. The `message` role is even simpler since it has no methods to implement, then you can just specify a Type and it will become its RoleInterface.
+Let's look at the `someone` Role. First it has a *RoleInterface*, which describes the required fields for any object to play this Role. In this case, a name is needed to be greeted. Then we have a *RoleMethod* called `greet`. A RoleMethod is a function defined in a Role, which will be attached to the object playing the Role when the object is executing within the Context. But only within, because the RoleMethods are only meaningful within a Context. The `message` Role is even simpler since it has no methods to implement, so you can just specify a Type and it will become its RoleInterface.
 
 ## Defining a RoleInterface
 
@@ -73,12 +73,12 @@ var roleInterface : {
 }
 ```
 
-Or if you want to specify a Type for the Role:
+Or if you want to specify a single Type for the Role:
 ```actionscript
 var roleInterface : Array<String>;
 ```
 
-The latter way can be tempting because it's quick and you'll get the full "API" of a class, but a nice thing with specifying a small RoleInterface is that we're only interested in what the Roles can do in the current Context. This is called "Full OO", a powerful concept that you can [read more about here](https://groups.google.com/d/msg/object-composition/umY_w1rXBEw/hyAF-jPgFn4J).
+The latter way can be tempting because it's quick and you'll get the full "API" of a class, but a nice thing with specifying a smaller RoleInterface is that we're only interested in what the Roles can do in the current Context. This is called "Full OO", a powerful concept that you can [read more about here](https://groups.google.com/d/msg/object-composition/umY_w1rXBEw/hyAF-jPgFn4J).
 
 ## Executing the Context
 
