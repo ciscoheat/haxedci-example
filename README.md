@@ -6,8 +6,6 @@ If you don't know what DCI is, go to [fulloo.info](http://fulloo.info) for docum
 ## Short introduction
 DCI stands for Data, Context, Interaction. One of the key aspects of DCI is to separate what a system *is* (form, class properties) from what it *does* (function, methods). Form and function has very different rates of change so they should be separated, not as it currently is, put in classes together.
 
-A Context rounds up Data objects that take on the part as Roles, then an Interaction takes place as a flow of messages through the Roles. The Roles define a network of communicating objects and the Role methods force the objects to collaborate according to the distributed interaction algorithm.
-
 ## Hello World
 A Hello World example is not too informative, since the power of DCI is shown when having a large number of communicating objects, but it can be useful to get familiar with the concepts, so here it is:
 
@@ -93,7 +91,9 @@ In the `greet` RoleMethod, the `someone` role is accessed using `self`, which al
 
 ## Interaction sequence
 
-What happens during an interaction? In this case, when it is started, the objects passed to the Context constructor now takes on their Role as **someone** and **message**, and a greeting is sent to **someone** as stated in the mental model. That's all that happens in this simple example, but a larger Context will have many Roles communicating over many RoleMethods, similar to a [sequence diagram](http://en.wikipedia.org/wiki/Sequence_diagram).
+What happens during an interaction? In this case, when it is started, the objects passed to the Context constructor now takes on their Role as **someone** and **message**, and a greeting is sent to **someone** as stated in the mental model. That's all that happens in this simple example, but a larger Context will have many Roles communicating over many RoleMethods, similar to a [sequence diagram](http://en.wikipedia.org/wiki/Sequence_diagram). In essence, the Context rounds up Data objects that take on the part as Roles, then an Interaction takes place as a flow of messages through the Roles. The Roles define a network of communicating objects and the Role methods force the objects to collaborate according to the distributed interaction algorithm.
+
+When designing the RoleMethods, be careful not to end up with one big method doing all the work. That is an imperative approach which limits the power of DCI, since we're aiming for communication between Roles, not a procedural algorithm that tells the Roles what to do. Make the methods small, and let the mental model of the Context become the guideline. A [Use case](http://www.usability.gov/how-to-and-tools/methods/use-cases.html) is a formalization of a mental model that is supposed to map to a Context in DCI.
 
 Catching on the concept? Don't be put down if it feels like a lot to grasp. DCI is a new paradigm, which forces the mind in different directions than the normal OO-thinking, which is really class-oriented when you think about it, since functionality are spread out in classes, not in Roles. DCI on the other hand is separating data (RoleInterfaces) from function (RoleMethods), which is a good mind-exercise, and a beautiful system architecture as a result! No polymorphism, no intergalactic GOTOs (or virtual methods as they are also called), everything is kept where it should, in Context.
 
