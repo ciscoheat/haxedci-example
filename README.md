@@ -78,7 +78,7 @@ Or if you want to specify a single Type for the Role:
 var roleInterface : Array<String>;
 ```
 
-The latter way can be tempting because it's quick and you'll get the full "API" of a class, but a nice thing with specifying a smaller RoleInterface is that we're only interested in what the Roles can do in the current Context. This is called "Full OO", a powerful concept that you can [read more about here](https://groups.google.com/d/msg/object-composition/umY_w1rXBEw/hyAF-jPgFn4J).
+The latter way can be tempting because it's quick and you'll get the full "API" of a class, but a nice thing with specifying a more exact RoleInterface is that we're only interested in what the Roles can do in the current Context. This is called "Full OO", a powerful concept that you can [read more about here](https://groups.google.com/d/msg/object-composition/umY_w1rXBEw/hyAF-jPgFn4J).
 
 ## Executing the Context
 
