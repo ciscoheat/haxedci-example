@@ -7,11 +7,23 @@ import jQuery.Promise;
 
 class Restaurant implements dci.Context
 {
-	@role var chef : Chef;
-	@role var waiter : Waiter;
+	@role var chef =
+	{
+		var roleInterface : {
+			var cookingSkill : Int;
+		}		
+	}
+	
+	@role var waiter =
+	{
+		var roleInterface : {
+			var name : String;
+		}		
+	}
+	
 	@role var console : Console;
 	@role var process : Deferred;
-	@role var menu : IMenu;
+	@role var menu : Array<String>;
 	
 	var order : ServeFood;
 	var account : Account;
@@ -27,7 +39,7 @@ class Restaurant implements dci.Context
 		chef.birth = new Date(1970, 1, 1, 0, 0, 0);
 		chef.cookingSkill = Std.random(10);
 		
-		this.chef = new Chef(chef);
+		this.chef = chef;
 		
 		// And a random waiter
 		var waiter = new Employee();
@@ -40,7 +52,7 @@ class Restaurant implements dci.Context
 			case _: "Delbert";
 		}
 		
-		this.waiter = new Waiter(waiter);
+		this.waiter = waiter;
 		
 		// And finally, todays menu.
 		var menu = new Array<String>();
@@ -98,35 +110,5 @@ class Restaurant implements dci.Context
 		}
 		
 		return def.resolve().promise();
-	}
-}
-
-typedef IMenu = Array<String>;
-
-typedef IChef = {
-	var cookingSkill : Int;
-};
-
-@:build(Dci.role(Restaurant))
-private abstract Chef(IChef) from IChef to IChef 
-{
-	public function roleMethod() 
-	{
-		var c : Restaurant = context;
-		
-	}
-}
-
-typedef IWaiter = {
-	var name : String;
-};
-
-@:build(Dci.role(Restaurant))
-private abstract Waiter(IWaiter) from IWaiter to IWaiter 
-{
-	public function roleMethod() 
-	{
-		var c : Restaurant = context;
-		
 	}
 }

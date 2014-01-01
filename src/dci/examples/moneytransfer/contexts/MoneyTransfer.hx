@@ -1,33 +1,39 @@
 package dci.examples.moneytransfer.contexts;
 
-typedef ISourceAccount = 
-{
-	function withdraw(amount : Float) : Void;
-	function balance() : Float;
-}
-
-typedef IDestinationAccount = 
-{
-	function deposit(amount : Float) : Void;
-}
-
-typedef IAmount = Float;
-
 class MoneyTransfer implements dci.Context
 {
-	@role var sourceAccount : SourceAccount;
-	@role var destinationAccount : DestinationAccount;
-	@role var amount : IAmount;
+	@role var sourceAccount =
+	{
+		var roleInterface : {
+			function withdraw(amount : Float) : Void;
+			function balance() : Float;
+		}
+		
+		function transfer()
+		{
+			self.withdraw(amount);
+			destinationAccount.deposit(amount);
+		}
+	}
+	
+	@role var destinationAccount =
+	{
+		var roleInterface : {
+			function deposit(amount : Float) : Void;
+		}
+	}
+	
+	@role var amount : Float;
 
-	public function new(source : ISourceAccount, destination : IDestinationAccount, amount : IAmount)
+	public function new(source, destination, amount)
 	{
 		bindRoles(source, destination, amount);
 	}
 
 	function bindRoles(source, destination, amt)
 	{
-		sourceAccount = new SourceAccount(source);
-		destinationAccount = new DestinationAccount(destination);
+		sourceAccount = source;
+		destinationAccount = destination;
 		amount = amt;
 		
 		// Object identity assertions
@@ -54,28 +60,4 @@ class MoneyTransfer implements dci.Context
 		else
 			execute();
 	}
-}
-
-@:build(Dci.role(MoneyTransfer))
-private abstract SourceAccount(ISourceAccount)
-{
-	// RoleInterface
-	public function withdraw(amount) { this.withdraw(amount); }
-	public function balance() { return this.balance(); }
-	
-	public function transfer()
-	{
-		// Until autocompletion works for injected local vars, define the Context like this:
-		var c : MoneyTransfer = context;
-		
-		this.withdraw(c.amount);
-		c.destinationAccount.deposit(c.amount);
-	}
-}
-
-@:build(Dci.role(MoneyTransfer))
-private abstract DestinationAccount(IDestinationAccount)
-{
-	// RoleInterface
-	public function deposit(amount)	{ this.deposit(amount);	}
 }

@@ -1,16 +1,31 @@
 package dci.examples.moneytransfer.contexts;
+import dci.Context;
 import dci.examples.moneytransfer.data.Ledger;
 
-typedef ILedgers = Array<Ledger>;
-
-@:build(Dci.context())
-class Account
+class Account implements Context
 {
-	@role var ledgers : Ledgers;
-	
-	public function new(ledgers : ILedgers)
+	@role var ledgers = 
 	{
-		this.ledgers = new Ledgers(ledgers);
+		var roleInterface : Array<Ledger>;
+		
+		function balance()
+		{
+			return Lambda.fold(self, function(a, b) { return a.amount + b; }, 0.0);
+		}
+		
+		function addEntry(message, amount)
+		{
+			var ledger = new Ledger();
+			ledger.message = message;
+			ledger.amount = amount;
+			
+			self.push(ledger);
+		}
+	}
+	
+	public function new(ledgers)
+	{
+		this.ledgers = ledgers;
 	}	
 	
 	public function balance() : Float
@@ -26,27 +41,5 @@ class Account
 	public function withdraw(amount : Float)
 	{
 		ledgers.addEntry("Withdrawing", -amount);
-	}
-}
-
-@:build(Dci.role(Account))
-@:arrayAccess private abstract Ledgers(ILedgers)
-{
-	// Required for iteration of an abstract type:
-	public var length(get, never) : Int;
-	function get_length() return this.length;
-	
-	public function balance()
-	{
-		return Lambda.fold(this, function(a, b) { return a.amount + b; }, 0.0); 
-	}
-	
-	public function addEntry(message, amount)
-	{		
-		var ledger = new Ledger();
-		ledger.message = message;
-		ledger.amount = amount;
-		
-		this.push(ledger);
 	}
 }
