@@ -76,18 +76,17 @@ var roleInterface : {
 Or if you want to specify a Type for the Role:
 ```actionscript
 var roleInterface : Array<String>;
-
-function aRoleMethod() {
-}
 ```
 
-The latter way can be tempting because it's quick and you'll get the full "API" of a class, but a nice thing with specifying a small RoleInterface is that we're only interested in what the Roles can do in the current Context. This is called "Full OO", a powerful concept that you can read more about [here](https://groups.google.com/d/msg/object-composition/umY_w1rXBEw/hyAF-jPgFn4J).
+The latter way can be tempting because it's quick and you'll get the full "API" of a class, but a nice thing with specifying a small RoleInterface is that we're only interested in what the Roles can do in the current Context. This is called "Full OO", a powerful concept that you can [read more about here](https://groups.google.com/d/msg/object-composition/umY_w1rXBEw/hyAF-jPgFn4J).
 
 ## Executing the Context
 
 To execute our `Greeting` Context, we use an *Interaction* to trigger it. As you see in Main.hx, it's only a method invocation on the instantiated Context. The only thing the Interaction should do is to kick off a RoleMethod, so the Roles start communicating with each other. 
 
 In the `greet` RoleMethod, the `someone` role is accessed using `self`, which always points to the current Role. `this` points to the Context in RoleMethods.
+
+The advantage we get from using Roles, RoleMethods and even a Context, is that we know exactly where our functionality is. It's not spread out in multiple classes anymore. When we talk about "a greeting", we know exactly where in the code it is handled now. Another thing is that we keep the code simple. No facades or other abstractions, just the methods we need, automatically added to the objects playing a Role in the Context.
 
 ## Interaction sequence
 
