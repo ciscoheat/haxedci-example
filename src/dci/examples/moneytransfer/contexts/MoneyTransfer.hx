@@ -9,7 +9,7 @@ class MoneyTransfer implements dci.Context
 			function balance() : Float;
 		}
 		
-		function transfer()
+		function transfer() : Void
 		{
 			self.withdraw(amount);
 			destinationAccount.deposit(amount);
@@ -34,17 +34,7 @@ class MoneyTransfer implements dci.Context
 	{
 		sourceAccount = source;
 		destinationAccount = destination;
-		amount = amt;
-		
-		// Object identity assertions
-		if (untyped sourceAccount != source)
-			throw "Object identity broken for sourceAccount";
-
-		if (untyped destinationAccount != destination)
-			throw "Object identity broken for sourceAccount";
-
-		if (untyped amount != amt)
-			throw "Object identity broken for amount";
+		amount = amt;		
 	}
 	
 	// Interaction

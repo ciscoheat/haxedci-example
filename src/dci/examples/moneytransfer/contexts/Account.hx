@@ -8,19 +8,19 @@ class Account implements Context
 	{
 		var roleInterface : Array<Ledger>;
 		
-		function balance()
+		function balance() : Float
 		{
 			return Lambda.fold(self, function(a, b) { return a.amount + b; }, 0.0);
 		}
-		
-		function addEntry(message, amount)
+				
+		function addEntry(message : String, amount : Float) : Void
 		{
 			var ledger = new Ledger();
 			ledger.message = message;
 			ledger.amount = amount;
 			
 			self.push(ledger);
-		}
+		}		
 	}
 	
 	public function new(ledgers)
