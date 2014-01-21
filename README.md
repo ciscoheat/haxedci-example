@@ -1,5 +1,5 @@
 # DCI in Haxe
-[Haxe](http://haxe.org) is a nice multiplatform language which in its third release (May 2013), enables a complete DCI implementation. This repository is a supplement to the [haxedci](https://github.com/ciscoheat/haxedci) library, giving a small introduction in this readme file, and having a larger example ready for download.
+[Haxe](http://haxe.org) is a nice multiplatform language which enables a full DCI implementation. This repository is a supplement to the [haxedci](https://github.com/ciscoheat/haxedci) library, having a larger example ready for download.
 
 This document is supposed to give you an introduction to DCI, as well as describing the library usage. At the end you can find multiple DCI resources for further exploration.
 
@@ -355,7 +355,7 @@ Clone this repository or [download it](https://github.com/ciscoheat/haxedci-exam
  
 ## DCI Resources
 Website - [fulloo.info](http://fulloo.info) <br>
-FAQ - [DCI FAQ](fulloo.info/doku.php?id=faq) <br>
+FAQ - [DCI FAQ](http://fulloo.info/doku.php?id=faq) <br>
 Support - [stackoverflow](http://stackoverflow.com/questions/tagged/dci), tagging the question with **dci** <br>
 Discussions - [Object-composition](https://groups.google.com/forum/?fromgroups#!forum/object-composition) <br>
 Wikipedia - [DCI entry](http://en.wikipedia.org/wiki/Data,_Context,_and_Interaction) <br>
