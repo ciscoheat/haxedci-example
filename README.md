@@ -55,7 +55,7 @@ class MoneyTransfer implements dci.Context {
 			function decreaseBalance(a : Int) : Void;
 		}
 		
-		function withdraw()	{
+		function withdraw()	: Void {
 			self.decreaseBalance(amount);
 			destination.deposit();
 		}
@@ -66,7 +66,7 @@ class MoneyTransfer implements dci.Context {
 			function increaseBalance(a : Int) : Void;
 		}
 		
-		function deposit() {
+		function deposit() : Void {
 			self.increaseBalance(amount);
 		}
 	}
@@ -207,7 +207,7 @@ Getting back to the mental model again, we know that we want to "Withdraw amount
 		function decreaseBalance(a : Int) : Void;
 	}
 	
-	function withdraw()	{
+	function withdraw() : Void {
 		self.decreaseBalance(amount);
 		destination.deposit();
 	}
@@ -220,11 +220,13 @@ This is a very close mapping of the mental model to code, which is the goal of D
 		function increaseBalance(a : Int) : Void;
 	}
 	
-	function deposit() {
+	function deposit() : Void {
 		self.increaseBalance(amount);
 	}
 }
 ```
+**Important:** If you want syntax autocompletion for the RoleMethods, you need to specify a return value for them explicitly!
+
 ### Accessors: this, self and context
 A RoleMethod is a stateless method with access only to its RolePlayer and the current Context. You can access them through variables that is automatically available in RoleMethods:
 
@@ -248,7 +250,7 @@ class MoneyTransfer implements dci.Context {
 			function decreaseBalance(a : Int) : Void;
 		}
 		
-		function withdraw()	{
+		function withdraw()	: Void {
 			self.decreaseBalance(amount);
 			destination.deposit();
 		}
@@ -259,7 +261,7 @@ class MoneyTransfer implements dci.Context {
 			function increaseBalance(a : Int) : Void;
 		}
 		
-		function deposit() {
+		function deposit() : Void {
 			self.increaseBalance(amount);
 		}
 	}
@@ -293,7 +295,7 @@ class MoneyTransfer implements dci.Context {
 			function decreaseBalance(a : Int) : Void;
 		}
 		
-		function withdraw()	{
+		function withdraw() : Void {
 			self.decreaseBalance(amount);
 			destination.deposit();
 		}
@@ -304,7 +306,7 @@ class MoneyTransfer implements dci.Context {
 			function increaseBalance(a : Int) : Void;
 		}
 		
-		function deposit() {
+		function deposit() : Void {
 			self.increaseBalance(amount);
 		}
 	}
