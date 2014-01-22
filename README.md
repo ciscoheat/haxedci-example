@@ -6,10 +6,8 @@ This document is supposed to give you an introduction to DCI, as well as describ
 ## Short introduction
 DCI stands for Data, Context, Interaction. One of the key aspects of DCI is to separate what a system *is* (data) from what it *does* (function). Data and function has very different rates of change so they should be separated, not as it currently is, put in classes together.
 
-DCI also embodies true object-orientation where runtime Interactions between a network of objects in a particular Context is understood _and_ coded as first class citizens.
-
 ## Example: A money transfer
-(Thanks to [Marc Grue](https://github.com/marcgrue) for the original tutorial.)
+(Thanks to [Marc Grue](https://github.com/marcgrue) for the original money transfer tutorial.)
 
 Let's take a simple Data class Account with some basic methods:
 
@@ -153,7 +151,7 @@ We have started out quick and easy by a broad definition: The source and destina
 	var roleInterface : Account;
 } 
 ```
-Thinking about it however, we're not interested in the whole `Account`. Since we want to focus on what happens in the Context and right now for a specific Role, all we need for playing the `source` Role is a way of decreasing the balance. The `Account` class has a `decreaseBalance` method, let's use it:
+Thinking about it however, we're not interested in the whole `Account`. Since we want to focus on what happens in the Context and right now for a specific Role, all we need for playing the *source* Role is a way of decreasing the balance. The `Account` class has a `decreaseBalance` method, let's use it:
 ```actionscript
 @role var source = {
 	var roleInterface : {
@@ -161,7 +159,7 @@ Thinking about it however, we're not interested in the whole `Account`. Since we
 	}
 }
 ```
-Now we're using [Haxe class notation](http://haxe.org/manual/struct#class-notation) to define the RoleInterface. Let's do the same for the `destination` Role, but it needs to increase the balance instead:
+Now we're using [Haxe class notation](http://haxe.org/manual/struct#class-notation) to define the RoleInterface. Let's do the same for the *destination* Role, but it needs to increase the balance instead:
 ```actionscript
 @role var destination = {
 	var roleInterface : {
@@ -169,7 +167,7 @@ Now we're using [Haxe class notation](http://haxe.org/manual/struct#class-notati
 	}
 }
 ```
-The `amount` role will be simpler. We're only using it as an `Int`, so we can specify the RoleInterface directly on the definition:
+The *amount* role will be simpler. We're only using it as an `Int`, so we can specify the RoleInterface directly on the definition:
 ```actionscript
 @role var amount : Int;
 ```
@@ -235,11 +233,11 @@ A RoleMethod is a stateless method with access only to its RolePlayer and the cu
 - `context` - An alias for `this`.
 
 ### More about functionality
-Functionality can change frequently, and will match the mental model. RoleMethods will come and go as requirement changes. The Data however will probably remain stable much longer. An `Account` will stay the same, no matter how fancy web functionality is available. So take care when designing your Data classes. A well-defined Data structure can support a lot of functionality through its RoleInterface.
+Functionality can change frequently, as requirements changes. The Data however will probably remain stable much longer. An `Account` will stay the same, no matter how fancy web functionality is available. So take care when designing your Data classes. A well-defined Data structure can support a lot of functionality through its RoleInterface.
 
-When designing RoleMethods, be careful not to end up with one big method doing all the work. That is an imperative approach which limits the power of DCI, since we're aiming for communication between Roles, not a procedural algorithm that tells the Roles what to do. Make the methods small, and let the mental model of the Context become the guideline. A [Use case](http://www.usability.gov/how-to-and-tools/methods/use-cases.html) is a formalization of a mental model that is supposed to map to a Context in DCI.
+When designing RoleMethods in a Context, be careful not to end up with one big method doing all the work. That is an imperative approach which limits the power of DCI, since we're aiming for communication between Roles, not a procedural algorithm that tells the Roles what to do. Make the methods small, and let the mental model of the Context become the guideline. A [Use case](http://www.usability.gov/how-to-and-tools/methods/use-cases.html) is a formalization of a mental model that is supposed to map to a Context in DCI.
 
-A difference between that kind of procedure orientation and object orientation is that in the former, we ask: “What happens?” In the latter, we ask: “Who does what?” Even in a simple example, a reader looses the “who” and thereby important locality context that is essential for building a mental model of the algorithm. ([From the DCI FAQ](http://fulloo.info/doku.php?id=what_is_the_advantage_of_distributing_the_interaction_algorithm_in_the_rolemethods_as_suggested_by_dci_instead_of_centralizing_it_in_a_context_method))
+A difference between that kind of procedure orientation and object orientation is that in the former, we ask: _“What happens?”_ In the latter, we ask: _“Who does what?”_ Even in a simple example, a reader looses the “who” and thereby important locality context that is essential for building a mental model of the algorithm. ([From the DCI FAQ](http://fulloo.info/doku.php?id=what_is_the_advantage_of_distributing_the_interaction_algorithm_in_the_rolemethods_as_suggested_by_dci_instead_of_centralizing_it_in_a_context_method))
 
 ### Adding a constructor
 Let's add a constructor to the class:
@@ -280,10 +278,10 @@ Nothing special about this one, just assign the Roles as normal instance variabl
 1. All Roles are bound as an atomic operation before an Interaction starts. 
 1. A Role should not be unbound.
 
-Rebinding Roles during executing complicates things immensely, and isn't. So put the binding in one place, you can factorize it out of the constructor to a "bindRoles" method if you want. Note that the Roles be rebound before another Interaction in the same Context occurs.
+Rebinding Roles during executing complicates things very much, and is hardly supported by any mental model. So put the binding in one place only, you can factorize it out of the constructor to a "bindRoles" method if you want. Note that the Roles be rebound before another Interaction in the same Context occurs, (can be useful during recursion, for example).
 
 ### Interaction(s)
-Now we have talked about **Interactions**, which is the final concept to learn before we can use the Context. It is simply a starting point for executing a Context. All an Interaction should do is to call a RoleMethod, so the Roles start interacting with each other.
+We have just mentioned **Interactions**, which is the final concept to learn before we can use the Context. It is simply a starting point for executing a Context. All an Interaction should do is to call a RoleMethod, so the Roles start interacting with each other.
 
 There may be many Interactions in a Context, but in this case we only need one, so lets call it `execute`.
 ```actionscript
@@ -339,9 +337,11 @@ class Main {
 ## Advantages
 Ok, we have learned new concepts and a different way of structuring our program. But why should we do all this?
 
-The advantage we get from using Roles and RoleMethods in a Context, is that we know exactly where our functionality is. It's not spread out in multiple classes anymore. When we talk about "money transfer", we know exactly where in the code it is handled now. Another thing is that we keep the code simple. No facades or other abstractions, just the methods we need.
+The advantage we get from using Roles and RoleMethods in a Context, is that we know exactly where our functionality is. It's not spread out in multiple classes anymore. When we talk about a "money transfer", we know exactly where in the code it is handled now. Another good thing is that we keep the code simple. No facades or other abstractions, just the methods we need.
 
-DCI is a new paradigm, which forces the mind in different directions than the normal OO-thinking. What we call object-orientation today is really class-orientation, since functionality is spread out throughout classes, instead of contained in Roles which interact at runtime. When you use DCI to separate Data (RoleInterfaces) from Function (RoleMethods), you get a beautiful system architecture as a result. No polymorphism, no intergalactic GOTOs (or virtual methods as they are also called), everything is kept where it should be, in Context!
+In other words, DCI embodies true object-orientation where runtime Interactions between a network of objects in a particular Context is understood _and_ coded as first class citizens.
+
+DCI is a new paradigm, which forces the mind in different directions than the common OO-thinking. What we call object-orientation today is really class-orientation, since functionality is spread out throughout classes, instead of contained in Roles which interact at runtime. When you use DCI to separate Data (RoleInterfaces) from Function (RoleMethods), you get a beautiful system architecture as a result. No polymorphism, no intergalactic GOTOs (or virtual methods as they are also called), everything is kept where it should be, in Context!
 
 ## Next steps
 Clone this repository or [download it](https://github.com/ciscoheat/haxedci-example/archive/master.zip), then open the [FlashDevelop](http://www.flashdevelop.org/) project file, or just execute run.bat (or the "run" script if you're on Linux), to see an advanced example in action:
