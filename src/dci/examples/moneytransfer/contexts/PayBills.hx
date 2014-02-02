@@ -32,10 +32,7 @@ class PayBills implements Context
 	{
 		var roleInterface : Iterable<Creditor>;
 
-		function owed() : Float
-		{
-			return Lambda.fold(self, function(cr, a) { return cr.amountOwed + a; }, 0.0);
-		}
+		function owed()	return Lambda.fold(self, function(cr, a) { return cr.amountOwed + a; }, 0.0);
 	}
 	
 	public function new(account, creditors)
@@ -48,7 +45,7 @@ class PayBills implements Context
 		this.account = account;
 		this.creditors = creditors;
 	}
-		
+	
 	public function payBills()
 	{
 		account.payBills();
