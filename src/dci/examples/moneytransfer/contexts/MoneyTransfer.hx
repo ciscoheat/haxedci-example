@@ -38,16 +38,16 @@ class MoneyTransfer implements dci.Context
 	}
 	
 	// Interaction
-	public function execute()
+	public function transfer()
 	{
 		sourceAccount.transfer();
 	}
 	
-	public function executeAndDeclineIfNotEnough()
+	public function transferButDeclineIfNotEnough()
 	{
 		if (sourceAccount.balance() < amount)
 			throw "Declined: Not enough money in account.";
 		else
-			execute();
+			transfer();
 	}
 }

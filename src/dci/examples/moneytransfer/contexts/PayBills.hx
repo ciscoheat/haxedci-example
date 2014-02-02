@@ -23,7 +23,7 @@ class PayBills implements Context
 			
 			for (creditor in creditors)
 			{
-				new MoneyTransfer(self, creditor.account, creditor.amountOwed).execute();
+				new MoneyTransfer(self, creditor.account, creditor.amountOwed).transfer();
 			}
 		}
 	}

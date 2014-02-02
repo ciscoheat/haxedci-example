@@ -79,7 +79,7 @@ class MoneyTransfer implements dci.Context {
 		this.amount = amount;
 	}
 	
-	public function execute() {
+	public function transfer() {
 		source.withdraw();
 	}
 }
@@ -90,7 +90,7 @@ We want our source code to map as closely to our mental model as possible so tha
 
 We want no surprises at runtime. With DCI we have all runtime interactions right there! No need to look through endless convoluted abstractions, tiers, polymorphism etc to answer the reasonable question _where is it actually happening, goddammit?!_
 
-To execute this MoneyTransfer context, lets create two accounts, the Context, and execute it:
+To use this MoneyTransfer context, lets create two accounts, the Context, then make the transfer:
 
 #### Main.hx
 ```actionscript
@@ -106,7 +106,7 @@ class Main {
 		trace(home.name + ": $" + home.balance);
 
 		// Creating and executing the Context:
-		new MoneyTransfer(savings, home, 500).execute();
+		new MoneyTransfer(savings, home, 500).transfer();
 
 		trace("After transfer:");
 		trace(savings.name + ": $" + savings.balance);
@@ -237,7 +237,7 @@ Functionality can change frequently, as requirements changes. The Data however w
 
 When designing functionality using RoleMethods in a Context, be careful not to end up with one big method doing all the work. That is an imperative approach which limits the power of DCI, since we're aiming for communication between Roles, not a procedural algorithm that tells the Roles what to do. Make the methods small, and let the mental model of the Context become the guideline. A [Use case](http://www.usability.gov/how-to-and-tools/methods/use-cases.html) is a formalization of a mental model that is supposed to map to a Context in DCI.
 
-> A difference between [the imperative] kind of procedure orientation and object orientation is that in the former, we ask: _“What happens?”_ In the latter, we ask: _“Who does what?”_ Even in a simple example, a reader looses the “who” and thereby important locality context that is essential for building a mental model of the algorithm. ([From the DCI FAQ](http://fulloo.info/doku.php?id=what_is_the_advantage_of_distributing_the_interaction_algorithm_in_the_rolemethods_as_suggested_by_dci_instead_of_centralizing_it_in_a_context_method))
+> A difference between [the imperative] kind of procedure orientation and object orientation is that in the former, we ask: _"What happens?"_ In the latter, we ask: _"Who does what?"_ Even in a simple example, a reader looses the "who" and thereby important locality context that is essential for building a mental model of the algorithm. ([From the DCI FAQ](http://fulloo.info/doku.php?id=what_is_the_advantage_of_distributing_the_interaction_algorithm_in_the_rolemethods_as_suggested_by_dci_instead_of_centralizing_it_in_a_context_method))
 
 ### Adding a constructor
 Let's add a constructor to the class:
@@ -273,17 +273,17 @@ class MoneyTransfer implements dci.Context {
 	}	
 }
 ```
-Nothing special about the constructor, just assign the Roles as normal instance variables. This is called *Role-binding*, and there are two important things to remember:
+Nothing special about it, just assign the Roles as normal instance variables. This is called *Role-binding*, and there are two important things to remember:
 
 1. All Roles are bound as an atomic operation before an Interaction starts. 
-1. A Role should not be unbound.
+1. A Role should not be left unbound.
 
 Rebinding Roles during executing complicates things, and is hardly supported by any mental model. So put the binding in one place only, you can factorize it out of the constructor to a `bindRoles` method if you want. Note that the Roles be rebound before another Interaction in the same Context occurs, (can be useful during recursion, for example).
 
-### Interaction(s)
-We have just mentioned **Interactions**, which is the final concept to learn before we can use the Context. It is simply a starting point for executing a Context. All an Interaction should do is to call a RoleMethod, so the Roles start interacting with each other.
+### System Operations
+We have just mentioned **Interactions**, which is the last character of the DCI acronym. An Interaction is a flow of messages through the Roles in a Context, like the one we have defined based on the mental model. To start an Interaction we need an entry point for the Context however. This is called a **System Operation**, and all it should do is to call a RoleMethod, so the Roles start interacting with each other.
 
-There may be many Interactions in a Context, but in this case we only need one, so lets call it `execute`.
+There may be many System Operations in a Context, but in this case we only need one, so lets call it `transfer`. Avoid using a generic name like "execute", instead give your API meaning by letting every method name carry meaningful information.
 ```actionscript
 class MoneyTransfer implements dci.Context {
 	@role var source = {
@@ -315,19 +315,19 @@ class MoneyTransfer implements dci.Context {
 		this.amount = amount;
 	}
 	
-	public function execute() {
+	public function transfer() {
 		source.withdraw();
 	}
 }
 ```
-Now when we can interact with our `MoneyTransfer` Context, it's ready for use! You saw how it's done earlier, but here are the essentials:
+With this System Operation as our entrypoint, the `MoneyTransfer` Context is ready for use! You saw how it's done earlier, but here are the essentials:
 ```actionscript
 class Main {	
 	static function main() {
 		var savings = new Account("Savings", 1000);
 		var home = new Account("Home", 0);
 
-		new MoneyTransfer(savings, home, 500).execute();
+		new MoneyTransfer(savings, home, 500).transfer();
 	}	
 }
 ```
@@ -337,7 +337,7 @@ Ok, we have learned new concepts and a different way of structuring our program.
 
 The advantage we get from using Roles and RoleMethods in a Context, is that we know exactly where our functionality is. It's not spread out in multiple classes anymore. When we talk about a "money transfer", we know exactly where in the code it is handled now. Another good thing is that we keep the code simple. No facades, design patterns or other abstractions, just the methods we need.
 
-In other words, DCI embodies true object-orientation where runtime Interactions between a network of objects in a particular Context is understood _and_ coded as first class citizens.
+The Roles and their RoleMethods gives us a view of the Interaction between objects instead of their inner structure. This enables us to reason about *system* functionality, not just class functionality. In other words, DCI embodies true object-orientation where runtime Interactions between a network of objects in a particular Context is understood *and* coded as first class citizens.
 
 DCI is a new paradigm, which forces the mind in different directions than the common OO-thinking. What we call object-orientation today is really class-orientation, since functionality is spread throughout classes, instead of contained in Roles which interact at runtime. When you use DCI to separate Data (RoleInterfaces) from Function (RoleMethods), you get a beautiful system architecture as a result. No polymorphism, no intergalactic GOTOs (or virtual methods as they are also called), everything is kept where it should be, in Context!
 

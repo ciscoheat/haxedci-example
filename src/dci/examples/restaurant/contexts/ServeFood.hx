@@ -53,7 +53,7 @@ class ServeFood implements Context
 			
 			return guests.output('Your total is $$${bill}.')
 			.then(function() {
-				new MoneyTransfer(account, restaurantAccount, bill).executeAndDeclineIfNotEnough();
+				new MoneyTransfer(account, restaurantAccount, bill).transferButDeclineIfNotEnough();
 			})
 			.then(function() { return guests.output("Thank you very much, sir."); });
 		}
