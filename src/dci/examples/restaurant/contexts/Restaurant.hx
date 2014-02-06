@@ -29,17 +29,12 @@ class Restaurant implements dci.Context
 	var account : Account;
 
 	public function new(console : Console, account : Account) 
-	{
-		this.console = console;
-		this.account = account;
-		
+	{		
 		// Make a random chef
 		var chef = new Employee();
 		chef.name = "Mr. Chef";
 		chef.birth = new Date(1970, 1, 1, 0, 0, 0);
 		chef.cookingSkill = Std.random(10);
-		
-		this.chef = chef;
 		
 		// And a random waiter
 		var waiter = new Employee();
@@ -52,8 +47,6 @@ class Restaurant implements dci.Context
 			case _: "Delbert";
 		}
 		
-		this.waiter = waiter;
-		
 		// And finally, todays menu.
 		var menu = new Array<String>();
 		menu.push("Peking Duck");
@@ -61,12 +54,23 @@ class Restaurant implements dci.Context
 		menu.push("Crab Cake");
 		menu.push("Roast Beef");
 		
+		bindRoles(console, account, null, chef, waiter, menu);
+	}
+	
+	private function bindRoles(console : Console, account : Account, process : Deferred, chef : Dynamic, waiter : Dynamic, menu : Array<String>)
+	{
+		this.console = console;
+		this.account = account;
+		this.process = process;
+		this.chef = chef;
+		this.waiter = waiter;
 		this.menu = menu;
 	}
 
 	public function start() : Deferred
 	{
-		process = new Deferred();
+		bindRoles(console, account, new Deferred(), chef, waiter, menu);
+		
 		order = new ServeFood(waiter, chef, menu, console);
 		
 		order.guestsArriving().then(process.notify);

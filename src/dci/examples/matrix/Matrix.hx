@@ -15,14 +15,20 @@ class Matrix implements dci.Context
 
 	public function new(console : Console, bills : Array<Creditor>, neoAccount : Account)
 	{
+		bindRoles(console, bills, neoAccount, null);
+	}
+	
+	private function bindRoles(console : Console, bills : Array<Creditor>, neoAccount : Account, process : Deferred)
+	{
 		this.console = console;
 		this.bills = bills;
-		this.neoAccount = neoAccount;
+		this.neoAccount = neoAccount;		
+		this.process = process;
 	}
 
 	public function start() : Deferred
 	{
-		process = new Deferred();
+		bindRoles(this.console, this.bills, this.neoAccount, new Deferred());
 		
 		var type = this.console.output;
 		var newline = this.console.newline;
