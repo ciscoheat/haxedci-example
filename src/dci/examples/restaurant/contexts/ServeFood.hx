@@ -1,5 +1,5 @@
 package dci.examples.restaurant.contexts;
-import dci.Context;
+import haxedci.Context;
 import dci.examples.moneytransfer.contexts.Account;
 import dci.examples.moneytransfer.contexts.MoneyTransfer;
 import haxe.Timer;

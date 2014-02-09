@@ -1,5 +1,5 @@
 package dci.examples.matrix;
-import dci.Context;
+import haxedci.Context;
 import jQuery.Promise;
 import jQuery.JQuery;
 import jQuery.Deferred;

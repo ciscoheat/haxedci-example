@@ -5,7 +5,7 @@ import dci.examples.restaurant.data.Employee;
 import jQuery.Deferred;
 import jQuery.Promise;
 
-class Restaurant implements dci.Context
+class Restaurant implements haxedci.Context
 {
 	@role var chef =
 	{

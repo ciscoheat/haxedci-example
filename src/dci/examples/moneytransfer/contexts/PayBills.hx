@@ -1,5 +1,5 @@
 package dci.examples.moneytransfer.contexts;
-import dci.Context;
+import haxedci.Context;
 import dci.examples.moneytransfer.data.Creditor;
 
 class PayBills implements Context

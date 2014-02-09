@@ -6,7 +6,7 @@ import dci.examples.restaurant.contexts.Restaurant;
 import jQuery.Deferred;
 import jQuery.Promise;
 
-class Matrix implements dci.Context 
+class Matrix implements haxedci.Context 
 {
 	@role var console : Console;
 	@role var bills : Array<Creditor>;

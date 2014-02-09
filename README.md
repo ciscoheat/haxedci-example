@@ -49,7 +49,7 @@ That could be our "Mental Model" of a money transfer. Interacting concepts like 
 ```actionscript
 package;
 
-class MoneyTransfer implements dci.Context {
+class MoneyTransfer implements haxedci.Context {
 	@role var source = {
 		var roleInterface : {
 			function decreaseBalance(a : Int) : Void;
@@ -117,14 +117,14 @@ class Main {
 ## Library usage
 To use haxedci, you need to be able to create Contexts. Lets build the `MoneyTransfer` class step-by-step from scratch:
 
-Start by defining a class and let it implement `dci.Context`.
+Start by defining a class and let it implement `haxedci.Context`.
 ```actionscript
-class MoneyTransfer implements dci.Context {
+class MoneyTransfer implements haxedci.Context {
 }
 ```
 Remember the mental model of a money transfer? "Withdraw *amount* from a *source* account and deposit the amount in a *destination* account". The three italicized nouns are the Roles that we will use in the Context. Lets put them there. They are defined using the `@role` metadata:
 ```actionscript
-class MoneyTransfer implements dci.Context {
+class MoneyTransfer implements haxedci.Context {
 	@role var source = {
 		var roleInterface : Account;
 	} 
@@ -171,7 +171,7 @@ The *amount* role will be simpler. We're only using it as an `Int`, so we can sp
 ```
 Our `MoneyTransfer` class now looks like this:
 ```actionscript
-class MoneyTransfer implements dci.Context {
+class MoneyTransfer implements haxedci.Context {
 	@role var source = {
 		var roleInterface : {
 			function decreaseBalance(a : Int) : Void;
@@ -242,7 +242,7 @@ When designing functionality using RoleMethods in a Context, be careful not to e
 ### Adding a constructor
 Let's add a constructor to the class:
 ```actionscript
-class MoneyTransfer implements dci.Context {
+class MoneyTransfer implements haxedci.Context {
 	@role var source = {
 		var roleInterface : {
 			function decreaseBalance(a : Int) : Void;
@@ -285,7 +285,7 @@ We have just mentioned **Interactions**, which is the last character of the DCI 
 
 There may be many System Operations in a Context, but in this case we only need one, so lets call it `transfer`. Avoid using a generic name like "execute", instead give your API meaning by letting every method name carry meaningful information.
 ```actionscript
-class MoneyTransfer implements dci.Context {
+class MoneyTransfer implements haxedci.Context {
 	@role var source = {
 		var roleInterface : {
 			function decreaseBalance(a : Int) : Void;

@@ -1,6 +1,6 @@
 package dci.examples.moneytransfer.contexts;
 
-class MoneyTransfer implements dci.Context
+class MoneyTransfer implements haxedci.Context
 {
 	@role var sourceAccount =
 	{
