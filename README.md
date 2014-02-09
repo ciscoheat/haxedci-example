@@ -350,7 +350,9 @@ Clone this repository or [download it](https://github.com/ciscoheat/haxedci-exam
 * Restaurant visits
 * An asynchronous DOS console
 * ...and more!
- 
+
+A very good example of how well DCI maps to Use cases is found in the recreation of the classic Snake game, created with haxedci and Haxeflixel: [SnakeDCI](https://github.com/ciscoheat/SnakeDCI)
+
 ## DCI Resources
 Website - [fulloo.info](http://fulloo.info) <br>
 FAQ - [DCI FAQ](http://fulloo.info/doku.php?id=faq) <br>
