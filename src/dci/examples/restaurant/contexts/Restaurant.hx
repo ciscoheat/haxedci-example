@@ -57,7 +57,7 @@ class Restaurant implements haxedci.Context
 		bindRoles(console, account, null, chef, waiter, menu);
 	}
 	
-	private function bindRoles(console : Console, account : Account, process : Deferred, chef : Dynamic, waiter : Dynamic, menu : Array<String>)
+	private function bindRoles(console, account, process, chef, waiter, menu)
 	{
 		this.console = console;
 		this.account = account;

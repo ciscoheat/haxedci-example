@@ -21,14 +21,14 @@ class Console implements Context
 	{
 		var roleInterface : JQuery;
 		
-		function type(txt : String, delay = 0) : Promise
+		function type(txt : String, ?delay : Int) : Promise
 		{
 			var p = new Deferred();
 			self.typeString(txt).then(function() { Timer.delay(function() { p.resolve(); }, delay); } );
 			return p.promise();
 		}
 		
-		function newline(delay = 0) : Promise
+		function newline(?delay : Int) : Promise
 		{
 			return self.type("", delay);
 		}
@@ -175,12 +175,12 @@ class Console implements Context
 		return processes.start(process);
 	}
 	
-	public function output(msg : String, delay = 0) : Promise
+	public function output(msg : String, ?delay : Int) : Promise
 	{
 		return screen.type(msg, delay);
 	}
 	
-	public function newline(delay = 0) : Promise
+	public function newline(?delay : Int) : Promise
 	{
 		return screen.newline(delay);
 	}

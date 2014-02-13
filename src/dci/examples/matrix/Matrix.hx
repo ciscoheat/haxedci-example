@@ -18,7 +18,7 @@ class Matrix implements haxedci.Context
 		bindRoles(console, bills, neoAccount, null);
 	}
 	
-	private function bindRoles(console : Console, bills : Array<Creditor>, neoAccount : Account, process : Deferred)
+	private function bindRoles(console, bills, neoAccount, process)
 	{
 		this.console = console;
 		this.bills = bills;
