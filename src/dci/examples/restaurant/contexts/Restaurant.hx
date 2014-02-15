@@ -23,10 +23,9 @@ class Restaurant implements haxedci.Context
 	
 	@role var console : Console;
 	@role var process : Deferred;
-	@role var menu : Array<String>;
-	
-	var order : ServeFood;
-	var account : Account;
+	@role var menu : Array<String>;	
+	@role var order : ServeFood;
+	@role var account : Account;
 
 	public function new(console : Console, account : Account) 
 	{		
@@ -65,14 +64,12 @@ class Restaurant implements haxedci.Context
 		this.chef = chef;
 		this.waiter = waiter;
 		this.menu = menu;
+		this.order = new ServeFood(waiter, chef, menu, console);
 	}
 
 	public function start() : Deferred
 	{
-		bindRoles(console, account, new Deferred(), chef, waiter, menu);
-		
-		order = new ServeFood(waiter, chef, menu, console);
-		
+		bindRoles(console, account, new Deferred(), chef, waiter, menu);				
 		order.guestsArriving().then(process.notify);
 		return process;
 	}

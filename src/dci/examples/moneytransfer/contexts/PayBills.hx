@@ -11,7 +11,7 @@ class PayBills implements Context
 			function balance() : Float;			
 		}
 		
-		function payBills()
+		function payBills() : Void
 		{
 			var surplus = self.balance() - creditors.owed();
 			
@@ -32,7 +32,7 @@ class PayBills implements Context
 	{
 		var roleInterface : Iterable<Creditor>;
 
-		function owed()	return Lambda.fold(self, function(cr, a) { return cr.amountOwed + a; }, 0.0);
+		function owed() : Float	return Lambda.fold(self, function(cr, a) { return cr.amountOwed + a; }, 0.0);
 	}
 	
 	public function new(account, creditors)
