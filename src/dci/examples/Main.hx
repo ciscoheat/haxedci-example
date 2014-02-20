@@ -2,6 +2,7 @@ package dci.examples;
 import dci.examples.matrix.Console;
 import dci.examples.matrix.Matrix;
 import dci.examples.moneytransfer.contexts.Account;
+import dci.examples.moneytransfer.contexts.ValidateCreditCard;
 import dci.examples.moneytransfer.data.Creditor;
 import dci.examples.moneytransfer.data.Ledger;
 import jQuery.JQuery;
@@ -17,11 +18,10 @@ import jQuery.JQuery;
  * 
  * Detailed information, tutorials and more at http://fulloo.info/
  */
-
 class Main 
 {
 	static function main() 
-	{
+	{		
 		// Start when jQuery is ready.
 		new JQuery(initializeMatrix);
 	}
@@ -49,7 +49,11 @@ class Main
 		// It needs a html element for output, and a text field for input.
 		// Create a Console and start the "Matrix" process.
 		var console = new Console(new JQuery("#content"), new JQuery("#input"));
-		
+
+		// Just a demonstration of a credit card validation Context.
+		if (!new ValidateCreditCard(4916239259614484).isValid())
+			console.output("Invalid credit card number!");
+
 		console.start(new Matrix(console, bills, neoAccount));
 	}	
 }

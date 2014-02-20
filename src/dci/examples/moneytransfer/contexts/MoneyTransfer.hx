@@ -2,6 +2,31 @@ package dci.examples.moneytransfer.contexts;
 
 class MoneyTransfer implements haxedci.Context
 {
+	public function new(source, destination, amount)
+	{
+		bindRoles(source, destination, amount);
+	}
+
+	function bindRoles(source, destination, amt)
+	{
+		sourceAccount = source;
+		destinationAccount = destination;
+		amount = amt;		
+	}
+	
+	public function transfer()
+	{
+		sourceAccount.transfer();
+	}
+	
+	public function transferButDeclineIfNotEnough()
+	{
+		if (sourceAccount.balance() < amount)
+			throw "Declined: Not enough money in account.";
+		else
+			transfer();
+	}
+	
 	@role var sourceAccount =
 	{
 		var roleInterface : {
@@ -24,30 +49,4 @@ class MoneyTransfer implements haxedci.Context
 	}
 	
 	@role var amount : Float;
-
-	public function new(source, destination, amount)
-	{
-		bindRoles(source, destination, amount);
-	}
-
-	function bindRoles(source, destination, amt)
-	{
-		sourceAccount = source;
-		destinationAccount = destination;
-		amount = amt;		
-	}
-	
-	// Interaction
-	public function transfer()
-	{
-		sourceAccount.transfer();
-	}
-	
-	public function transferButDeclineIfNotEnough()
-	{
-		if (sourceAccount.balance() < amount)
-			throw "Declined: Not enough money in account.";
-		else
-			transfer();
-	}
 }
