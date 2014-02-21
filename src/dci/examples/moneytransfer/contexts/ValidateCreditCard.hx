@@ -13,9 +13,7 @@ class ValidateCreditCard implements Context
 	public function new(number : Dynamic)
 	{
 		// Parse a string or a big integer to an array of ints
-		var parsedNumber = [];
-		for (d in Std.string(number).split(""))
-			parsedNumber.push(Std.int(Std.parseInt(d)));
+		var parsedNumber = [for (d in Std.string(number).split("")) Std.int(Std.parseInt(d))];
 		
 		// Assign Roles
 		checkDigit = parsedNumber.pop();
