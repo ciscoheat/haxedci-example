@@ -5,3 +5,4 @@
 -main dci.examples.Main
 --times
 -D macro-times
+-D dcigraphs
