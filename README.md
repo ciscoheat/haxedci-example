@@ -12,7 +12,7 @@ DCI stands for Data, Context, Interaction. One of the key aspects of DCI is to s
 Let's take a simple Data class Account with some basic methods:
 
 #### Account.hx
-```actionscript
+```haxe
 package;
 
 class Account {
@@ -46,7 +46,7 @@ and after some more thought specify it further:
 That could be our "Mental Model" of a money transfer. Interacting concepts like our "Source" and "Destination" accounts of our mental model we call "Roles" in DCI, and we can define them and what they do to accomplish the money transfer in a DCI Context:
 
 #### MoneyTransfer.hx
-```actionscript
+```haxe
 package;
 
 class MoneyTransfer implements haxedci.Context {
@@ -93,7 +93,7 @@ We want no surprises at runtime. With DCI we have all runtime interactions right
 To use this MoneyTransfer context, lets create two accounts, the Context, then make the transfer:
 
 #### Main.hx
-```actionscript
+```haxe
 package ;
 
 class Main {	
@@ -118,12 +118,12 @@ class Main {
 To use haxedci, you need to be able to create Contexts. Lets build the `MoneyTransfer` class step-by-step from scratch:
 
 Start by defining a class and let it implement `haxedci.Context`.
-```actionscript
+```haxe
 class MoneyTransfer implements haxedci.Context {
 }
 ```
 Remember the mental model of a money transfer? "Withdraw *amount* from a *source* account and deposit the amount in a *destination* account". The three italicized nouns are the Roles that we will use in the Context. Lets put them there. They are defined using the `@role` metadata:
-```actionscript
+```haxe
 class MoneyTransfer implements haxedci.Context {
 	@role var source = {
 		var roleInterface : Account;
@@ -144,13 +144,13 @@ Using this syntax, we have now defined three Roles and a **RoleInterface** for e
 There are a couple of ways of defining a RoleInterface which we will explore now. For starters, the variable has to be named `roleInterface`.
 
 We have started out quick and easy by a broad definition: The source and destination Roles must be an `Account` object:
-```actionscript
+```haxe
 @role var source = {
 	var roleInterface : Account;
 } 
 ```
 Thinking about it however, we're not interested in the whole `Account`. Since we want to focus on what happens in the Context and right now for a specific Role, all we need for playing the *source* Role is a way of decreasing the balance. The `Account` class has a `decreaseBalance` method, let's use it:
-```actionscript
+```haxe
 @role var source = {
 	var roleInterface : {
 		function decreaseBalance(a : Int) : Void;
@@ -158,7 +158,7 @@ Thinking about it however, we're not interested in the whole `Account`. Since we
 }
 ```
 We're using [Haxe class notation](http://haxe.org/manual/struct#class-notation) to define the RoleInterface. Let's do the same for the *destination* Role, but it needs to increase the balance instead:
-```actionscript
+```haxe
 @role var destination = {
 	var roleInterface : {
 		function increaseBalance(a : Int) : Void;
@@ -166,11 +166,11 @@ We're using [Haxe class notation](http://haxe.org/manual/struct#class-notation) 
 }
 ```
 The *amount* role will be simpler. We're only using it as an `Int`, so we can specify the RoleInterface directly on the definition:
-```actionscript
+```haxe
 @role var amount : Int;
 ```
 Our `MoneyTransfer` class now looks like this:
-```actionscript
+```haxe
 class MoneyTransfer implements haxedci.Context {
 	@role var source = {
 		var roleInterface : {
@@ -199,7 +199,7 @@ Using a whole class can be tempting because it's quick and you'll get full acces
 Now we have the Roles and their interfaces for accessing the underlying Data. That's a good start, so lets add the core of a DCI Context: functionality. It is implemented through **RoleMethods**.
 
 Getting back to the mental model again, we know that we want to "Withdraw amount from a source account and deposit the amount in a destination account". So lets model that in a RoleMethod for the `source` Role:
-```actionscript
+```haxe
 @role var source = {
 	var roleInterface : {
 		function decreaseBalance(a : Int) : Void;
@@ -212,7 +212,7 @@ Getting back to the mental model again, we know that we want to "Withdraw amount
 }
 ```
 This is a very close mapping of the mental model to code, which is the goal of DCI. Note how we're using the RoleInterface method only for the actual Data operation, the rest is functionality, collaboration between Roles. This collaboration requires a RoleMethod on destination called `deposit`:
-```actionscript
+```haxe
 @role var destination =	{
 	var roleInterface : {
 		function increaseBalance(a : Int) : Void;
@@ -241,7 +241,7 @@ When designing functionality using RoleMethods in a Context, be careful not to e
 
 ### Adding a constructor
 Let's add a constructor to the class:
-```actionscript
+```haxe
 class MoneyTransfer implements haxedci.Context {
 	@role var source = {
 		var roleInterface : {
@@ -284,7 +284,7 @@ Rebinding Roles during executing complicates things, and is hardly supported by 
 We have just mentioned **Interactions**, which is the last character of the DCI acronym. An Interaction is a flow of messages through the Roles in a Context, like the one we have defined based on the mental model. To start an Interaction we need an entry point for the Context however. This is called a **System Operation**, and all it should do is to call a RoleMethod, so the Roles start interacting with each other.
 
 There may be many System Operations in a Context, but in this case we only need one, so lets call it `transfer`. Avoid using a generic name like "execute", instead give your API meaning by letting every method name carry meaningful information.
-```actionscript
+```haxe
 class MoneyTransfer implements haxedci.Context {
 	@role var source = {
 		var roleInterface : {
@@ -321,7 +321,7 @@ class MoneyTransfer implements haxedci.Context {
 }
 ```
 With this System Operation as our entrypoint, the `MoneyTransfer` Context is ready for use! You saw how it's done earlier, but here are the essentials:
-```actionscript
+```haxe
 class Main {	
 	static function main() {
 		var savings = new Account("Savings", 1000);
