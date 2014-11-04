@@ -11,26 +11,23 @@ private typedef IMenu = Array<String>;
 
 class ServeFood implements Context
 {
-	@role var waiter =
-	{
-		var roleInterface : {
-			var name : String;
-		}
-		
+	@role var waiter : {
+		var name : String;
+	} =	{
 		function guestsArriving() : Promise
 		{
 			var output = guests.output;
-			
+
 			return output('Good evening, my name is ${self.name}, I\'ll be your waiter.')
 			.then(function() { return output("This is on the menu for tonight:"); })
 			.then(function() { return output(""); })
 			.then(function() { guests.selectFood(); });
 		}
-		
+
 		function takeOrder(choice : Int) : Promise
 		{
 			var text = menu.choice(choice) + ", an excellent choice. I'll be right back.";
-			
+
 			return guests.output(text)
 			.then(function() { return chef.cook(choice); })
 			.then(
@@ -39,18 +36,18 @@ class ServeFood implements Context
 				function(msg) { guests.output(msg); }
 			);
 		}
-		
+
 		function serve(food : String)
 		{
 			var bill = Std.random(90) + 10;
 			guests.eat(food, bill);
 		}
-		
+
 		function pay(account : Account) : Promise
 		{
 			// Just create a temp account.
-			var restaurantAccount = new Account([]);		
-			
+			var restaurantAccount = new Account([]);
+
 			return guests.output('Your total is $$${bill}.')
 			.then(function() {
 				new MoneyTransfer(account, restaurantAccount, bill).transferButDeclineIfNotEnough();
@@ -58,25 +55,22 @@ class ServeFood implements Context
 			.then(function() { return guests.output("Thank you very much, sir."); });
 		}
 	}
-	
-	@role var chef =
-	{
-		var roleInterface : {
-			var cookingSkill : Int;
-		}
-		
-		function cook(choice : Int) 
+
+	@role var chef : {
+		var cookingSkill : Int;
+	} = {
+		function cook(choice : Int)
 		{
 			var def = new Deferred();
 			var points = 2;
 			var wait = 0;
-			
+
 			if (Std.random(10) < self.cookingSkill)
 			{
 				points--;
 				wait += 2000;
-				
-				Timer.delay(function() 
+
+				Timer.delay(function()
 				{
 					def.notify("You hear a crash in the kitchen.");
 				}, wait);
@@ -86,16 +80,16 @@ class ServeFood implements Context
 			{
 				points--;
 				wait += 2000;
-				
-				Timer.delay(function() 
+
+				Timer.delay(function()
 				{
 					def.notify("Something smells burnt.");
 				}, wait);
 			}
 
 			wait += 3000;
-			
-			Timer.delay(function() 
+
+			Timer.delay(function()
 			{
 				var foodName = menu.choice(choice);
 				var dish = switch(points)
@@ -109,7 +103,7 @@ class ServeFood implements Context
 					case _:
 						throw "Not possible.";
 				}
-				
+
 				def.resolve(dish);
 			}, wait);
 
@@ -117,17 +111,15 @@ class ServeFood implements Context
 		}
 	}
 
-	@role var guests =
+	@role var guests : {
+		function output(msg : String, ?delay : Int) : Promise;
+	} =
 	{
-		var roleInterface : {
-			function output(msg : String, ?delay : Int) : Promise;
-		}
-		
 		function selectFood()
 		{
 			menu.display();
 		}
-		
+
 		function eat(food : String, bill : Int)
 		{
 			// Note: this refers to the context.
@@ -138,10 +130,8 @@ class ServeFood implements Context
 		}
 	}
 
-	@role var menu =
+	@role var menu : Array<String> =
 	{
-		var roleInterface : Array<String>;
-		
 		function display()
 		{
 			var index = 0;
@@ -149,18 +139,18 @@ class ServeFood implements Context
 			{
 				guests.output(++index + " - " + item);
 			}
-			
+
 			guests.output("");
 		}
-		
+
 		function choice(choice : Int)
 		{
 			return self[choice-1];
 		}
 	}
-	
+
 	@role var bill : Int;
-	
+
 	public function new(waiter, chef, menu, guests)
 	{
 		this.waiter = waiter;
@@ -169,20 +159,20 @@ class ServeFood implements Context
 		this.guests = guests;
 		this.bill = 0;
 	}
-	
+
 	public function guestsArriving() : Promise
 	{
 		return waiter.guestsArriving();
 	}
-	
+
 	public function guestsOrdering(choice : Int) : Promise
 	{
 		return waiter.takeOrder(choice);
 	}
-	
+
 	public function guestsPaying(account : Account) : Promise
 	{
-		return bill > 0 
+		return bill > 0
 			? waiter.pay(account)
 			: new Deferred().resolve().promise();
 	}

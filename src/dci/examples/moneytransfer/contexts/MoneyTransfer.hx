@@ -11,14 +11,14 @@ class MoneyTransfer implements haxedci.Context
 	{
 		sourceAccount = source;
 		destinationAccount = destination;
-		amount = amt;		
+		amount = amt;
 	}
-	
+
 	public function transfer()
 	{
 		sourceAccount.transfer();
 	}
-	
+
 	public function transferButDeclineIfNotEnough()
 	{
 		if (sourceAccount.balance() < amount)
@@ -26,27 +26,21 @@ class MoneyTransfer implements haxedci.Context
 		else
 			transfer();
 	}
-	
-	@role var sourceAccount =
-	{
-		var roleInterface : {
-			function withdraw(amount : Float) : Void;
-			function balance() : Float;
-		}
-		
+
+	@role var sourceAccount : {
+		function withdraw(amount : Float) : Void;
+		function balance() : Float;
+	} = {
 		function transfer() : Void
 		{
 			self.withdraw(amount);
 			destinationAccount.deposit(amount);
 		}
 	}
-	
-	@role var destinationAccount =
-	{
-		var roleInterface : {
-			function deposit(amount : Float) : Void;
-		}
-	}
-	
+
+	@role var destinationAccount : {
+		function deposit(amount : Float) : Void;
+	};
+
 	@role var amount : Float;
 }

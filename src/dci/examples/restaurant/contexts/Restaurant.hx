@@ -7,34 +7,28 @@ import jQuery.Promise;
 
 class Restaurant implements haxedci.Context
 {
-	@role var chef =
-	{
-		var roleInterface : {
-			var cookingSkill : Int;
-		}		
-	}
-	
-	@role var waiter =
-	{
-		var roleInterface : {
-			var name : String;
-		}		
-	}
-	
+	@role var chef : {
+		var cookingSkill : Int;
+	};
+
+	@role var waiter : {
+		var name : String;
+	};
+
 	@role var console : Console;
 	@role var process : Deferred;
-	@role var menu : Array<String>;	
+	@role var menu : Array<String>;
 	@role var order : ServeFood;
 	@role var account : Account;
 
-	public function new(console : Console, account : Account) 
-	{		
+	public function new(console : Console, account : Account)
+	{
 		// Make a random chef
 		var chef = new Employee();
 		chef.name = "Mr. Chef";
 		chef.birth = new Date(1970, 1, 1, 0, 0, 0);
 		chef.cookingSkill = Std.random(10);
-		
+
 		// And a random waiter
 		var waiter = new Employee();
 		waiter.name = switch(Std.random(5))
@@ -45,17 +39,17 @@ class Restaurant implements haxedci.Context
 			case 3: "Julian";
 			case _: "Delbert";
 		}
-		
+
 		// And finally, todays menu.
 		var menu = new Array<String>();
 		menu.push("Peking Duck");
 		menu.push("Shepherds Pie");
 		menu.push("Crab Cake");
 		menu.push("Roast Beef");
-		
+
 		bindRoles(console, account, null, chef, waiter, menu);
 	}
-	
+
 	private function bindRoles(console, account, process, chef, waiter, menu)
 	{
 		this.console = console;
@@ -69,16 +63,16 @@ class Restaurant implements haxedci.Context
 
 	public function start() : Deferred
 	{
-		bindRoles(console, account, new Deferred(), chef, waiter, menu);				
+		bindRoles(console, account, new Deferred(), chef, waiter, menu);
 		order.guestsArriving().then(process.notify);
 		return process;
 	}
-	
+
 	public function input(msg : String) : Promise
 	{
-		var def = new Deferred();		
+		var def = new Deferred();
 		var choice = Std.parseInt(msg);
-		
+
 		if (choice != null && choice > 0 && choice <= menu.length)
 		{
 			return order.guestsOrdering(choice);
@@ -103,13 +97,13 @@ class Restaurant implements haxedci.Context
 					{
 						console.output("Sorry sir, your card was declined.");
 					}
-					
+
 				case _:
 					var name = Std.random(10) == 9 ? "Neo" : "sir";
 					console.output('Pardon me, $name?');
 			}
 		}
-		
+
 		return def.resolve().promise();
 	}
 }
