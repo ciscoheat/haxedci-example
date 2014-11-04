@@ -30,7 +30,8 @@ class MoneyTransfer implements haxedci.Context
 	@role var sourceAccount : {
 		function withdraw(amount : Float) : Void;
 		function balance() : Float;
-	} = {
+	} =
+	{
 		function transfer() : Void
 		{
 			self.withdraw(amount);

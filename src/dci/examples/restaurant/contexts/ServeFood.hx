@@ -58,7 +58,8 @@ class ServeFood implements Context
 
 	@role var chef : {
 		var cookingSkill : Int;
-	} = {
+	} =
+	{
 		function cook(choice : Int)
 		{
 			var def = new Deferred();

@@ -7,7 +7,8 @@ class PayBills implements Context
 	@role var account : {
 		function withdraw(amount : Float) : Void;
 		function balance() : Float;
-	} = {
+	} =
+	{
 		function payBills() : Void
 		{
 			var surplus = self.balance() - creditors.owed();
