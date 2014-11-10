@@ -9,10 +9,14 @@ import js.html.MenuElement;
 
 private typedef IMenu = Array<String>;
 
+/**
+ * Simulation of serving food at a restaurant.
+ */
 class ServeFood implements Context
 {
 	public function new(waiter, chef, menu, guests, account)
 	{
+		// Role binding
 		this.waiter = waiter;
 		this.chef = chef;
 		this.menu = menu;
@@ -20,6 +24,8 @@ class ServeFood implements Context
 		this.bill = 0;
 		this.account = account;
 	}
+
+	///// System Operations /////
 
 	public function guestsArriving() : Promise
 	{
@@ -158,7 +164,6 @@ class ServeFood implements Context
 
 		function eat(food : String, price : Int)
 		{
-			// Note: "this" refers to the context.
 			this.bill += price;
 
 			self.output("You are served " + food)
@@ -178,10 +183,7 @@ class ServeFood implements Context
 			guests.output("");
 		}
 
-		function choice(choice : Int)
-		{
-			return self[choice-1];
-		}
+		function choice(choice : Int) return self[choice-1];
 	}
 
 	@role var bill : Int;

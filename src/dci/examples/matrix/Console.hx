@@ -25,18 +25,20 @@ class Console implements Context
 {
 	public function new(screen, input)
 	{
+		// Bind Roles
 		this.screen = screen;
 		this.input = input;
 		this.processes = new List<IProcess>();
+
+		// Setup input
+		input.passToActiveProcess();
+		screen.on('click', input.focus);
 	}
 
 	///// System Operations /////
 
 	public function start(process : IProcess) : Deferred
 	{
-		input.passToActiveProcess();
-		screen.on('click', input.focus);
-
 		return processes.start(process);
 	}
 

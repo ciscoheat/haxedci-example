@@ -5,6 +5,9 @@ import dci.examples.restaurant.data.Employee;
 import jQuery.Deferred;
 import jQuery.Promise;
 
+/**
+ * An online Restaurant with a waiter, menu, guests and the current order.
+ */
 class Restaurant implements haxedci.Context
 {
 	/**
