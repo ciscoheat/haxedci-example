@@ -1,45 +1,88 @@
 package dci.examples.matrix;
+import dci.examples.matrix.Console.Process;
 import haxedci.Context;
+import jQuery.Event;
 import jQuery.Promise;
 import jQuery.JQuery;
 import jQuery.Deferred;
 import haxe.Timer;
 
 /**
- * A process has a start method, which should return a Deferred that
- * sends a "notify" message when input should be accepted.
- * Then it should resolve when the process finishes.
+ * A crude computer emulator, created to show how different mental models can
+ * be mixed together with DCI.
  */
-typedef IProcess = {
+
+/**
+ * RoleObjectInterface for a process. It has a start method, which should return
+ * a Deferred that sends a progress message when the process is Running and input
+ * should be accepted. Resolve the Deferred to terminate the process.
+ *
+ * Input should return a Promise that should be resolved when input has finished.
+ */
+typedef Process = {
 	function start() : Deferred;
 	function input(msg : String) : Promise;
 }
 
-typedef IProcesses = List<IProcess>;
+enum ProcessState {
+	Running;
+	Blocked;
+	Terminated;
+}
+
+private class ProcessList extends List<Process>
+{
+	public var state : Map<Process, ProcessState>;
+
+	public function new()
+	{
+		super();
+		state = new Map<Process, ProcessState>();
+	}
+}
 
 /**
  * The Console is a terminal emulator. It has a screen, an input device
- * and a list (stack) of processes that it will run.
+ * and a list (stack) of processes that it will run. Sorry, no multi-tasking. ;)
  */
 class Console implements Context
 {
 	public function new(screen, input)
 	{
-		// Bind Roles
+		bindRoles(screen, input, new ProcessList());
+	}
+
+	private function bindRoles(screen, input, processes)
+	{
 		this.screen = screen;
 		this.input = input;
-		this.processes = new List<IProcess>();
-
-		// Setup input
-		input.passToActiveProcess();
-		screen.on('click', input.focus);
+		this.processes = processes;
+		this.currentProcess = processes.first();
 	}
 
 	///// System Operations /////
 
-	public function start(process : IProcess) : Deferred
+	/**
+	 * Initialize screen and input handlers.
+	 */
+	public function start() : Console
 	{
-		return processes.start(process);
+		// Turn on screen
+		screen.fadeTo(0, 0.25).fadeTo(6000, 1);
+
+		// Initialize input
+		input.keydown(input.keyDown);
+		input.keyup(input.keyUp);
+
+		// Initialize screen
+		screen.on('click', input.focus);
+
+		return this;
+	}
+
+	public function load(process : Process) : Deferred
+	{
+		return processes.load(process);
 	}
 
 	public function output(msg : String, ?delay : Int) : Promise
@@ -126,68 +169,55 @@ class Console implements Context
 
 	@role var input : JQuery =
 	{
-		function isBusy(?state : Bool) : Bool
+		function keyDown(e : Event) : Void
 		{
-			if (state == null)
-			{
-				var busy = self.data("busy");
-				return busy == null ? true : busy;
-			}
-			else
-			{
-				self.data("busy", state);
-				return state;
-			}
+			if (!currentProcess.acceptsRead()) e.preventDefault();
 		}
 
-		function passToActiveProcess() : Void
+		function keyUp(e : Event) : Void
 		{
-			self.keydown(function(e) {
-				if (input.isBusy()) e.preventDefault();
-			});
+			if (e.which != 13 || !currentProcess.acceptsRead()) return;
 
-			self.keyup(function(e) {
-				if (e.which != 13 || input.isBusy()) return;
+			var msg = self.val();
 
-				var msg = self.val();
-				self.val("");
-
-				processes.input(msg);
-			});
+			self.val("");
+			currentProcess.read(msg);
 		}
 	}
 
-	@role var processes : List<IProcess> =
+	@role var currentProcess : Process =
 	{
-		function start(process : IProcess) : Deferred
+		function read(s : String) : Void
 		{
-			input.isBusy(true);
-			self.push(process);
+			processes.state[self] = ProcessState.Blocked;
+			self.input(s).done(function() processes.state[self] = ProcessState.Running);
+		}
 
+		function acceptsRead() return processes.state[self] == ProcessState.Running;
+	}
+
+	@role var processes : ProcessList =
+	{
+		function load(process : Process) : Deferred
+		{
+			self.push(process);
+			self.state[process] = ProcessState.Blocked;
+
+			// Rebind the Roles when a new process starts, because currentProcess changes.
+			bindRoles(screen, input, self);
+
+			// Start the process and wait for the progress message.
 			return process.start()
 			.progress(function() {
-				input.isBusy(false);
+				self.state[process] = ProcessState.Running;
 				input.focus();
 			})
 			.done(function() {
-				self.pop();
-				input.isBusy(true);
-			});
-		}
+				self.state[process] = ProcessState.Terminated;
+				self.state.remove(self.pop());
 
-		function current() return self.first();
-
-		function input(i : String) : Void
-		{
-			var currentProcess = self.current();
-
-			input.isBusy(true);
-
-			self.current().input(i).done(function() {
-				// Release input if still in same process
-				// if not, wait for new process to release it.
-				if(self.current() == currentProcess)
-					input.isBusy(false);
+				// Rebind again at termination.
+				bindRoles(screen, input, self);
 			});
 		}
 	}

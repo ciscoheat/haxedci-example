@@ -66,7 +66,7 @@ class Matrix implements haxedci.Context
 					console.output(e);
 				}
 			case '2':
-				return console.start(new Restaurant(console, neoAccount)).then(menu);
+				return console.load(new Restaurant(console, neoAccount)).then(menu);
 			case 'dir', 'ls', 'ls -l':
 				console.hackingDetected();
 			case 'exit':

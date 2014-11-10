@@ -45,13 +45,13 @@ class Main
 
 		// The Console is a terminal emulator.
 		// It needs a html element for output and a text field for input.
-		var console = new Console(new JQuery("#content"), new JQuery("#input"));
+		var console = new Console(new JQuery("#content"), new JQuery("#input")).start();
 
 		// A demonstration of a credit card validation Context.
 		if (!new ValidateCreditCard(4916239259614484).isValid())
 			console.output("Invalid credit card number!");
 
 		// Start the "Matrix" process on the Console.
-		console.start(new Matrix(console, bills, neoAccount));
+		console.load(new Matrix(console, bills, neoAccount));
 	}
 }

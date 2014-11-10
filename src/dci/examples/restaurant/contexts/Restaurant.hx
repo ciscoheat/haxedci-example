@@ -18,8 +18,6 @@ class Restaurant implements haxedci.Context
 
 	public function new(console : Console, account : Account)
 	{
-		process = new Deferred();
-
 		// Make a random chef
 		var chef = new Employee();
 		chef.name = "Mr. Blumensay";
@@ -53,6 +51,7 @@ class Restaurant implements haxedci.Context
 
 	public function start() : Deferred
 	{
+		process = new Deferred();
 		order.guestsArriving().then(process.notify);
 		return process;
 	}
