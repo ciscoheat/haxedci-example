@@ -5,6 +5,11 @@ import jQuery.JQuery;
 import jQuery.Deferred;
 import haxe.Timer;
 
+/**
+ * A process has a start method, which should return a Deferred that
+ * sends a "notify" message when input should be accepted.
+ * Then it should resolve when the process finishes.
+ */
 typedef IProcess = {
 	function start() : Deferred;
 	function input(msg : String) : Promise;
@@ -12,15 +17,55 @@ typedef IProcess = {
 
 typedef IProcesses = List<IProcess>;
 
+/**
+ * The Console is a terminal emulator. It has a screen, an input device
+ * and a list (stack) of processes that it will run.
+ */
 class Console implements Context
 {
-	// Roles in a Context are annotated with the @role metadata.
+	public function new(screen, input)
+	{
+		this.screen = screen;
+		this.input = input;
+		this.processes = new List<IProcess>();
+	}
+
+	///// System Operations /////
+
+	public function start(process : IProcess) : Deferred
+	{
+		input.passToActiveProcess();
+		screen.on('click', input.focus);
+
+		return processes.start(process);
+	}
+
+	public function output(msg : String, ?delay : Int) : Promise
+	{
+		return screen.type(msg, delay);
+	}
+
+	public function newline(?delay : Int) : Promise
+	{
+		return screen.newline(delay);
+	}
+
+	public function turnOff() : Promise
+	{
+		var def = new Deferred();
+		screen.fadeTo(3500, 0);
+		input.fadeTo(3500, 0, function() def.resolve());
+		return def;
+	}
+
+	///// Roles /////
+
 	@role var screen : JQuery =
 	{
 		function type(txt : String, ?delay : Int) : Promise
 		{
 			var p = new Deferred();
-			self.typeString(txt).then(function() { Timer.delay(function() { p.resolve(); }, delay); } );
+			self.typeString(txt).then(Timer.delay.bind(function() p.resolve(), delay));
 			return p.promise();
 		}
 
@@ -79,7 +124,7 @@ class Console implements Context
 
 	@role var input : JQuery =
 	{
-		function isBusy(?state : Bool)
+		function isBusy(?state : Bool) : Bool
 		{
 			if (state == null)
 			{
@@ -93,15 +138,13 @@ class Console implements Context
 			}
 		}
 
-		function sendInputToActiveProcess()
+		function passToActiveProcess() : Void
 		{
 			self.keydown(function(e) {
-				if (input.isBusy())
-					e.preventDefault();
+				if (input.isBusy()) e.preventDefault();
 			});
 
-			self.keyup(function(e)
-			{
+			self.keyup(function(e) {
 				if (e.which != 13 || input.isBusy()) return;
 
 				var msg = self.val();
@@ -114,7 +157,6 @@ class Console implements Context
 
 	@role var processes : List<IProcess> =
 	{
-		// RoleMethods, implementing the functionality.
 		function start(process : IProcess) : Deferred
 		{
 			input.isBusy(true);
@@ -131,57 +173,20 @@ class Console implements Context
 			});
 		}
 
-		function current()
-		{
-			return self.first();
-		}
+		function current() return self.first();
 
-		function input(i : String)
+		function input(i : String) : Void
 		{
 			var currentProcess = self.current();
 
 			input.isBusy(true);
 
 			self.current().input(i).done(function() {
-				// Check if still in same process
+				// Release input if still in same process
+				// if not, wait for new process to release it.
 				if(self.current() == currentProcess)
 					input.isBusy(false);
 			});
 		}
-	}
-
-	public function new(screen, input)
-	{
-		this.screen = screen;
-		this.input = input;
-		this.processes = new List<IProcess>();
-
-		this.input.sendInputToActiveProcess();
-		this.screen.on('click', function() { input.focus(); } );
-	}
-
-	// Interactions
-
-	public function start(process : IProcess) : Deferred
-	{
-		return processes.start(process);
-	}
-
-	public function output(msg : String, ?delay : Int) : Promise
-	{
-		return screen.type(msg, delay);
-	}
-
-	public function newline(?delay : Int) : Promise
-	{
-		return screen.newline(delay);
-	}
-
-	public function turnOff() : Promise
-	{
-		var def = new Deferred();
-		screen.fadeTo(3500, 0);
-		input.fadeTo(3500, 0, function() { def.resolve(); });
-		return def;
 	}
 }

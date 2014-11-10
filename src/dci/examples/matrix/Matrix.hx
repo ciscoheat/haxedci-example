@@ -6,66 +6,57 @@ import dci.examples.restaurant.contexts.Restaurant;
 import jQuery.Deferred;
 import jQuery.Promise;
 
-class Matrix implements haxedci.Context 
+/**
+ * "Matrix" is a little game that is supposed to be played in a Console.
+ * You are Neo and must pay some bills, or spend the money on food instead.
+ */
+class Matrix implements haxedci.Context
 {
-	@role var console : Console;
-	@role var bills : Array<Creditor>;
-	@role var neoAccount : Account;
-	@role var process : Deferred;
+	var process : Deferred;
 
 	public function new(console : Console, bills : Array<Creditor>, neoAccount : Account)
 	{
-		bindRoles(console, bills, neoAccount, null);
-	}
-	
-	private function bindRoles(console, bills, neoAccount, process)
-	{
 		this.console = console;
 		this.bills = bills;
-		this.neoAccount = neoAccount;		
-		this.process = process;
+		this.neoAccount = neoAccount;
+		this.process = new Deferred();
 	}
+
+	///// System Operations /////
 
 	public function start() : Deferred
 	{
-		bindRoles(this.console, this.bills, this.neoAccount, new Deferred());
-		
 		var type = this.console.output;
 		var newline = this.console.newline;
 
-		// Some asynchronous niceness
-		type("Hello Neo...", 1000)
-		.then(function() { return type("It's time to pay your bills, Neo.", 500); })
+		type("Hello Neo...", 900)
+		.then(type.bind("It's time to pay your bills, Neo.", 500))
 		.then(newline)
 		.then(newline)
 		.then(menu)
 		.then(newline)
 		.then(process.notify);
-		
+
 		return process;
 	}
-	
+
 	function menu() : Promise
 	{
-		var totalToPay = Lambda.fold(bills, function(cr, a) { return cr.amountOwed + a; }, 0.0);
+		var totalToPay = Lambda.fold(bills, function(cr, a) return cr.amountOwed + a, 0.0);
 		var type = this.console.output;
-		
+
 		return type("Current account balance: " + neoAccount.balance())
-		.then(function() { return type('1 - Pay bills ($totalToPay)'); })
-		.then(function() { return type('2 - Order some food'); });
+		.then(type.bind('1 - Pay bills ($totalToPay)'))
+		.then(type.bind('2 - Order some food'));
 	}
-	
+
 	public function input(msg : String) : Promise
 	{
-		trace(msg);
-		
-		var def = new Deferred();
-		
 		switch(msg.toLowerCase())
 		{
 			case '':
 			case '1':
-				try 
+				try
 				{
 					new PayBills(neoAccount, bills).payBills();
 					console.output("Account balance after paying bills: " + neoAccount.balance());
@@ -74,16 +65,42 @@ class Matrix implements haxedci.Context
 				{
 					console.output(e);
 				}
-			case '2':				
+			case '2':
 				return console.start(new Restaurant(console, neoAccount)).then(menu);
-			case 'dir':
-				console.output("Maybe in the next version of Matrix.");
+			case 'dir', 'ls', 'ls -l':
+				console.hackingDetected();
 			case 'exit':
-				console.output("Goodbye, Neo.").then(console.turnOff).then(process.resolve);
+				console.exit().then(process.resolve);
 			case _:
-				console.output("Try again, Neo.");
+				console.unknownCommand();
 		}
-		
-		return def.resolve();
+
+		return new Deferred().resolve();
 	}
+
+	///// Roles /////
+
+	@role var console : Console =
+	{
+		function hackingDetected() : Promise
+		{
+			return
+			self.output("Tell me, Mr. Anderson, what good is a directory listing if you're unable to...", 200)
+			.then(self.output.bind("see?"))
+			.then(self.turnOff);
+		}
+
+		function exit() : Promise
+		{
+			return self.output("Goodbye, Neo.").then(self.turnOff);
+		}
+
+		function unknownCommand() : Promise
+		{
+			return self.output("Try again, Neo.");
+		}
+	}
+
+	@role var bills : Array<Creditor>;
+	@role var neoAccount : Account;
 }

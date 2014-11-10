@@ -4,23 +4,6 @@ import dci.examples.moneytransfer.data.Ledger;
 
 class Account implements Context
 {
-	@role var ledgers : Array<Ledger> =
-	{
-		function balance() : Float
-		{
-			return Lambda.fold(self, function(a, b) { return a.amount + b; }, 0.0);
-		}
-
-		function addEntry(message : String, amount : Float) : Void
-		{
-			var ledger = new Ledger();
-			ledger.message = message;
-			ledger.amount = amount;
-
-			self.push(ledger);
-		}
-	}
-
 	public function new(ledgers)
 	{
 		this.ledgers = ledgers;
@@ -39,5 +22,22 @@ class Account implements Context
 	public function withdraw(amount : Float)
 	{
 		ledgers.addEntry("Withdrawing", -amount);
+	}
+
+	@role var ledgers : Array<Ledger> =
+	{
+		function balance() : Float
+		{
+			return Lambda.fold(self, function(a, b) { return a.amount + b; }, 0.0);
+		}
+
+		function addEntry(message : String, amount : Float) : Void
+		{
+			var ledger = new Ledger();
+			ledger.message = message;
+			ledger.amount = amount;
+
+			self.push(ledger);
+		}
 	}
 }

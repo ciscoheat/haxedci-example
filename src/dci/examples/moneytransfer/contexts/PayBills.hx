@@ -4,6 +4,17 @@ import dci.examples.moneytransfer.data.Creditor;
 
 class PayBills implements Context
 {
+	public function new(account, creditors)
+	{
+		this.account = account;
+		this.creditors = creditors;
+	}
+
+	public function payBills()
+	{
+		account.payBills();
+	}
+
 	@role var account : {
 		function withdraw(amount : Float) : Void;
 		function balance() : Float;
@@ -29,23 +40,7 @@ class PayBills implements Context
 	@role var creditors : Iterable<Creditor> =
 	{
 		function owed() : Float	return Lambda.fold(self,
-			function(cr, a) { return cr.amountOwed + a; }, 0.0
+			function(cr, a) return cr.amountOwed + a, 0.0
 		);
-	}
-
-	public function new(account, creditors)
-	{
-		bindRoles(account, creditors);
-	}
-
-	function bindRoles(account, creditors)
-	{
-		this.account = account;
-		this.creditors = creditors;
-	}
-
-	public function payBills()
-	{
-		account.payBills();
 	}
 }

@@ -7,25 +7,19 @@ import jQuery.Promise;
 
 class Restaurant implements haxedci.Context
 {
-	@role var chef : {
-		var cookingSkill : Int;
-	};
-
-	@role var waiter : {
-		var name : String;
-	};
-
-	@role var console : Console;
-	@role var process : Deferred;
-	@role var menu : Array<String>;
-	@role var order : ServeFood;
-	@role var account : Account;
+	/**
+	 * The process is a system-level concept and should not play a
+	 * Role in this Context.
+	 */
+	var process : Deferred;
 
 	public function new(console : Console, account : Account)
 	{
+		process = new Deferred();
+
 		// Make a random chef
 		var chef = new Employee();
-		chef.name = "Mr. Chef";
+		chef.name = "Mr. Blumensay";
 		chef.birth = new Date(1970, 1, 1, 0, 0, 0);
 		chef.cookingSkill = Std.random(10);
 
@@ -47,23 +41,15 @@ class Restaurant implements haxedci.Context
 		menu.push("Crab Cake");
 		menu.push("Roast Beef");
 
-		bindRoles(console, account, null, chef, waiter, menu);
-	}
-
-	private function bindRoles(console, account, process, chef, waiter, menu)
-	{
-		this.console = console;
-		this.account = account;
-		this.process = process;
-		this.chef = chef;
+		// Bind the Roles
+		this.guests = console;
 		this.waiter = waiter;
 		this.menu = menu;
-		this.order = new ServeFood(waiter, chef, menu, console);
+		this.order = new ServeFood(waiter, chef, menu, console, account);
 	}
 
 	public function start() : Deferred
 	{
-		bindRoles(console, account, new Deferred(), chef, waiter, menu);
 		order.guestsArriving().then(process.notify);
 		return process;
 	}
@@ -73,37 +59,45 @@ class Restaurant implements haxedci.Context
 		var def = new Deferred();
 		var choice = Std.parseInt(msg);
 
-		if (choice != null && choice > 0 && choice <= menu.length)
+		if (choice != null)
 		{
 			return order.guestsOrdering(choice);
-		}
-		else if (choice != null)
-		{
-			console.output("Sorry sir, we don't have that on the menu tonight.");
 		}
 		else
 		{
 			switch(msg.toLowerCase())
 			{
+				case '':
+
 				case "quit", "exit", "leave", "goodbye", "bye", "pay", "go home", "go back":
-					try
-					{
-						order.guestsPaying(account)
-						.then(function() { return console.output('Goodbye, have a nice evening sir.'); })
-						.then(console.newline)
-						.then(process.resolve);
-					}
-					catch (e : String)
-					{
-						console.output("Sorry sir, your card was declined.");
-					}
+					order.guestsPaying().done(function() waiter.bidFarewell().then(process.resolve));
 
 				case _:
 					var name = Std.random(10) == 9 ? "Neo" : "sir";
-					console.output('Pardon me, $name?');
+					guests.output('Pardon me, $name?');
 			}
 		}
 
 		return def.resolve().promise();
 	}
+
+	///// Roles and their RoleMethods /////
+
+	@role var waiter : {
+		var name : String;
+	} =
+	{
+		function bidFarewell() : Promise
+		{
+			return guests.output('Goodbye, have a nice evening sir.')
+			.then(guests.output.bind(''));
+		}
+	}
+
+	@role var guests : {
+		function output(msg : String, ?delay : Int) : Promise;
+	};
+
+	@role var menu : Array<String>;
+	@role var order : ServeFood;
 }

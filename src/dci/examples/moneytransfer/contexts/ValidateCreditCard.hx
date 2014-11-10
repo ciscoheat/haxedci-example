@@ -20,28 +20,23 @@ class ValidateCreditCard implements Context
 		digits = parsedNumber;
 	}
 
-	var valid : Null<Bool>;
-
 	public function isValid() : Bool
 	{
-		if (valid == null)
-			digits.doubleEverySecondFromRight();
-
-		return valid;
+		return digits.doubleEverySecondFromRight();
 	}
 
 	@role var checkDigit : Int =
 	{
-		function testIfValid() : Void
+		function isValid() : Bool
 		{
 			var test = digits.sum() * 9;
-			valid = Std.parseInt(Std.string(test).substr(-1)) == self;
+			return Std.parseInt(Std.string(test).substr(-1)) == self;
 		}
 	}
 
 	@role var digits : Array<Int> =
 	{
-		function doubleEverySecondFromRight() : Void
+		function doubleEverySecondFromRight() : Bool
 		{
 			var i = digits.length - 1;
 			while (i >= 0)
@@ -54,11 +49,8 @@ class ValidateCreditCard implements Context
 				i -= 2;
 			}
 
-			// Mod 10 test
-			if ((self.sum() + checkDigit) % 10 != 0)
-				valid = false;
-			else
-				checkDigit.testIfValid();
+			// Mod 10 and check digit test
+			return (self.sum() + checkDigit) % 10 == 0 && checkDigit.isValid();
 		}
 
 		function sum() : Int return Lambda.fold(self, function(a, b) { return a + b; }, 0);

@@ -4,14 +4,9 @@ class MoneyTransfer implements haxedci.Context
 {
 	public function new(source, destination, amount)
 	{
-		bindRoles(source, destination, amount);
-	}
-
-	function bindRoles(source, destination, amt)
-	{
-		sourceAccount = source;
-		destinationAccount = destination;
-		amount = amt;
+		this.sourceAccount = source;
+		this.destinationAccount = destination;
+		this.amount = amount;
 	}
 
 	public function transfer()
@@ -19,13 +14,15 @@ class MoneyTransfer implements haxedci.Context
 		sourceAccount.transfer();
 	}
 
-	public function transferButDeclineIfNotEnough()
+	public function transferAndDeclineIfNotEnough()
 	{
 		if (sourceAccount.balance() < amount)
 			throw "Declined: Not enough money in account.";
 		else
 			transfer();
 	}
+
+	@role var amount : Float;
 
 	@role var sourceAccount : {
 		function withdraw(amount : Float) : Void;
@@ -42,6 +39,4 @@ class MoneyTransfer implements haxedci.Context
 	@role var destinationAccount : {
 		function deposit(amount : Float) : Void;
 	};
-
-	@role var amount : Float;
 }

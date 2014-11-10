@@ -28,8 +28,6 @@ class Main
 
 	static function initializeMatrix()
 	{
-		// Create some Data objects.
-
 		// Create an Account with initial balance of $1000
 		var ledger = new Ledger();
 		ledger.message = "Initial balance";
@@ -41,19 +39,19 @@ class Main
 		var foodBill = new Creditor();
 		foodBill.account = new Account([]);
 		foodBill.amountOwed = 300;
-		foodBill.name = "Food bill";
+		foodBill.name = "Groceries";
 
 		var bills = [foodBill];
 
-		// A Console is a Context for basic I/O.
-		// It needs a html element for output, and a text field for input.
-		// Create a Console and start the "Matrix" process.
+		// The Console is a terminal emulator.
+		// It needs a html element for output and a text field for input.
 		var console = new Console(new JQuery("#content"), new JQuery("#input"));
 
-		// Just a demonstration of a credit card validation Context.
+		// A demonstration of a credit card validation Context.
 		if (!new ValidateCreditCard(4916239259614484).isValid())
 			console.output("Invalid credit card number!");
 
+		// Start the "Matrix" process on the Console.
 		console.start(new Matrix(console, bills, neoAccount));
 	}
 }
