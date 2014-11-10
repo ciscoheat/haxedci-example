@@ -57,7 +57,7 @@ class ServeFood implements Context
 			return output('Good evening, my name is ${self.name}, I\'ll be your waiter.')
 			.then(output.bind("This is on the menu for tonight:"))
 			.then(output.bind(""))
-			.then(guests.selectFood);
+			.then(menu.display);
 		}
 
 		function takeOrder(choice : Int) : Promise
@@ -157,11 +157,6 @@ class ServeFood implements Context
 		function output(msg : String, ?delay : Int) : Promise;
 	} =
 	{
-		function selectFood()
-		{
-			menu.display();
-		}
-
 		function eat(food : String, price : Int)
 		{
 			this.bill += price;
@@ -176,11 +171,12 @@ class ServeFood implements Context
 		function display()
 		{
 			var index = 0;
-
 			for (item in self)
 				guests.output(++index + " - " + item);
 
 			guests.output("");
+
+			// Interaction ends here, waiting for user input.
 		}
 
 		function choice(choice : Int) return self[choice-1];
