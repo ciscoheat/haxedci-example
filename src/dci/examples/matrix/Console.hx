@@ -71,11 +71,11 @@ class Console implements Context
 		screen.fadeTo(0, 0.25).fadeTo(6000, 1);
 
 		// Initialize input
-		input.keydown(input.keyDown);
 		input.keyup(input.keyUp);
 
 		// Initialize screen
 		screen.on('click', input.focus);
+		input.focus();
 
 		return this;
 	}
@@ -165,18 +165,24 @@ class Console implements Context
 
 			return def.promise();
 		}
+
+		function flash() : Void
+		{
+			self.css('background-color', '#ddd');
+			Timer.delay(function() self.css('background-color', 'black'), 50);
+		}
 	}
 
 	@role var input : JQuery =
 	{
-		function keyDown(e : Event) : Void
-		{
-			if (!currentProcess.acceptsRead()) e.preventDefault();
-		}
-
 		function keyUp(e : Event) : Void
 		{
-			if (e.which != 13 || !currentProcess.acceptsRead()) return;
+			if (e.which != 13) return;
+			if (self.val() == "" || !currentProcess.acceptsRead())
+			{
+				screen.flash();
+				return;
+			}
 
 			var msg = self.val();
 
@@ -189,11 +195,13 @@ class Console implements Context
 	{
 		function read(s : String) : Void
 		{
+			if (!self.acceptsRead()) return;
+
 			processes.state[self] = ProcessState.Blocked;
 			self.input(s).done(function() processes.state[self] = ProcessState.Running);
 		}
 
-		function acceptsRead() return processes.state[self] == ProcessState.Running;
+		function acceptsRead() : Bool return processes.state[self] == ProcessState.Running;
 	}
 
 	@role var processes : ProcessList =
