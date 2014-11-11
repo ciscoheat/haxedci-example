@@ -27,7 +27,6 @@ typedef Process = {
 enum ProcessState {
 	Running;
 	Blocked;
-	Terminated;
 }
 
 private class ProcessList extends List<Process>
@@ -74,7 +73,7 @@ class Console implements Context
 		input.keyup(input.keyUp);
 
 		// Initialize screen
-		screen.on('click', input.focus);
+		screen.on('click', function() input.focus());
 		input.focus();
 
 		return this;
@@ -193,6 +192,11 @@ class Console implements Context
 
 	@role var currentProcess : Process =
 	{
+		function acceptsRead() : Bool
+		{
+			return processes.state[self] == ProcessState.Running;
+		}
+
 		function read(s : String) : Void
 		{
 			if (!self.acceptsRead()) return;
@@ -201,7 +205,11 @@ class Console implements Context
 			self.input(s).done(function() processes.state[self] = ProcessState.Running);
 		}
 
-		function acceptsRead() : Bool return processes.state[self] == ProcessState.Running;
+		function loaded() : Void
+		{
+			processes.state[self] = ProcessState.Running;
+			input.focus();
+		}
 	}
 
 	@role var processes : ProcessList =
@@ -216,17 +224,19 @@ class Console implements Context
 
 			// Start the process and wait for the progress message.
 			return process.start()
-			.progress(function() {
-				self.state[process] = ProcessState.Running;
-				input.focus();
-			})
-			.done(function() {
-				self.state[process] = ProcessState.Terminated;
-				self.state.remove(self.pop());
+			.progress(currentProcess.loaded)
+			.done(self.terminate.bind(process));
+		}
 
-				// Rebind again at termination.
-				bindRoles(screen, input, self);
-			});
+		function terminate(process : Process) : Void
+		{
+			if (processes.first() != process)
+				throw "Error: Terminating process not executing!";
+
+			self.state.remove(processes.pop());
+
+			// Rebind Roles at termination, because currentProcess changes.
+			bindRoles(screen, input, self);
 		}
 	}
 }
