@@ -71,10 +71,10 @@ class Console implements Context
 
 		// Initialize input
 		input.keyup(input.keyUp);
+		input.focus();
 
 		// Initialize screen
 		screen.on('click', function() input.focus());
-		input.focus();
 
 		return this;
 	}
@@ -103,92 +103,6 @@ class Console implements Context
 	}
 
 	///// Roles /////
-
-	@role var screen : JQuery =
-	{
-		function type(txt : String, ?delay : Int) : Promise
-		{
-			var p = new Deferred();
-			self.typeString(txt).then(Timer.delay.bind(function() p.resolve(), delay));
-			return p.promise();
-		}
-
-		function newline(?delay : Int) : Promise
-		{
-			return self.type("", delay);
-		}
-
-		function typeString(txt : String) : Promise
-		{
-			var lines = self.find('div').length;
-
-			if (lines > 22)
-				self.find('div:first').remove();
-
-			var timeOut;
-			var txtLen = txt.length;
-			var char = 0;
-			var typeIt = null;
-
-			var def : Deferred = new Deferred();
-			var el = new JQuery("<div />").appendTo(self);
-
-			if (txt.length == 0)
-			{
-				el.html("&nbsp;");
-				return def.resolve().promise();
-			}
-
-			(typeIt = function()
-			{
-				var humanize = Math.round(Math.random() * (50 - 30)) + 30;
-				timeOut = Timer.delay(function()
-				{
-					var type = txt.substr(char++, 1);
-					var currentText = el.text().substr(0, el.text().length - 1);
-
-					el.text(currentText + type + '|');
-
-					if (char == txtLen)
-					{
-						el.text(currentText + type);
-						def.resolve();
-					}
-					else
-					{
-						typeIt();
-					}
-
-				}, humanize);
-			})();
-
-			return def.promise();
-		}
-
-		function flash() : Void
-		{
-			self.css('background-color', '#ddd');
-			Timer.delay(function() self.css('background-color', 'black'), 50);
-		}
-	}
-
-	@role var input : JQuery =
-	{
-		function keyUp(e : Event) : Void
-		{
-			if (e.which != 13) return;
-			if (self.val() == "" || !currentProcess.acceptsRead())
-			{
-				screen.flash();
-				return;
-			}
-
-			var msg = self.val();
-
-			self.val("");
-			currentProcess.read(msg);
-		}
-	}
 
 	@role var currentProcess : Process =
 	{
@@ -237,6 +151,95 @@ class Console implements Context
 
 			// Rebind Roles at termination, because currentProcess changes.
 			bindRoles(screen, input, self);
+		}
+	}
+
+	@role var input : JQuery =
+	{
+		function keyUp(e : Event) : Void
+		{
+			if (e.which != 13) return;
+			if (self.val() == "" || !currentProcess.acceptsRead())
+			{
+				screen.flash();
+				return;
+			}
+
+			var msg = self.val();
+			self.val("");
+
+			currentProcess.read(msg);
+		}
+	}
+
+	@role var screen : JQuery =
+	{
+		function type(txt : String, ?delay : Int) : Promise
+		{
+			var p = new Deferred();
+			self.typeString(txt).then(Timer.delay.bind(p.resolve.bind(), delay));
+			return p.promise();
+		}
+
+		function newline(?delay : Int) : Promise
+		{
+			return self.type("", delay);
+		}
+
+		function flash() : Void
+		{
+			self.css('background-color', '#ddd');
+			Timer.delay(function() self.css('background-color', 'black'), 50);
+		}
+
+		/**
+		 * A bit more complicated RoleMethod, for simulating a human-like text output.
+		 */
+		function typeString(txt : String) : Promise
+		{
+			var lines = self.find('div').length;
+
+			if (lines > 22)
+				self.find('div:first').remove();
+
+			var timeOut;
+			var txtLen = txt.length;
+			var char = 0;
+			var typeIt = null;
+
+			var def : Deferred = new Deferred();
+			var el = new JQuery("<div />").appendTo(self);
+
+			if (txt.length == 0)
+			{
+				el.html("&nbsp;");
+				return def.resolve().promise();
+			}
+
+			(typeIt = function()
+			{
+				var humanize = Math.round(Math.random() * (50 - 30)) + 30;
+				timeOut = Timer.delay(function()
+				{
+					var type = txt.substr(char++, 1);
+					var currentText = el.text().substr(0, el.text().length - 1);
+
+					el.text(currentText + type + '|');
+
+					if (char == txtLen)
+					{
+						el.text(currentText + type);
+						def.resolve();
+					}
+					else
+					{
+						typeIt();
+					}
+
+				}, humanize);
+			})();
+
+			return def.promise();
 		}
 	}
 }
