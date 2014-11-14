@@ -64,6 +64,30 @@ class MatrixEffect implements Context
 
 	@role var columns : List<JQuery> =
 	{
+		function addColumn() : Void
+		{
+			if (positions.length > 0)
+			{
+				var pos = positions[Std.random(positions.length)];
+				var el = new JQuery("<div />").css({
+					"font-size": fontSize + "px",
+					position: "absolute",
+					width: fontSize + "px",
+					margin: "2px",
+					"word-wrap": "break-word",
+					overflow: "hidden",
+					height: screen.height() + 78 + "px",
+					top: 0,
+					left: pos + "px"
+				}).appendTo(screen);
+
+				positions.remove(pos);
+				self.add(el);
+			}
+
+			self.moveDown();
+		}
+
 		function moveDown()
 		{
 			for (column in self)
@@ -97,32 +121,9 @@ class MatrixEffect implements Context
 				}
 			}
 
-			// Test if self is still bound to the context, then continue the effect.
+			// Test if self is still bound to the context, then call start() again
+			// to continue the effect.
 			Timer.delay(function() if(self == this.columns) this.start(), 100);
-		}
-
-		function addColumn() : Void
-		{
-			if (positions.length > 0)
-			{
-				var pos = positions[Std.random(positions.length)];
-				var el = new JQuery("<div />").css({
-					"font-size": fontSize + "px",
-					position: "absolute",
-					width: fontSize + "px",
-					margin: "2px",
-					"word-wrap": "break-word",
-					overflow: "hidden",
-					height: screen.height() + 78 + "px",
-					top: 0,
-					left: pos + "px"
-				}).appendTo(screen);
-
-				positions.remove(pos);
-				self.add(el);
-			}
-
-			self.moveDown();
 		}
 	}
 }
