@@ -154,7 +154,7 @@ class ServeFood implements Context
 	}
 
 	@role var guests : {
-		function output(msg : String, ?delay : Int) : Promise;
+		function output(msg : String, ?delay : Int, ?padding : Int) : Promise;
 	} =
 	{
 		function eat(food : String, price : Int)

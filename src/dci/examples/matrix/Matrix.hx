@@ -26,16 +26,30 @@ class Matrix implements haxedci.Context
 
 	public function start() : Deferred
 	{
+		var effect = new MatrixEffect(console).start();
+
 		var type = this.console.output;
 		var newline = this.console.newline;
 
-		type("Hello Neo...", 900)
-		.then(type.bind("It's time to pay your bills, Neo.", 500))
-		.then(newline)
-		.then(newline)
-		.then(menu)
-		.then(newline)
-		.then(process.notify);
+		var i = 13;
+		while(--i > 0) newline();
+
+		type("PRESS ANY KEY", 0, 245);
+
+		console.getInput().one('keydown', function(e) {
+			e.preventDefault();
+
+			effect.clear();
+			console.clear();
+
+			type("Hello Neo...", 1250)
+			.then(type.bind("It's time to pay your bills, Neo.", 500))
+			.then(newline)
+			.then(newline)
+			.then(menu)
+			.then(newline)
+			.then(process.notify);
+		});
 
 		return process;
 	}

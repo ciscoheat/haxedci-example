@@ -79,14 +79,29 @@ class Console implements Context
 		return this;
 	}
 
+	public function clear() : Void
+	{
+		screen.clear();
+	}
+
+	public function getScreen() : JQuery
+	{
+		return this.screen;
+	}
+
+	public function getInput() : JQuery
+	{
+		return this.input;
+	}
+
 	public function load(process : Process) : Deferred
 	{
 		return processes.load(process);
 	}
 
-	public function output(msg : String, ?delay : Int) : Promise
+	public function output(msg : String, ?delay : Int, padding = 0) : Promise
 	{
-		return screen.type(msg, delay);
+		return screen.type(msg, delay, padding);
 	}
 
 	public function newline(?delay : Int) : Promise
@@ -108,7 +123,7 @@ class Console implements Context
 	{
 		function acceptsRead() : Bool
 		{
-			return processes.state[self] == ProcessState.Running;
+			return self != null && processes.state[self] == ProcessState.Running;
 		}
 
 		function read(s : String) : Void
@@ -174,10 +189,10 @@ class Console implements Context
 
 	@role var screen : JQuery =
 	{
-		function type(txt : String, ?delay : Int) : Promise
+		function type(txt : String, ?delay : Int, padding = 0) : Promise
 		{
 			var p = new Deferred();
-			self.typeString(txt).then(Timer.delay.bind(p.resolve.bind(), delay));
+			self.typeString(txt, padding).then(Timer.delay.bind(p.resolve.bind(), delay));
 			return p.promise();
 		}
 
@@ -192,15 +207,20 @@ class Console implements Context
 			Timer.delay(function() self.css('background-color', 'black'), 50);
 		}
 
+		function clear() : Void
+		{
+			self.find('div.text').remove();
+		}
+
 		/**
 		 * A bit more complicated RoleMethod, for simulating a human-like text output.
 		 */
-		function typeString(txt : String) : Promise
+		function typeString(txt : String, padding : Int) : Promise
 		{
-			var lines = self.find('div').length;
+			var lines = self.find('div.text').length;
 
 			if (lines > 22)
-				self.find('div:first').remove();
+				self.find('div.text:first').remove();
 
 			var timeOut;
 			var txtLen = txt.length;
@@ -208,7 +228,7 @@ class Console implements Context
 			var typeIt = null;
 
 			var def : Deferred = new Deferred();
-			var el = new JQuery("<div />").appendTo(self);
+			var el = new JQuery("<div class='text' />").css('margin-left', padding + "px").appendTo(self);
 
 			if (txt.length == 0)
 			{
@@ -224,17 +244,15 @@ class Console implements Context
 					var type = txt.substr(char++, 1);
 					var currentText = el.text().substr(0, el.text().length - 1);
 
-					el.text(currentText + type + '|');
+					el.html(currentText + type + '|');
 
 					if (char == txtLen)
 					{
-						el.text(currentText + type);
+						el.html(currentText + type);
 						def.resolve();
 					}
 					else
-					{
 						typeIt();
-					}
 
 				}, humanize);
 			})();

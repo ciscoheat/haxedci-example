@@ -97,7 +97,7 @@ class Restaurant implements haxedci.Context
 	}
 
 	@role var guests : {
-		function output(msg : String, ?delay : Int) : Promise;
+		function output(msg : String, ?delay : Int, ?padding : Int) : Promise;
 	};
 
 	@role var menu : Array<String>;
