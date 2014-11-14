@@ -14,20 +14,22 @@ using Lambda;
  *   screen:    The Console screen
  *   fontSize:  Character size in pixels
  *   positions: Available positions for the columns
+ *   speed:     (ms) The columns will move downwards at this interval
  */
 class MatrixEffect implements Context
 {
-	public function new(console, fontSize = 12)
+	public function new(console, fontSize = 12, speed = 100)
 	{
-		bindRoles(console.getScreen(), fontSize);
+		bindRoles(console.getScreen(), fontSize, speed);
 	}
 
-	private function bindRoles(screen, fontSize)
+	private function bindRoles(screen, fontSize, speed)
 	{
 		this.screen = screen;
 		this.columns = new List<JQuery>();
 		this.fontSize = fontSize;
 		this.positions = new Array<Int>();
+		this.speed = speed;
 
 		// Create the list of positions for the columns.
 		// (25 is offset from left of screen)
@@ -51,7 +53,7 @@ class MatrixEffect implements Context
 			f.fadeOut(1500, f.remove.bind());
 
 		// Rebind roles to reset the effect.
-		bindRoles(screen, fontSize);
+		bindRoles(screen, fontSize, speed);
 
 		return this;
 	}
@@ -59,8 +61,9 @@ class MatrixEffect implements Context
 	///// Roles /////
 
 	@role var screen : JQuery;
-	@role var fontSize : Int;
 	@role var positions : Array<Int>;
+	@role var fontSize : Int;
+	@role var speed : Int;
 
 	@role var columns : List<JQuery> =
 	{
@@ -123,7 +126,7 @@ class MatrixEffect implements Context
 
 			// Test if self is still bound to the context, then call start() again
 			// to continue the effect.
-			Timer.delay(function() if(self == this.columns) this.start(), 100);
+			Timer.delay(function() if(self == this.columns) this.start(), speed);
 		}
 	}
 }
