@@ -1,7 +1,7 @@
 # DCI in Haxe
 [Haxe](http://haxe.org) is a nice multiplatform language which enables a full DCI implementation. This repository is a supplement to the [haxedci](https://github.com/ciscoheat/haxedci) library, having a larger example ready for download.
 
-This document is supposed to give you an introduction to DCI, as well as describing the library usage. At the end you can find multiple DCI resources for further exploration.
+This document is supposed to give you an introduction to DCI, as well as describing the library usage. At the end you'll find multiple DCI resources for further exploration.
 
 ## Short introduction
 DCI stands for Data, Context, Interaction. One of the key aspects of DCI is to separate what a system *is* (data) from what it *does* (function). Data and function has very different rates of change so they should be separated, not as it currently is, put in classes together.
@@ -327,6 +327,8 @@ Clone this repository or [download it](https://github.com/ciscoheat/haxedci-exam
 A very good example of how well DCI maps to Use cases is found in the recreation of the classic Snake game, created with haxedci and Haxeflixel: [SnakeDCI](https://github.com/ciscoheat/SnakeDCI)
 
 ## DCI Resources
+**Recommended:** [DCI – How to get ahead in system architecture](http://www.silexlabs.org/wwx2014-speech-andreas-soderlund-dci-how-to-get-ahead-in-system-architecture/) - My latest DCI speech.
+
 Website - [fulloo.info](http://fulloo.info) <br>
 FAQ - [DCI FAQ](http://fulloo.info/doku.php?id=faq) <br>
 Support - [stackoverflow](http://stackoverflow.com/questions/tagged/dci), tagging the question with **dci** <br>
