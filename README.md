@@ -50,7 +50,7 @@ That could be our "Mental Model" of a money transfer. Interacting concepts like 
 package;
 
 class MoneyTransfer implements haxedci.Context {
-	@role var source = : {
+	@role var source : {
 		function decreaseBalance(a : Int) : Void;
 	} =
 	{
@@ -180,7 +180,7 @@ Now we have the Roles and their contracts for accessing the underlying Data. Tha
 
 Getting back to the mental model again, we know that we want to "Withdraw amount from a source account and deposit the amount in a destination account". So lets model that in a RoleMethod for the `source` Role:
 ```haxe
-@role var source = : {
+@role var source : {
 	function decreaseBalance(a : Int) : Void;
 } =
 {
