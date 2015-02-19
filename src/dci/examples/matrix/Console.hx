@@ -127,9 +127,8 @@ class Console implements Context
 		}
 
 		function read(s : String) : Void
-		{
+		{	
 			if (!self.acceptsRead()) return;
-
 			processes.state[self] = ProcessState.Blocked;
 			self.input(s).done(function() processes.state[self] = ProcessState.Running);
 		}
@@ -189,8 +188,10 @@ class Console implements Context
 
 	@role var screen : JQuery =
 	{
-		function type(txt : String, ?delay : Int, padding = 0) : Promise
+		// Possible compiler bug with padding = 0
+		function type(txt : String, ?delay : Int, ?padding : Int) : Promise
 		{
+			if(padding == null) padding = 0;
 			var p = new Deferred();
 			self.typeString(txt, padding).then(Timer.delay.bind(p.resolve.bind(), delay));
 			return p.promise();
