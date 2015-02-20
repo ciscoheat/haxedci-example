@@ -17,7 +17,7 @@ class ServeFood implements Context
 	public function new(waiter, chef, menu, guests, account)
 	{
 		// Role binding
-		this.waiter = waiter;
+		this.waiter = waiter;			
 		this.chef = chef;
 		this.menu = menu;
 		this.guests = guests;
@@ -73,7 +73,7 @@ class ServeFood implements Context
 			}
 		}
 
-		function serve(food : String)
+		function serve(food : String) : Void
 		{
 			var price = Std.random(90) + 10;
 			guests.eat(food, price);

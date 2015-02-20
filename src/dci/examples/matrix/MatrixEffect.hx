@@ -32,7 +32,7 @@ class MatrixEffect implements Context
 		this.speed = speed;
 
 		// Create the list of positions for the columns.
-		// (25 is offset from left of screen)
+		// (25 is offset from left of screen, hardcoded for convenience)
 		var max = Math.floor((screen.width() - 25) / fontSize);
 
 		while (positions.length < max)
@@ -69,6 +69,7 @@ class MatrixEffect implements Context
 	{
 		function addColumn() : Void
 		{
+			// Still positions available? Then add a new column.
 			if (positions.length > 0)
 			{
 				var pos = positions[Std.random(positions.length)];
