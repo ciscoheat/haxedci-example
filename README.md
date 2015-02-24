@@ -43,75 +43,10 @@ and after some more thought specify it further:
 
 - "Withdraw amount from a source account and deposit the amount in a destination account"
 
-That could be our "Mental Model" of a money transfer. Interacting concepts like our "Source" and "Destination" accounts of our mental model we call "Roles" in DCI, and we can define them and what they do to accomplish the money transfer in a DCI Context:
+That could be our "Mental Model" of a money transfer. Interacting concepts like our "Source" and "Destination" accounts of our mental model we call "Roles" in DCI, and we can define them and what they do to accomplish the money transfer in a DCI Context.
 
-#### MoneyTransfer.hx
-```haxe
-package;
+Our source code should map as closely to our mental model as possible so that we can confidently and easily overview and reason about _how the objects will interact at runtime_. We want no surprises at runtime. With DCI we have all runtime interactions right there! No need to look through endless convoluted abstractions, tiers, polymorphism etc to answer the reasonable question _where is it actually happening, goddammit?!_
 
-class MoneyTransfer implements haxedci.Context {
-	@role var source : {
-		function decreaseBalance(a : Int) : Void;
-	} =
-	{
-		function withdraw() : Void {
-			self.decreaseBalance(amount);
-			destination.deposit();
-		}
-	}
-
-	@role var destination : {
-		function increaseBalance(a : Int) : Void;
-	} =
-	{
-		function deposit() : Void {
-			self.increaseBalance(amount);
-		}
-	}
-
-	@role var amount : Int;
-
-	public function new(source, destination, amount) {
-		this.source = source;
-		this.destination = destination;
-		this.amount = amount;
-	}
-
-	public function transfer() {
-		source.withdraw();
-	}
-}
-```
-**(Detailed syntax explanation follows in the Usage section later.)**
-
-We want our source code to map as closely to our mental model as possible so that we can confidently and easily overview and reason about _how the objects will interact at runtime_!
-
-We want no surprises at runtime. With DCI we have all runtime interactions right there! No need to look through endless convoluted abstractions, tiers, polymorphism etc to answer the reasonable question _where is it actually happening, goddammit?!_
-
-To use this MoneyTransfer context, lets create two accounts, the Context, then make the transfer:
-
-#### Main.hx
-```haxe
-package ;
-
-class Main {
-	static function main() {
-		var savings = new Account("Savings", 1000);
-		var home = new Account("Home", 0);
-
-		trace("Before transfer:");
-		trace(savings.name + ": $" + savings.balance);
-		trace(home.name + ": $" + home.balance);
-
-		// Creating and executing the Context:
-		new MoneyTransfer(savings, home, 500).transfer();
-
-		trace("After transfer:");
-		trace(savings.name + ": $" + savings.balance);
-		trace(home.name + ": $" + home.balance);
-	}
-}
-```
 ## Library usage
 To use haxedci, you need to be able to create Contexts. Lets build the `MoneyTransfer` class step-by-step from scratch:
 
@@ -293,14 +228,27 @@ class MoneyTransfer implements haxedci.Context {
 	@role var amount : Int;
 }
 ```
-With this System Operation as our entrypoint, the `MoneyTransfer` Context is ready for use! You saw how it's done earlier, but here are the essentials:
+With this System Operation as our entrypoint, the `MoneyTransfer` Context is ready for use! Let's create two accounts, the Context, then make the transfer:
+
+#### Main.hx
 ```haxe
+package ;
+
 class Main {
 	static function main() {
 		var savings = new Account("Savings", 1000);
 		var home = new Account("Home", 0);
 
+		trace("Before transfer:");
+		trace(savings.name + ": $" + savings.balance);
+		trace(home.name + ": $" + home.balance);
+
+		// Creating and executing the Context:
 		new MoneyTransfer(savings, home, 500).transfer();
+
+		trace("After transfer:");
+		trace(savings.name + ": $" + savings.balance);
+		trace(home.name + ": $" + home.balance);
 	}
 }
 ```
