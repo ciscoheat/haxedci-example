@@ -44,13 +44,14 @@ class ValidateCreditCard implements Context
 				digits[i] *= 2;
 
 				if (digits[i] > 9)
-					digits[i] = self.sumDigitProduct(digits[i]);
+					digits[i] = digits.sumDigitProduct(digits[i]);
 
 				i -= 2;
 			}
-
+			
+			
 			// Mod 10 and check digit test
-			return (self.sum() + checkDigit) % 10 == 0 && checkDigit.isValid();
+			return (digits.sum() + checkDigit) % 10 == 0 && checkDigit.isValid();
 		}
 
 		function sum() : Int return Lambda.fold(self, function(a, b) { return a + b; }, 0);

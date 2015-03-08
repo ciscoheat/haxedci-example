@@ -70,7 +70,7 @@ class Console implements Context
 		screen.fadeTo(0, 0.25).fadeTo(6000, 1);
 
 		// Initialize input
-		input.keyup(input.keyUp);
+		input.keyup(input.sendMessage);
 		input.focus();
 
 		// Initialize screen
@@ -127,8 +127,8 @@ class Console implements Context
 		}
 
 		function read(s : String) : Void
-		{	
-			if (!self.acceptsRead()) return;
+		{
+			if (!currentProcess.acceptsRead()) return;
 			processes.state[self] = ProcessState.Blocked;
 			self.input(s).done(function() processes.state[self] = ProcessState.Running);
 		}
@@ -146,14 +146,14 @@ class Console implements Context
 		{
 			self.push(process);
 			self.state[process] = ProcessState.Blocked;
-
+			
 			// Rebind the Roles when a new process starts, because currentProcess changes.
 			bindRoles(screen, input, self);
-
+			
 			// Start the process and wait for the progress message.
 			return process.start()
 			.progress(currentProcess.loaded)
-			.done(self.terminate.bind(process));
+			.done(processes.terminate.bind(process));
 		}
 
 		function terminate(process : Process) : Void
@@ -170,7 +170,16 @@ class Console implements Context
 
 	@role var input : JQuery =
 	{
-		function keyUp(e : Event) : Void
+		function initialize() : Void {
+			self.keyup(input.sendMessage);
+			self.focus();
+		}
+		
+		function setFocus() : Void {
+			self.focus();
+		}
+		
+		function sendMessage(e : Event) : Void
 		{
 			if (e.which != 13) return;
 			if (self.val() == "" || !currentProcess.acceptsRead())
@@ -188,18 +197,26 @@ class Console implements Context
 
 	@role var screen : JQuery =
 	{
+		function turnOn() : Void {
+			// Turn on screen
+			self.fadeTo(0, 0.25).fadeTo(6000, 1);
+			self.on('click', input.setFocus);
+			
+			input.initialize();
+		}
+		
 		// Possible compiler bug with padding = 0
 		function type(txt : String, ?delay : Int, ?padding : Int) : Promise
 		{
 			if(padding == null) padding = 0;
 			var p = new Deferred();
-			self.typeString(txt, padding).then(Timer.delay.bind(p.resolve.bind(), delay));
+			screen.typeString(txt, padding).then(Timer.delay.bind(p.resolve.bind(), delay));
 			return p.promise();
 		}
 
 		function newline(?delay : Int) : Promise
 		{
-			return self.type("", delay);
+			return screen.type("", delay);
 		}
 
 		function flash() : Void

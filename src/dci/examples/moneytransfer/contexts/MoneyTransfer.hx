@@ -11,15 +11,12 @@ class MoneyTransfer implements haxedci.Context
 
 	public function transfer()
 	{
-		sourceAccount.transfer();
+		sourceAccount.transfer(false);
 	}
 
-	public function transferAndDeclineIfNotEnough()
+	public function transferButDeclineIfNotEnough()
 	{
-		if (sourceAccount.balance() < amount)
-			throw "Declined: Not enough money in account.";
-		else
-			transfer();
+		sourceAccount.transfer(true);
 	}
 
 	@role var amount : Float;
@@ -29,8 +26,11 @@ class MoneyTransfer implements haxedci.Context
 		function balance() : Float;
 	} =
 	{
-		function transfer() : Void
+		function transfer(declineIfNotEnough : Bool) : Void
 		{
+			if (declineIfNotEnough && self.balance() < amount)
+				throw "Declined: Not enough money in account.";
+			
 			self.withdraw(amount);
 			destinationAccount.deposit(amount);
 		}

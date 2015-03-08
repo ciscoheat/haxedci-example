@@ -89,7 +89,7 @@ class MatrixEffect implements Context
 				self.add(el);
 			}
 
-			self.moveDown();
+			columns.moveDown();
 		}
 
 		function moveDown()
