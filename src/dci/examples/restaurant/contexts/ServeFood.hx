@@ -104,7 +104,7 @@ class ServeFood implements Context
 		var cookingSkill : Int;
 	} =
 	{
-		function cook(choice : Int)
+		function cook(choice : Int) : Promise
 		{
 			var def = new Deferred();
 			var points = 2;
@@ -157,9 +157,9 @@ class ServeFood implements Context
 		function output(msg : String, ?delay : Int, ?padding : Int) : Promise;
 	} =
 	{
-		function eat(food : String, price : Int)
+		function eat(food : String, price : Int) : Void
 		{
-			this.bill += price;
+			bill += price;
 
 			self.output("You are served " + food)
 			.then(self.output.bind('That will be $$$price, sir. You can pay when you leave.'));
@@ -168,7 +168,7 @@ class ServeFood implements Context
 
 	@role var menu : Array<String> =
 	{
-		function display()
+		function display() : Void
 		{
 			var index = 0;
 			for (item in self)
@@ -179,7 +179,7 @@ class ServeFood implements Context
 			// Interaction ends here, waiting for user input.
 		}
 
-		function choice(choice : Int) return self[choice-1];
+		function choice(choice : Int) : String return self[choice-1];
 	}
 
 	@role var bill : Int;

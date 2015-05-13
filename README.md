@@ -138,12 +138,10 @@ The `} =` syntax looks a bit strange at first, but the rest is a very close mapp
 ```
 **Important:** If you want syntax autocompletion for the RoleMethods, you need to specify a return value for them explicitly!
 
-### Accessors: this, self and context
-A RoleMethod is a stateless method with access only to its RolePlayer and the current Context. You can access them through variables that is automatically available in RoleMethods:
+### Accessors: self and this
+A RoleMethod is a method with access only to its RolePlayer and the current Context. You can access the current RolePlayer through the `self` identifier which is automatically available in RoleMethods. `this` is not allowed in RoleMethods, as it can create confusion what it really references, the RolePlayer or the Context.
 
-- `this`- Points to the current Context
-- `self` - The current RolePlayer
-- `context` - An alias for `this`.
+There are other rules enforced by the compiler that reduces the number of surprises in the code, which is one of the foremost goals of DCI - Readable code. Hopefully time will be found later to list them here.
 
 ### More about functionality and RoleMethods
 Functionality can change frequently, as requirements changes. The Data however will probably remain stable much longer. An `Account` will stay the same, no matter how fancy web functionality is available. So take care when designing your Data classes. A well-defined Data structure can support a lot of functionality through a RoleObjectContract.
@@ -185,13 +183,13 @@ class MoneyTransfer implements haxedci.Context {
 ```
 There's nothing special about it, just assign the Roles as normal instance variables. This is called *Role-binding*, and there are two important things to remember:
 
-1. All Roles are bound as an atomic operation before an Interaction starts.
+1. All Roles *must* be bound in the same function.
 1. A Role should not be left unbound.
 
-Rebinding individual Roles during executing complicates things, and is hardly supported by any mental model. So put the binding in one place only, you can factorize it out of the constructor to a `bindRoles` method if you want. The Roles can be rebound before another Interaction in the same Context occurs, can be useful during recursion for example, but it must always happen in one place.
+Rebinding individual Roles during executing complicates things, and is hardly supported by any mental model. So put the binding in one place only, you can factorize it out of the constructor to a separate method if you want. The Roles can be rebound before another Interaction in the same Context occurs, which can be useful during recursion for example, but it must always happen in the same function.
 
 ### System Operations
-We have just mentioned **Interactions**, which is the last character of the DCI acronym. An Interaction is a flow of messages through the Roles in a Context, like the one we have defined based on the mental model. To start an Interaction we need an entry point for the Context however. This is called a **System Operation**, and all it should do is to call a RoleMethod, so the Roles start interacting with each other.
+We have just mentioned **Interactions**, which is the last part of the DCI acronym. An Interaction is a flow of messages through the Roles in a Context, like the one we have defined based on the mental model. To start an Interaction we need an entry point for the Context, a public method in other words. This is called a **System Operation**, and all it should do is to call a RoleMethod, so the Roles start interacting with each other.
 
 There may be many System Operations in a Context, but in this case we only need one, so lets call it `transfer`. Avoid using a generic name like "execute", instead give your API meaning by letting every method name carry meaningful information.
 ```haxe
@@ -228,7 +226,7 @@ class MoneyTransfer implements haxedci.Context {
 	@role var amount : Int;
 }
 ```
-With this System Operation as our entrypoint, the `MoneyTransfer` Context is ready for use! Let's create two accounts, the Context, then make the transfer:
+With this System Operation as our entrypoint, the `MoneyTransfer` Context is ready for use! Let's create two accounts and the Context, and finally make the transfer:
 
 #### Main.hx
 ```haxe
@@ -260,6 +258,8 @@ The advantage we get from using Roles and RoleMethods in a Context, is that we k
 
 The Roles and their RoleMethods gives us a view of the Interaction between objects instead of their inner structure. This enables us to reason about *system* functionality, not just class functionality. In other words, DCI embodies true object-orientation where runtime Interactions between a network of objects in a particular Context is understood *and* coded as first class citizens.
 
+We are using the terminology and mental model of the user. We can reason with non-programmers using their terminology, see the responsibility of each Role in the RoleMethods, and follow the mental model as specified within the Context.
+
 DCI is a new paradigm, which forces the mind in different directions than the common OO-thinking. What we call object-orientation today is really class-orientation, since functionality is spread throughout classes, instead of contained in Roles which interact at runtime. When you use DCI to separate Data (RoleObjectContracts) from Function (RoleMethods), you get a beautiful system architecture as a result. No polymorphism, no intergalactic GOTOs (aka virtual methods), everything is kept where it should be, in Context!
 
 ## Next steps
@@ -272,7 +272,7 @@ Clone this repository or [download it](https://github.com/ciscoheat/haxedci-exam
 * An asynchronous DOS console
 * ...and more!
 
-A very good example of how well DCI maps to Use cases is found in the recreation of the classic Snake game, created with haxedci and Haxeflixel: [SnakeDCI](https://github.com/ciscoheat/SnakeDCI)
+A nice example of how well DCI maps to Use cases is found in the recreation of the classic Snake game, created with haxedci and Haxeflixel: [SnakeDCI](https://github.com/ciscoheat/SnakeDCI)
 
 ## DCI Resources
 **Recommended:** [DCI – How to get ahead in system architecture](http://www.silexlabs.org/wwx2014-speech-andreas-soderlund-dci-how-to-get-ahead-in-system-architecture/) - My latest DCI speech.

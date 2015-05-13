@@ -1,7 +1,8 @@
+-debug
 -cp src 
 -lib haxedci 
 -lib jQueryExtern 
 -js bin/dci.js 
 -main dci.examples.Main
---times
--D macro-times
+#--times
+#-D macro-times

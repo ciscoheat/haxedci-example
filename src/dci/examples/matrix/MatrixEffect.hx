@@ -127,7 +127,7 @@ class MatrixEffect implements Context
 
 			// Test if self is still bound to the context, then call start() again
 			// to continue the effect.
-			Timer.delay(function() if(self == this.columns) this.start(), speed);
+			Timer.delay(function() if(self == columns) start(), speed);
 		}
 	}
 }
