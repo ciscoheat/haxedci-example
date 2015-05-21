@@ -8,6 +8,9 @@ import jQuery.Promise;
 import js.html.MenuElement;
 
 private typedef IMenu = Array<String>;
+private typedef Guests = {
+	function output(msg : String, ?delay : Int, ?padding : Int) : Promise;
+}
 
 /**
  * Simulation of serving food at a restaurant.
@@ -21,7 +24,7 @@ class ServeFood implements Context
 		this.chef = chef;
 		this.menu = menu;
 		this.guests = guests;
-		this.bill = 0;
+		this.bill = {total: 0};
 		this.account = account;
 	}
 
@@ -39,7 +42,7 @@ class ServeFood implements Context
 
 	public function guestsPaying() : Promise
 	{
-		return bill > 0
+		return bill.total > 0
 			? waiter.collectPayment()
 			: new Deferred().resolve().promise();
 	}
@@ -85,10 +88,10 @@ class ServeFood implements Context
 			var restaurantAccount = new Account([]);
 
 			// A small delay for payment processing
-			return guests.output('Your total is $$${bill}.', 2000)
+			return guests.output('Your total is $$${bill.total}.', 2000)
 			.then(function() {
 				try {
-					new MoneyTransfer(account, restaurantAccount, bill).transferButDeclineIfNotEnough();
+					new MoneyTransfer(account, restaurantAccount, bill.total).transferButDeclineIfNotEnough();
 					return guests.output("Thank you very much, sir.");
 				}
 				catch (e : String) {
@@ -153,13 +156,11 @@ class ServeFood implements Context
 		}
 	}
 
-	@role var guests : {
-		function output(msg : String, ?delay : Int, ?padding : Int) : Promise;
-	} =
+	@role var guests : Guests =
 	{
 		function eat(food : String, price : Int) : Void
 		{
-			bill += price;
+			bill.total += price;
 
 			self.output("You are served " + food)
 			.then(self.output.bind('That will be $$$price, sir. You can pay when you leave.'));
@@ -182,6 +183,6 @@ class ServeFood implements Context
 		function choice(choice : Int) : String return self[choice-1];
 	}
 
-	@role var bill : Int;
+	@role var bill : {total: Int};
 	@role var account : Account;
 }

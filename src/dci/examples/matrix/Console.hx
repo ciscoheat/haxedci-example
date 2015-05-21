@@ -48,15 +48,9 @@ class Console implements Context
 {
 	public function new(screen, input)
 	{
-		bindRoles(screen, input, new ProcessList());
-	}
-
-	private function bindRoles(screen, input, processes)
-	{
 		this.screen = screen;
 		this.input = input;
-		this.processes = processes;
-		this.currentProcess = processes.first();
+		this.processes = new ProcessList();
 	}
 
 	///// System Operations /////
@@ -119,52 +113,39 @@ class Console implements Context
 
 	///// Roles /////
 
-	@role var currentProcess : Process =
+	@role var processes : ProcessList =
 	{
-		function acceptsRead() : Bool
+		function current() : Process 
 		{
-			return self != null && processes.state[self] == ProcessState.Running;
+			return self.first();
 		}
 
 		function read(s : String) : Void
 		{
-			if (!currentProcess.acceptsRead()) return;
-			processes.state[self] = ProcessState.Blocked;
-			self.input(s).done(function() processes.state[self] = ProcessState.Running);
+			if (!self.acceptsRead()) return;
+			self.state[self.current()] = ProcessState.Blocked;
+			self.current().input(s).done(function() self.state[self.current()] = ProcessState.Running);
 		}
 
-		function loaded() : Void
-		{
-			processes.state[self] = ProcessState.Running;
-			input.focus();
+		function acceptsRead() : Bool {
+			return self.current() != null && self.state[self.current()] == ProcessState.Running;
 		}
-	}
 
-	@role var processes : ProcessList =
-	{
 		function load(process : Process) : Deferred
 		{
 			self.push(process);
 			self.state[process] = ProcessState.Blocked;
 			
-			// Rebind the Roles when a new process starts, because currentProcess changes.
-			bindRoles(screen, input, self);
-			
 			// Start the process and wait for the progress message.
 			return process.start()
-			.progress(currentProcess.loaded)
-			.done(processes.terminate.bind(process));
-		}
-
-		function terminate(process : Process) : Void
-		{
-			if (processes.first() != process)
-				throw "Error: Terminating process not executing!";
-
-			self.state.remove(processes.pop());
-
-			// Rebind Roles at termination, because currentProcess changes.
-			bindRoles(screen, input, self);
+			.progress(function() {
+				self.state[process] = ProcessState.Running;
+				input.focus();
+			})
+			.done(function() {
+				if (self.current() != process) throw "Error: Terminating process not executing!";
+				self.state.remove(self.pop());
+			});
 		}
 	}
 
@@ -182,7 +163,7 @@ class Console implements Context
 		function sendMessage(e : Event) : Void
 		{
 			if (e.which != 13) return;
-			if (self.val() == "" || !currentProcess.acceptsRead())
+			if (self.val() == "" || !processes.acceptsRead())
 			{
 				screen.flash();
 				return;
@@ -191,7 +172,7 @@ class Console implements Context
 			var msg = self.val();
 			self.val("");
 
-			currentProcess.read(msg);
+			processes.read(msg);
 		}
 	}
 

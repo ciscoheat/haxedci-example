@@ -20,12 +20,7 @@ class MatrixEffect implements Context
 {
 	public function new(console, fontSize = 12, speed = 100)
 	{
-		bindRoles(console.getScreen(), fontSize, speed);
-	}
-
-	private function bindRoles(screen, fontSize, speed)
-	{
-		this.screen = screen;
+		this.screen = console.getScreen();
 		this.columns = new List<JQuery>();
 		this.fontSize = fontSize;
 		this.positions = new Array<Int>();
@@ -49,12 +44,8 @@ class MatrixEffect implements Context
 
 	public function clear()
 	{
-		for (f in columns)
-			f.fadeOut(1500, f.remove.bind());
-
-		// Rebind roles to reset the effect.
-		bindRoles(screen, fontSize, speed);
-
+		for (f in columns) f.fadeOut(1500, f.remove.bind());
+		columns.clear();
 		return this;
 	}
 
@@ -125,9 +116,7 @@ class MatrixEffect implements Context
 				}
 			}
 
-			// Test if self is still bound to the context, then call start() again
-			// to continue the effect.
-			Timer.delay(function() if(self == columns) start(), speed);
+			Timer.delay(function() if(self.length > 0) start(), speed);
 		}
 	}
 }
