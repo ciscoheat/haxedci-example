@@ -4,7 +4,12 @@
 This document is supposed to give you an introduction to DCI, as well as describing the library usage. At the end you'll find multiple DCI resources for further exploration.
 
 ## Short introduction
-DCI stands for Data, Context, Interaction. One of the key aspects of DCI is to separate what a system *is* (data) from what it *does* (function). Data and function has very different rates of change so they should be separated, not as it currently is, put in classes together.
+DCI stands for Data, Context, Interaction. The key aspects of the DCI architecture are:
+
+- Separating what the system *is* (data) from what it *does* (function). Data and function have different rates of change so they should be separated, not as it currently is, put in classes together.
+- Create a direct mapping from the user's mental model to code. The computer should think as the user, not the other way around.
+- Make system behavior a first class entity.
+- Great code readability with no surprises at runtime.
 
 ## Example: A money transfer
 (Thanks to [Marc Grue](https://github.com/marcgrue) for the original money transfer tutorial.)
