@@ -83,7 +83,7 @@ Thinking about it however, we're not interested in the whole `Account`. Since we
 	function decreaseBalance(a : Int) : Void;
 };
 ```
-Now we're using [Haxe class notation](http://haxe.org/manual/struct#class-notation) to define the RoleObjectContract. Let's do the same for the *destination* Role, but it needs to increase the balance instead:
+We're using [Class notation for structure types](http://haxe.org/manual/types-structure-class-notation.html) to define the RoleObjectContract. Let's do the same for the *destination* Role, but it needs to increase the balance instead:
 ```haxe
 @role var destination : {
 	function increaseBalance(a : Int) : Void;
