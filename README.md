@@ -18,8 +18,6 @@ Let's take a simple Data class Account with some basic methods:
 
 #### Account.hx
 ```haxe
-package;
-
 class Account {
     public var name(default, null) : String;
 	public var balance(default, null) : Int;
@@ -80,13 +78,13 @@ We have started out quick and easy by a broad definition: The source and destina
 Thinking about it however, we're not interested in the whole `Account`. Since we want to focus on what happens in the Context and right now for a specific Role, all we need for playing the *source* Role is a way of decreasing the balance. The `Account` class has a `decreaseBalance` method, let's use it:
 ```haxe
 @role var source : {
-	function decreaseBalance(a : Int) : Void;
+	function decreaseBalance(a : Int);
 };
 ```
-We're using [Class notation for structure types](http://haxe.org/manual/types-structure-class-notation.html) to define the RoleObjectContract. Let's do the same for the *destination* Role, but it needs to increase the balance instead:
+Now we're using [Haxe class notation](http://haxe.org/manual/struct#class-notation) to define the RoleObjectContract. Let's do the same for the *destination* Role, but it needs to increase the balance instead:
 ```haxe
 @role var destination : {
-	function increaseBalance(a : Int) : Void;
+	function increaseBalance(a : Int);
 };
 ```
 The *amount* role will be simpler. We're only using it as an `Int`, so we can specify the RoleObjectContract directly on the definition:
@@ -97,11 +95,11 @@ Our `MoneyTransfer` class now looks like this:
 ```haxe
 class MoneyTransfer implements haxedci.Context {
 	@role var source : {
-		function decreaseBalance(a : Int) : Void;
+		function decreaseBalance(a : Int);
 	};
 
 	@role var destination : {
-		function increaseBalance(a : Int) : Void;
+		function increaseBalance(a : Int);
 	};
 
 	@role var amount : Int;
@@ -121,10 +119,10 @@ Now we have the Roles and their contracts for accessing the underlying Data. Tha
 Getting back to the mental model again, we know that we want to "Withdraw amount from a source account and deposit the amount in a destination account". So lets model that in a RoleMethod for the `source` Role:
 ```haxe
 @role var source : {
-	function decreaseBalance(a : Int) : Void;
+	function decreaseBalance(a : Int);
 } =
 {
-	function withdraw() : Void {
+	function withdraw() {
 		self.decreaseBalance(amount);
 		destination.deposit();
 	}
@@ -133,18 +131,23 @@ Getting back to the mental model again, we know that we want to "Withdraw amount
 The `} =` syntax looks a bit strange at first, but the rest is a very close mapping of the mental model to code, which is the goal of DCI. Note how we're using the RoleObjectContract method only for the actual Data operation, the rest is functionality, collaboration between Roles. This collaboration requires a RoleMethod on destination called `deposit`:
 ```haxe
 @role var destination : {
-	function increaseBalance(a : Int) : Void;
+	function increaseBalance(a : Int);
 } =
 {
-	function deposit() : Void {
+	function deposit() {
 		self.increaseBalance(amount);
 	}
 }
 ```
-**Important:** If you want syntax autocompletion for the RoleMethods, you need to specify a return value for them explicitly!
 
 ### Accessors: self and this
-A RoleMethod is a method with access only to its RolePlayer and the current Context. You can access the current RolePlayer through the `self` identifier which is automatically available in RoleMethods. `this` is not allowed in RoleMethods, as it can create confusion what it really references, the RolePlayer or the Context.
+A RoleMethod is a method with access only to its RolePlayer and the current Context. You can access the current RolePlayer through the `self` identifier which is automatically available in RoleMethods. `this` is not allowed in RoleMethods, as it can create confusion what it really references, the RolePlayer or the Context. Use `self` and the other Role names when referencing them.
+
+### Return values
+
+The astute reader may have noticed that there are no return values on `decreaseBalance`, `increaseBalance` and `deposit`. To encourage and assist OO and encapsulation, haxedci Contexts will automatically make any RoleMethod return `self` unless a return type is specified explicitly.  See for example [message passing](http://c2.com/cgi/wiki?AlanKayOnMessaging) and [east-oriented code](http://www.saturnflyer.com/blog/jim/2014/12/23/enforcing-encapsulation-with-east-oriented-code/) why this is a good idea. On RoleObjectContracts (as in `increaseBalance` above), a method without a return value is assumed to return `Void`.
+
+If you prefer to be explicit, the compiler can help you find those missing return values. Define `-D dci-signatures-warnings` in your `.hxml` file and you'll get warnings.
 
 There are other rules enforced by the compiler that reduces the number of surprises in the code, which is one of the foremost goals of DCI - Readable code. Hopefully time will be found later to list them here.
 
@@ -166,19 +169,19 @@ class MoneyTransfer implements haxedci.Context {
 	}
 
 	@role var source : {
-		function decreaseBalance(a : Int) : Void;
+		function decreaseBalance(a : Int);
 	} =
 	{
-		function withdraw() : Void {
+		function withdraw() {
 			self.decreaseBalance(amount);
 			destination.deposit();
 		}
 	}
 
 	@role var destination : {
-		function increaseBalance(a : Int) : Void;
+		function increaseBalance(a : Int);
 	} = { // <-- An alternative if you prefer braces on the same line
-		function deposit() : Void {
+		function deposit() {
 			self.increaseBalance(amount);
 		}
 	}
@@ -210,20 +213,20 @@ class MoneyTransfer implements haxedci.Context {
 	}
 
 	@role var source : {
-		function decreaseBalance(a : Int) : Void;
+		function decreaseBalance(a : Int);
 	} =
 	{
-		function withdraw() : Void {
+		function withdraw() {
 			self.decreaseBalance(amount);
 			destination.deposit();
 		}
 	}
 
 	@role var destination : {
-		function increaseBalance(a : Int) : Void;
+		function increaseBalance(a : Int);
 	} =
 	{
-		function deposit() : Void {
+		function deposit() {
 			self.increaseBalance(amount);
 		}
 	}
@@ -235,8 +238,6 @@ With this System Operation as our entrypoint, the `MoneyTransfer` Context is rea
 
 #### Main.hx
 ```haxe
-package ;
-
 class Main {
 	static function main() {
 		var savings = new Account("Savings", 1000);
