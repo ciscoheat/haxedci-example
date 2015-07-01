@@ -111,7 +111,7 @@ The most obvious advantage is that we're making the Role more generic. Any objec
 
 Another interesting advantage is that when specifying a more compressed RoleObjectContract, we only observe what the Roles can do in the current Context. This is called *"Full OO"*, a powerful concept that you can [read more about here](https://groups.google.com/d/msg/object-composition/umY_w1rXBEw/hyAF-jPgFn4J).
 
-Using a whole class can be tempting because it's quick and you'll get full access in case you need something. It can be good as as start, but don't be lazy with your code. Work on the public class API, consider what it does, how it's named and why. Then refine your RoleObjectContracts. DCI is as much about clear and readable code as matching a mental model and separating data from function.
+Using a whole class can be tempting because it's quick and you'll get full access in case you need something. It can be good as as start, but you will lose [locality](http://www.saturnflyer.com/blog/jim/2015/04/21/locality-and-cohesion/), the ability to understand code by looking at only a small portion of it. So plan your public class API, consider what it does, how it's named and why. Then refine your RoleObjectContracts. DCI is as much about clear and readable code as matching a mental model and separating data from function.
 
 ### RoleMethods
 Now we have the Roles and their contracts for accessing the underlying Data. That's a good start, so lets add the core of a DCI Context: functionality. It is implemented through **RoleMethods**.
