@@ -1,9 +1,11 @@
 package dci.examples.matrix;
+import dci.examples.matrix.Console.Process;
 import dci.examples.moneytransfer.contexts.Account;
 import dci.examples.moneytransfer.contexts.PayBills;
 import dci.examples.moneytransfer.data.Creditor;
 import dci.examples.restaurant.contexts.Restaurant;
 import jQuery.Deferred;
+import jQuery.JQuery;
 import jQuery.Promise;
 
 /**
@@ -14,7 +16,7 @@ class Matrix implements haxedci.Context
 {
 	var process : Deferred;
 
-	public function new(console : Console, bills : Array<Creditor>, neoAccount : Account)
+	public function new(console, bills, neoAccount)
 	{
 		this.console = console;
 		this.bills = bills;
@@ -26,7 +28,7 @@ class Matrix implements haxedci.Context
 
 	public function start() : Deferred
 	{
-		var effect = new MatrixEffect(console).start();
+		var effect = new MatrixEffect(console.getScreen()).start();
 
 		var type = this.console.output;
 		var newline = this.console.newline;
@@ -94,7 +96,15 @@ class Matrix implements haxedci.Context
 
 	///// Roles /////
 
-	@role var console : Console =
+	@role var console : {
+		function output(msg : String, ?delay : Int, ?padding : Int) : Promise;
+		function newline(?delay : Int) : Promise;
+		function turnOff() : Promise;
+		function clear() : Void;
+		function getScreen() : Dynamic;
+		function getInput() : Dynamic;
+		function load(process : Process) : Deferred;
+	} =
 	{
 		function hackingDetected() : Promise
 		{
@@ -115,6 +125,12 @@ class Matrix implements haxedci.Context
 		}
 	}
 
-	@role var bills : Array<Creditor>;
-	@role var neoAccount : Account;
+	@role var bills : {
+		function iterator() : Iterator<Creditor>;
+	};
+	
+	@role var neoAccount : {
+		function balance() : Float;
+		function withdraw(amount : Float) : Void;
+	};
 }

@@ -24,7 +24,10 @@ class Account implements Context
 		ledgers.addEntry("Withdrawing", -amount);
 	}
 
-	@role var ledgers : Array<Ledger> =
+	@role var ledgers : {
+		function iterator() : Iterator<Ledger>;
+		function push(ledger : Ledger) : Void;
+	} =
 	{
 		function balance() : Float
 		{

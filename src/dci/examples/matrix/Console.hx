@@ -1,5 +1,6 @@
 package dci.examples.matrix;
 import dci.examples.matrix.Console.Process;
+import dci.examples.matrix.Console.ProcessState;
 import haxedci.Context;
 import jQuery.Event;
 import jQuery.Promise;
@@ -68,7 +69,7 @@ class Console implements Context
 		input.focus();
 
 		// Initialize screen
-		screen.on('click', function() input.focus());
+		screen.on('click', function(_) input.focus());
 
 		return this;
 	}
@@ -78,12 +79,12 @@ class Console implements Context
 		screen.clear();
 	}
 
-	public function getScreen() : JQuery
+	public function getScreen() : Dynamic
 	{
 		return this.screen;
 	}
 
-	public function getInput() : JQuery
+	public function getInput() : Dynamic
 	{
 		return this.input;
 	}
@@ -113,8 +114,12 @@ class Console implements Context
 
 	///// Roles /////
 
-	@role var processes : ProcessList =
-	{
+	@role var processes : {
+		var state : Map<Process, ProcessState>;
+		function first() : Process;
+		function push(process : Process) : Void;
+		function pop() : Null<Process>;
+	} =	{
 		function current() : Process 
 		{
 			return self.first();
@@ -149,14 +154,19 @@ class Console implements Context
 		}
 	}
 
-	@role var input : JQuery =
+	@role var input : {
+		function keyup(cb : Event -> Void) : JQuery;
+		function focus() : JQuery;
+		function val(?value : String) : String;		
+		function fadeTo(time : Int, ?opacity : Float, ?cb : Void -> Void) : JQuery;
+	} =
 	{
 		function initialize() : Void {
 			self.keyup(input.sendMessage);
 			self.focus();
 		}
 		
-		function setFocus() : Void {
+		function setFocus(e : Event) : Void {
 			self.focus();
 		}
 		
@@ -176,7 +186,12 @@ class Console implements Context
 		}
 	}
 
-	@role var screen : JQuery =
+	@role var screen : {
+		function on(events : Dynamic, ?selector : String,  ?data : Dynamic) : JQuery;
+		function fadeTo(time : Int, opacity : Float) : JQuery;
+		function css(properties : Dynamic) : JQuery;
+		function find(selector : String) : JQuery;
+	} =
 	{
 		function turnOn() : Void {
 			// Turn on screen
@@ -202,8 +217,8 @@ class Console implements Context
 
 		function flash() : Void
 		{
-			self.css('background-color', '#ddd');
-			Timer.delay(function() self.css('background-color', 'black'), 50);
+			self.css({'background-color': '#ddd'});
+			Timer.delay(function() self.css({'background-color': 'black'}), 50);
 		}
 
 		function clear() : Void
@@ -227,7 +242,7 @@ class Console implements Context
 			var typeIt = null;
 
 			var def : Deferred = new Deferred();
-			var el = new JQuery("<div class='text' />").css('margin-left', padding + "px").appendTo(self);
+			var el = new JQuery("<div class='text' />").css({'margin-left': padding + "px"}).appendTo(cast self);
 
 			if (txt.length == 0)
 			{

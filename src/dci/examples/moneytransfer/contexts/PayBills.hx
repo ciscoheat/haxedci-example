@@ -37,8 +37,9 @@ class PayBills implements Context
 		}
 	}
 
-	@role var creditors : Iterable<Creditor> =
-	{
+	@role var creditors : {
+		function iterator() : Iterator<Creditor>;
+	} = {
 		function owed() : Float	return Lambda.fold(self,
 			function(cr, a) return cr.amountOwed + a, 0.0
 		);

@@ -156,7 +156,9 @@ class ServeFood implements Context
 		}
 	}
 
-	@role var guests : Guests =
+	@role var guests : {
+		function output(msg : String, ?delay : Int, ?padding : Int) : Promise;
+	} =
 	{
 		function eat(food : String, price : Int) : Void
 		{
@@ -167,7 +169,10 @@ class ServeFood implements Context
 		}
 	}
 
-	@role var menu : Array<String> =
+	@role var menu : {
+		function iterator() : Iterator<String>;
+		var length(default, null) : Int;
+	} =
 	{
 		function display() : Void
 		{
@@ -180,9 +185,18 @@ class ServeFood implements Context
 			// Interaction ends here, waiting for user input.
 		}
 
-		function choice(choice : Int) : String return self[choice-1];
+		function choice(choice : Int) : String {
+			var i = 0;
+			for (item in self) if (i++ == choice) 
+				return item;
+			
+			return null;
+		}
 	}
 
 	@role var bill : {total: Int};
-	@role var account : Account;
+	@role var account : {
+		function withdraw(amount : Float) : Void;
+		function balance() : Float;
+	};
 }

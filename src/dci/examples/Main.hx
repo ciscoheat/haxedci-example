@@ -2,7 +2,6 @@ package dci.examples;
 import dci.examples.matrix.Console;
 import dci.examples.matrix.Matrix;
 import dci.examples.moneytransfer.contexts.Account;
-import dci.examples.moneytransfer.contexts.ValidateCreditCard;
 import dci.examples.moneytransfer.data.Creditor;
 import dci.examples.moneytransfer.data.Ledger;
 import jQuery.JQuery;
@@ -45,11 +44,7 @@ class Main
 
 		// The Console is a terminal emulator.
 		// It needs a html element for output and a text field for input.
-		var console = new Console(new JQuery("#content"), new JQuery("#input")).start();
-
-		// A demonstration of a credit card validation Context.
-		if (!new ValidateCreditCard(4916239259614484).isValid())
-			console.output("Invalid credit card number!");
+		var console = new Console(cast new JQuery("#content"), cast new JQuery("#input")).start();
 
 		// Start the "Matrix" process on the Console.
 		console.load(new Matrix(console, bills, neoAccount));

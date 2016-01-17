@@ -16,7 +16,7 @@ class Restaurant implements haxedci.Context
 	 */
 	var process : Deferred;
 
-	public function new(console : Console, account : Account)
+	public function new(console, account)
 	{
 		// Make a random chef
 		var chef = new Employee();
@@ -100,6 +100,13 @@ class Restaurant implements haxedci.Context
 		function output(msg : String, ?delay : Int, ?padding : Int) : Promise;
 	};
 
-	@role var menu : Array<String>;
-	@role var order : ServeFood;
+	@role var menu : {
+		function iterator() : Iterator<String>;
+	};
+	
+	@role var order : {
+		function guestsOrdering(choice : Int) : Promise;
+		function guestsArriving() : Promise;
+		function guestsPaying() : Promise;
+	};
 }

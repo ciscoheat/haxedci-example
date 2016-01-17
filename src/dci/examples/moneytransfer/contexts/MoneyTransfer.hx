@@ -19,10 +19,10 @@ class MoneyTransfer implements haxedci.Context
 		sourceAccount.transfer(true);
 	}
 
-	@role var amount : Float;
+	var amount : Float;
 
 	@role var sourceAccount : {
-		function withdraw(amount : Float);
+		function withdraw(amount : Float) : Void;
 		function balance() : Float;
 	} =
 	{

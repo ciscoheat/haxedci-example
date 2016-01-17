@@ -18,9 +18,9 @@ using Lambda;
  */
 class MatrixEffect implements Context
 {
-	public function new(console, fontSize = 12, speed = 100)
+	public function new(screen, fontSize = 12, speed = 100)
 	{
-		this.screen = console.getScreen();
+		this.screen = screen;
 		this.columns = new List<JQuery>();
 		this.fontSize = fontSize;
 		this.positions = new Array<Int>();
@@ -51,12 +51,22 @@ class MatrixEffect implements Context
 
 	///// Roles /////
 
-	@role var screen : JQuery;
-	@role var positions : Array<Int>;
-	@role var fontSize : Int;
-	@role var speed : Int;
+	@role var screen : {
+		function height() : Float;
+		function width() : Float;
+		function append(content : JQuery) : JQuery;
+	};
+	
+	var positions : Array<Int>;
+	var fontSize : Int;
+	var speed : Int;
 
-	@role var columns : List<JQuery> =
+	@role var columns : {
+		function iterator() : Iterator<JQuery>;
+		function clear() : Void;
+		function add(el : JQuery);
+		var length(default, null) : Int;
+	} =
 	{
 		function addColumn() : Void
 		{
@@ -64,18 +74,21 @@ class MatrixEffect implements Context
 			if (positions.length > 0)
 			{
 				var pos = positions[Std.random(positions.length)];
-				var el = new JQuery("<div />").css({
+				var el = new JQuery("<div />");
+
+				el.css({
 					"font-size": fontSize + "px",
 					position: "absolute",
 					width: fontSize + "px",
 					margin: "2px",
 					"word-wrap": "break-word",
 					overflow: "hidden",
-					height: screen.height() + 78 + "px",
+					height: (screen.height() + 78) + "px",
 					top: 0,
 					left: pos + "px"
-				}).appendTo(screen);
-
+				});
+				
+				screen.append(el);
 				positions.remove(pos);
 				self.add(el);
 			}
