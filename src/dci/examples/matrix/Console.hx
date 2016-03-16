@@ -14,7 +14,7 @@ import haxe.Timer;
  */
 
 /**
- * RoleObjectInterface for a process. It has a start method, which should return
+ * RoleObjectContract for a process. It has a start method, which should return
  * a Deferred that sends a progress message when the process is Running and input
  * should be accepted. Resolve the Deferred to terminate the process.
  *
