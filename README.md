@@ -261,6 +261,20 @@ class Main {
 }
 ```
 
+## Fluent interfaces
+
+DCI pays great respect to Alan Kay and Smalltalk, which has a feature popularized in the [fluent interface](https://en.wikipedia.org/wiki/Fluent_interface). See [message passing](http://c2.com/cgi/wiki?AlanKayOnMessaging) and [east-oriented code](http://www.saturnflyer.com/blog/jim/2014/12/23/enforcing-encapsulation-with-east-oriented-code/) for more information.
+
+If you're designing your objects to return "this", enabling a fluent interface, there is a special feature when such an object is playing a Role in a Context:
+
+```haxe
+@role var destination : {
+	function increaseBalance(a : Int) : dci.Self;
+} = {
+	// ...
+}
+```
+
 ## Advantages
 
 Ok, we have learned new concepts and a different way of structuring our program. But why should we do all this?
