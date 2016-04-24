@@ -61,7 +61,7 @@ class Matrix implements haxedci.Context
 		var totalToPay = Lambda.fold(bills, function(cr, a) return cr.amountOwed + a, 0.0);
 		var type = this.console.output;
 
-		return type("Current account balance: " + neoAccount.balance())
+		return type("Current account balance: " + neoAccount.accountBalance())
 		.then(type.bind('1 - Pay bills ($totalToPay)'))
 		.then(type.bind('2 - Order some food'));
 	}
@@ -75,7 +75,7 @@ class Matrix implements haxedci.Context
 				try
 				{
 					new PayBills(neoAccount, bills).payBills();
-					console.output("Account balance after paying bills: " + neoAccount.balance());
+					console.output("Account balance after paying bills: " + neoAccount.accountBalance());
 				}
 				catch (e : String)
 				{
@@ -84,11 +84,14 @@ class Matrix implements haxedci.Context
 			case '2':
 				return console.load(new Restaurant(console, neoAccount)).then(menu);
 			case 'dir', 'ls', 'ls -l':
-				console.hackingDetected();
+				return
+				console.output("Tell me, Mr. Anderson, what good is a directory listing if you're unable to...", 200)
+				.then(console.output.bind("see?"))
+				.then(console.turnOff);
 			case 'exit':
-				console.exit().then(process.resolve);
+				console.output("Goodbye, Neo.").then(console.turnOff).then(process.resolve);
 			case _:
-				console.unknownCommand();
+				console.output("Try again, Neo.");
 		}
 
 		return new Deferred().resolve();
@@ -96,35 +99,8 @@ class Matrix implements haxedci.Context
 
 	///// Roles /////
 
-	@role var console : {
-		function output(msg : String, ?delay : Int, ?padding : Int) : Promise;
-		function newline(?delay : Int) : Promise;
-		function turnOff() : Promise;
-		function clear() : Void;
-		function getScreen() : Dynamic;
-		function getInput() : Dynamic;
-		function load(process : Process) : Deferred;
-	} =
-	{
-		function hackingDetected() : Promise
-		{
-			return
-			self.output("Tell me, Mr. Anderson, what good is a directory listing if you're unable to...", 200)
-			.then(self.output.bind("see?"))
-			.then(self.turnOff);
-		}
-
-		function exit() : Promise
-		{
-			return self.output("Goodbye, Neo.").then(self.turnOff);
-		}
-
-		function unknownCommand() : Promise
-		{
-			return self.output("Try again, Neo.");
-		}
-	}
-
+	var console : Console;
+		
 	@role var bills : {
 		function iterator() : Iterator<Creditor>;
 	};
@@ -132,5 +108,7 @@ class Matrix implements haxedci.Context
 	@role var neoAccount : {
 		function balance() : Float;
 		function withdraw(amount : Float) : Void;
-	};
+	} = {
+		function accountBalance() return balance();
+	}
 }

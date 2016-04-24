@@ -55,7 +55,7 @@ class ServeFood implements Context
 	{
 		function guestsArriving() : Promise
 		{
-			var output = guests.output;
+			var output = guests.say;
 
 			return output('Good evening, my name is ${self.name}, I\'ll be your waiter.')
 			.then(output.bind("This is on the menu for tonight:"))
@@ -65,14 +65,14 @@ class ServeFood implements Context
 
 		function takeOrder(choice : Int) : Promise
 		{
-			if (choice >= 1 && choice <= menu.length)
+			if (choice >= 1 && choice <= menu.numberOfItems())
 			{
 				var text = menu.choice(choice) + ", an excellent choice. I'll be right back.";
-				return guests.output(text).then(chef.cook.bind(choice));
+				return guests.say(text).then(chef.cook.bind(choice));
 			}
 			else
 			{
-				return guests.output("Sorry sir, we don't have that on the menu tonight.");
+				return guests.say("Sorry sir, we don't have that on the menu tonight.");
 			}
 		}
 
@@ -88,15 +88,15 @@ class ServeFood implements Context
 			var restaurantAccount = new Account([]);
 
 			// A small delay for payment processing
-			return guests.output('Your total is $$${bill.total}.', 2000)
+			return guests.say('Your total is $$${bill.total}.', 2000)
 			.then(function() {
 				try {
 					new MoneyTransfer(account, restaurantAccount, bill.total).transferButDeclineIfNotEnough();
-					return guests.output("Thank you very much, sir.");
+					return guests.say("Thank you very much, sir.");
 				}
 				catch (e : String) {
 					var def = new Deferred();
-					guests.output("Sorry sir, your card was declined.").then(def.reject);
+					guests.say("Sorry sir, your card was declined.").then(def.reject);
 					return def;
 				}
 			});
@@ -151,7 +151,7 @@ class ServeFood implements Context
 			return def.promise().then(
 				function(food) waiter.serve(food),
 				null,
-				function(msg) guests.output(msg)
+				function(msg) guests.say(msg)
 			);
 		}
 	}
@@ -160,13 +160,14 @@ class ServeFood implements Context
 		function output(msg : String, ?delay : Int, ?padding : Int) : Promise;
 	} =
 	{
-		function eat(food : String, price : Int) : Void
-		{
+		function eat(food : String, price : Int) : Void {
 			bill.total += price;
 
 			self.output("You are served " + food)
 			.then(self.output.bind('That will be $$$price, sir. You can pay when you leave.'));
 		}
+		
+		function say(msg : String, ?delay : Int) : Promise return output(msg, delay);
 	}
 
 	@role var menu : {
@@ -178,23 +179,26 @@ class ServeFood implements Context
 		{
 			var index = 0;
 			for (item in self)
-				guests.output(++index + " - " + item);
+				guests.say(++index + " - " + item);
 
-			guests.output("");
+			guests.say("");
 
 			// Interaction ends here, waiting for user input.
 		}
 
-		function choice(choice : Int) : String {
+		function choice(c : Int) : String {
 			var i = 0;
-			for (item in self) if (i++ == choice) 
+			for (item in self) if (++i == c) 
 				return item;
 			
 			return null;
 		}
+		
+		function numberOfItems() : Int return length;
 	}
 
-	@role var bill : {total: Int};
+	var bill : { total: Int };
+	
 	@role var account : {
 		function withdraw(amount : Float) : Void;
 		function balance() : Float;

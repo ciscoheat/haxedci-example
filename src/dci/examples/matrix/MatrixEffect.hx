@@ -45,17 +45,13 @@ class MatrixEffect implements Context
 	public function clear()
 	{
 		for (f in columns) f.fadeOut(1500, f.remove.bind());
-		columns.clear();
+		columns.clearAll();
 		return this;
 	}
 
 	///// Roles /////
 
-	@role var screen : {
-		function height() : Float;
-		function width() : Float;
-		function append(content : JQuery) : JQuery;
-	};
+	var screen : JQuery;
 	
 	var positions : Array<Int>;
 	var fontSize : Int;
@@ -64,10 +60,12 @@ class MatrixEffect implements Context
 	@role var columns : {
 		function iterator() : Iterator<JQuery>;
 		function clear() : Void;
-		function add(el : JQuery);
+		function add(el : JQuery) : Void;
 		var length(default, null) : Int;
 	} =
 	{
+		function clearAll() : Void clear();
+		
 		function addColumn() : Void
 		{
 			// Still positions available? Then add a new column.

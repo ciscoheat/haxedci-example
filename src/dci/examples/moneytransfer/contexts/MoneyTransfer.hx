@@ -32,11 +32,13 @@ class MoneyTransfer implements haxedci.Context
 				throw "Declined: Not enough money in account.";
 			
 			self.withdraw(amount);
-			destinationAccount.deposit(amount);
+			destinationAccount.doDeposit(amount);
 		}
 	}
 
 	@role var destinationAccount : {
-		function deposit(amount : Float);
-	};
+		function deposit(amount : Float) : Void;
+	} = {
+		function doDeposit(amount : Float) : Void deposit(amount);
+	}
 }

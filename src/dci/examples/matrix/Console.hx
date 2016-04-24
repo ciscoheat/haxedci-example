@@ -61,16 +61,7 @@ class Console implements Context
 	 */
 	public function start() : Console
 	{
-		// Turn on screen
-		screen.fadeTo(0, 0.25).fadeTo(6000, 1);
-
-		// Initialize input
-		input.keyup(input.sendMessage);
-		input.focus();
-
-		// Initialize screen
-		screen.on('click', function(_) input.focus());
-
+		screen.turnOn();
 		return this;
 	}
 
@@ -106,10 +97,7 @@ class Console implements Context
 
 	public function turnOff() : Promise
 	{
-		var def = new Deferred();
-		screen.fadeTo(3500, 0);
-		input.fadeTo(3500, 0, function() def.resolve());
-		return def;
+		return screen.turnOff();
 	}
 
 	///// Roles /////
@@ -154,36 +142,19 @@ class Console implements Context
 		}
 	}
 
-	@role var input : {
-		function keyup(cb : Event -> Void) : JQuery;
-		function focus() : JQuery;
-		function val(?value : String) : String;		
-		function fadeTo(time : Int, ?opacity : Float, ?cb : Void -> Void) : JQuery;
-	} =
-	{
-		function initialize() : Void {
-			self.keyup(input.sendMessage);
-			self.focus();
+	var input : JQuery;
+	
+	function sendMessage(e : Event) : Void {
+		if (e.which != 13) return;
+		if (input.val() == "" || !processes.acceptsRead()) {
+			screen.flash();
+			return;
 		}
-		
-		function setFocus(e : Event) : Void {
-			self.focus();
-		}
-		
-		function sendMessage(e : Event) : Void
-		{
-			if (e.which != 13) return;
-			if (self.val() == "" || !processes.acceptsRead())
-			{
-				screen.flash();
-				return;
-			}
 
-			var msg = self.val();
-			self.val("");
+		var msg = input.val();
+		input.val("");
 
-			processes.read(msg);
-		}
+		processes.read(msg);
 	}
 
 	@role var screen : {
@@ -193,12 +164,22 @@ class Console implements Context
 		function find(selector : String) : JQuery;
 	} =
 	{
-		function turnOn() : Void {
+		function turnOn() : Void 
+		{
 			// Turn on screen
 			self.fadeTo(0, 0.25).fadeTo(6000, 1);
-			self.on('click', input.setFocus);
+			self.on('click', input.focus);
 			
-			input.initialize();
+			input.keyup(sendMessage);
+			input.focus();
+		}
+		
+		function turnOff() : Promise
+		{
+			var def = new Deferred();
+			self.fadeTo(3500, 0);
+			input.fadeTo(3500, 0, function() def.resolve());
+			return def.promise();
 		}
 		
 		// Possible compiler bug with padding = 0
@@ -212,7 +193,7 @@ class Console implements Context
 
 		function newline(?delay : Int) : Promise
 		{
-			return screen.type("", delay);
+			return self.type("", delay);
 		}
 
 		function flash() : Void
@@ -231,6 +212,8 @@ class Console implements Context
 		 */
 		function typeString(txt : String, padding : Int) : Promise
 		{
+			trace(txt);
+			
 			var lines = self.find('div.text').length;
 
 			if (lines > 22)
@@ -256,8 +239,8 @@ class Console implements Context
 				timeOut = Timer.delay(function()
 				{
 					var type = txt.substr(char++, 1);
-					var currentText = el.text().substr(0, el.text().length - 1);
-
+					var currentText = txt.substr(0, char);
+					
 					el.html(currentText + type + '|');
 
 					if (char == txtLen)

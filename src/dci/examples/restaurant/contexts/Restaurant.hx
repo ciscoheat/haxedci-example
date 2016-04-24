@@ -25,8 +25,8 @@ class Restaurant implements haxedci.Context
 		chef.cookingSkill = Std.random(10);
 
 		// And a random waiter
-		var waiter = new Employee();
-		waiter.name = switch(Std.random(5))
+		var waiter1 = new Employee();
+		waiter1.name = switch(Std.random(5))
 		{
 			case 0: "Jeeves";
 			case 1: "James";
@@ -44,7 +44,7 @@ class Restaurant implements haxedci.Context
 
 		// Bind the Roles
 		this.guests = console;
-		this.waiter = waiter;
+		this.waiter = waiter1;
 		this.menu = menu;
 		this.order = new ServeFood(waiter, chef, menu, console, account);
 	}
@@ -72,11 +72,11 @@ class Restaurant implements haxedci.Context
 				case '':
 
 				case "quit", "exit", "leave", "goodbye", "bye", "pay", "go home", "go back":
-					order.guestsPaying().done(function() waiter.bidFarewell().then(process.resolve));
+					order.guestsPaying().done(function() guests.bidFarewell().then(process.resolve));
 
 				case _:
 					var name = Std.random(10) == 9 ? "Neo" : "sir";
-					guests.output('Pardon me, $name?');
+					guests.say('Pardon me, $name?');
 			}
 		}
 
@@ -87,26 +87,22 @@ class Restaurant implements haxedci.Context
 
 	@role var waiter : {
 		var name : String;
-	} =
-	{
-		function bidFarewell() : Promise
-		{
+	};
+
+	@role var guests : {
+		function output(msg : String, ?delay : Int, ?padding : Int) : Promise;		
+	} = {
+		function bidFarewell() : Promise {
 			return guests.output('Goodbye, have a nice evening sir.')
 			.then(guests.output.bind(''));
 		}
+		
+		function say(msg : String) : Promise return output(msg);
 	}
-
-	@role var guests : {
-		function output(msg : String, ?delay : Int, ?padding : Int) : Promise;
-	};
 
 	@role var menu : {
 		function iterator() : Iterator<String>;
 	};
 	
-	@role var order : {
-		function guestsOrdering(choice : Int) : Promise;
-		function guestsArriving() : Promise;
-		function guestsPaying() : Promise;
-	};
+	var order : ServeFood;
 }
