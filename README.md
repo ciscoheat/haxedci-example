@@ -130,39 +130,36 @@ Getting back to the mental model again, we know that we want to *"Withdraw amoun
 ```haxe
 @role var source : {
 	function decreaseBalance(a : Int);
-} = {
-	function withdraw() {
-		self.decreaseBalance(amount);
+
+	public function withdraw() {
+		decreaseBalance(amount);
 		destination.deposit();
 	}
-}
+}; // (Remember the semicolon)
 ```
 
-The `} = {` syntax looks a bit strange perhaps, but the *withdraw* RoleMethod is a very close mapping of the mental model to code, which is the goal of DCI. Note how we're using the contract method only for the actual Data operation, the rest is functionality, collaboration between Roles. This collaboration requires a RoleMethod on destination called `deposit`:
+The *withdraw* RoleMethod, created using a function with a body, is a very close mapping of the mental model to code, which is the goal of DCI. Note how we're using the contract method only for the actual Data operation, the rest is functionality, collaboration between Roles. This collaboration requires a RoleMethod on destination called `deposit`:
 ```haxe
 @role var destination : {
 	function increaseBalance(a : Int);
-} = {
-	function deposit() {
-		self.increaseBalance(amount);
+
+	public function deposit() {
+		increaseBalance(amount);
 	}
-}
+};
 ```
 
+### Visibility
+
+RoleMethods and contract fields can be declared `public` or `private`, private is default. When they are private, they can only be accessed within their own Role. As in any OO coding, keep things private for a good encapsulation.
+
 ### Accessors: self and this
-A RoleMethod is a method with access only to its RolePlayer (through the contract) and the current Context. You can access the current RolePlayer through the `self` identifier which is automatically available in RoleMethods. `this` is not allowed in RoleMethods, as it can create confusion what it really references, the RolePlayer or the Context. Use `self` and the other Role names when referencing them.
 
-### More about functionality and RoleMethods
-
-Functionality can change frequently, as requirements changes. The Data however will probably remain stable much longer. An `Account` will stay the same, no matter how fancy web functionality is available. So take care when designing your Data classes. A well-defined Data structure can support a lot of functionality, by playing Roles in Contexts.
-
-When designing functionality using RoleMethods in a Context, be careful not to end up with one big method doing all the work. That is an imperative approach which limits the power of DCI, since we're aiming for communication between Roles, not a procedural algorithm that tells the Roles what to do. Make the methods small, and let the mental model of the Context become the guideline. A [Use case](http://www.usability.gov/how-to-and-tools/methods/use-cases.html) is a formalization of a mental model that is supposed to map to a Context in DCI.
-
-> A difference between [the imperative] kind of procedure orientation and object orientation is that in the former, we ask: _"What happens?"_ In the latter, we ask: _"Who does what?"_ Even in a simple example, a reader looses the "who" and thereby important locality context that is essential for building a mental model of the algorithm. ([From the DCI FAQ](http://fulloo.info/doku.php?id=what_is_the_advantage_of_distributing_the_interaction_algorithm_in_the_rolemethods_as_suggested_by_dci_instead_of_centralizing_it_in_a_context_method))
+A RoleMethod is a method with access only to its RolePlayer (through the Role contract) and the current Context. You can access the current RolePlayer through the `self` identifier which is automatically available in RoleMethods. `this` is not allowed in RoleMethods, as it can create confusion what it really references, the RolePlayer or the Context. Use `self` and the other Role names when referencing them.
 
 ### Adding a constructor
 
-Let's add a constructor to the class:
+Let's add a constructor to the class (showing off the `self` identifier as well):
 
 ```haxe
 class MoneyTransfer implements dci.Context {
@@ -174,25 +171,25 @@ class MoneyTransfer implements dci.Context {
 
 	@role var source : {
 		function decreaseBalance(a : Int);
-	} =	{
-		function withdraw() {
+
+		public function withdraw() {
 			self.decreaseBalance(amount);
 			destination.deposit();
 		}
-	}
+	};
 
 	@role var destination : {
 		function increaseBalance(a : Int);
-	} = {
-		function deposit() {
+
+		public function deposit() {
 			self.increaseBalance(amount);
 		}
-	}
+	};
 
 	var amount : Int;
 }
 ```
-There's nothing special about it, just assign the Roles as normal instance variables. This is called *Role-binding*, and there are two important things to remember:
+There's nothing special about the constructor, just assign the Roles as normal instance variables. This is called *Role-binding*, and there are two important things to remember:
 
 1. All Roles *must* be bound in the same function.
 1. A Role should not be left unbound (it can be bound to `null`).
@@ -219,20 +216,20 @@ class MoneyTransfer implements dci.Context {
 
 	@role var source : {
 		function decreaseBalance(a : Int);
-	} = {
-		function withdraw() {
-			self.decreaseBalance(amount);
+
+		public function withdraw() {
+			decreaseBalance(amount);
 			destination.deposit();
 		}
-	}
+	};
 
 	@role var destination : {
 		function increaseBalance(a : Int);
-	} = {
-		function deposit() {
-			self.increaseBalance(amount);
+
+		public function deposit() {
+			increaseBalance(amount);
 		}
-	}
+	};
 
 	var amount : Int;
 }
@@ -270,8 +267,6 @@ If you're designing your objects to return "this", enabling a fluent interface, 
 ```haxe
 @role var destination : {
 	function increaseBalance(a : Int) : dci.Self;
-} = {
-	// ...
 }
 ```
 
@@ -286,6 +281,14 @@ The Roles and their RoleMethods gives us a view of the Interaction between objec
 We are using the terminology and mental model of the user. We can reason with non-programmers using their terminology, see the responsibility of each Role in the RoleMethods, and follow the mental model as specified within the Context.
 
 DCI is a new paradigm, which forces the mind in different directions than the common OO-thinking. What we call object-orientation today is really class-orientation, since functionality is spread throughout classes, instead of contained in Roles which interact at runtime. When you use DCI to separate Data (RoleObjectContracts) from Function (RoleMethods), you get a beautiful system architecture as a result. No polymorphism, no intergalactic GOTOs (aka virtual methods), everything is kept where it should be, in Context!
+
+### Functionality and RoleMethods
+
+Functionality can change frequently, as requirements changes. The Data however will probably remain stable much longer. An `Account` will stay the same, no matter how fancy web functionality is available. So take care when designing your Data classes. A well-defined Data structure can support a lot of functionality, by playing Roles in Contexts.
+
+When designing functionality using RoleMethods in a Context, be careful not to end up with one big method doing all the work. That is an imperative approach which limits the power of DCI, since we're aiming for communication between Roles, not a procedural algorithm that tells the Roles what to do. Make the methods small, and let the mental model of the Context become the guideline. A [Use case](http://www.usability.gov/how-to-and-tools/methods/use-cases.html) is a formalization of a mental model that is supposed to map to a Context in DCI.
+
+> A difference between [the imperative] kind of procedure orientation and object orientation is that in the former, we ask: _"What happens?"_ In the latter, we ask: _"Who does what?"_ Even in a simple example, a reader looses the "who" and thereby important locality context that is essential for building a mental model of the algorithm. ([From the DCI FAQ](http://fulloo.info/doku.php?id=what_is_the_advantage_of_distributing_the_interaction_algorithm_in_the_rolemethods_as_suggested_by_dci_instead_of_centralizing_it_in_a_context_method))
 
 ### A silver bullet?
 
