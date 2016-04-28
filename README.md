@@ -130,32 +130,39 @@ Getting back to the mental model again, we know that we want to *"Withdraw amoun
 ```haxe
 @role var source : {
 	function decreaseBalance(a : Int);
-
-	public function withdraw() {
+} = {
+	function withdraw() {
 		decreaseBalance(amount);
 		destination.deposit();
 	}
 }; // (Remember the semicolon)
 ```
 
-The *withdraw* RoleMethod, created using a function with a body, is a very close mapping of the mental model to code, which is the goal of DCI. Note how we're using the contract method only for the actual Data operation, the rest is functionality, collaboration between Roles. This collaboration requires a RoleMethod on destination called `deposit`:
+The *withdraw* RoleMethod, created as a function with a body, is a very close mapping of the mental model to code, which is the goal of DCI. 
+
+The `} = {` syntax is a bit unfortunate, but it's the only way to get autocompletion working. More on that in the "Visibility" section below.
+
+Note how we're using the contract method only for the actual data operation, the rest is function, collaboration between Roles through RoleMethods. This collaboration requires a RoleMethod on destination called `deposit`, according to the mental model. Let's define it:
+
 ```haxe
 @role var destination : {
 	function increaseBalance(a : Int);
-
-	public function deposit() {
+} = {
+	function deposit() {
 		increaseBalance(amount);
 	}
 };
 ```
 
-### Visibility
+### Visibility (and the quirky syntax)
 
-RoleMethods and contract fields can be declared `public` or `private`, private is default. When they are private, they can only be accessed within their own Role. As in any OO coding, keep things private for a good encapsulation.
+Contract fields can be declared `public` or `private`, private is default. When they are private, they can only be accessed from the Role's own RoleMethods. As in any OO coding, keep things private for a good encapsulation.
+
+RoleMethods on the other hand, can only be declared public or private when they are created *without* the `} = {` syntax (just leave it out), but then autocompletion won't work. If you prefer autocompletion and use `} = {`, you cannot specify visibility, and the RoleMethods will default to `public`.
 
 ### Accessors: self and this
 
-A RoleMethod is a method with access only to its RolePlayer (through the Role contract) and the current Context. You can access the current RolePlayer through the `self` identifier which is automatically available in RoleMethods. `this` is not allowed in RoleMethods, as it can create confusion what it really references, the RolePlayer or the Context. Use `self` and the other Role names when referencing them.
+A RoleMethod is a method with access only to its RolePlayer (through the Role contract) and the current Context. You can access the current RolePlayer through the `self` identifier. `this` is not allowed in RoleMethods, as it can create confusion what it really references, the RolePlayer or the Context. Use `self` and the other Role names when referencing them.
 
 ### Adding a constructor
 
@@ -180,8 +187,8 @@ class MoneyTransfer implements dci.Context {
 
 	@role var destination : {
 		function increaseBalance(a : Int);
-
-		public function deposit() {
+    } = {
+		function deposit() {
 			self.increaseBalance(amount);
 		}
 	};
@@ -216,8 +223,8 @@ class MoneyTransfer implements dci.Context {
 
 	@role var source : {
 		function decreaseBalance(a : Int);
-
-		public function withdraw() {
+    } = {
+		function withdraw() {
 			decreaseBalance(amount);
 			destination.deposit();
 		}
