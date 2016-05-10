@@ -140,7 +140,7 @@ Getting back to the mental model again, we know that we want to *"Withdraw amoun
 
 The *withdraw* RoleMethod, created as a function with a body, is a very close mapping of the mental model to code, which is the goal of DCI. 
 
-The `} = {` syntax is a bit unfortunate, but it's the only way to get autocompletion working. More on that in the "Visibility" section below.
+The `} = {` syntax is a bit unfortunate, but it's the only way to get autocompletion working for RoleMethods. More on that in the "Visibility" section below.
 
 Note how we're using the contract method only for the actual data operation, the rest is function, collaboration between Roles through RoleMethods. This collaboration requires a RoleMethod on destination called `deposit`, according to the mental model. Let's define it:
 
@@ -156,9 +156,11 @@ Note how we're using the contract method only for the actual data operation, the
 
 ### Visibility (and the quirky syntax)
 
-Contract fields can be declared `public` or `private`, private is default. When they are private, they can only be accessed from the Role's own RoleMethods. As in any OO coding, keep things private for a good encapsulation.
+Contract fields can be declared `public` or `private`, private is default. When they are private, they can only be accessed from the Role's own RoleMethods. This enables the ability to trace the flow of cooperation between Roles, instead of any Role being able to call another Role's interface at all times. It's important for reading and understanding the use-case-level logic of a Context.
 
-RoleMethods on the other hand, can only be declared public or private when they are created *without* the `} = {` syntax (just leave it out), but then autocompletion won't work. If you prefer autocompletion and use `} = {`, you cannot specify visibility, and the RoleMethods will default to `public`.
+There could be cases when a public contract field is useful, therefore it's allowed, but its presence should be viewed as a compromise measure that explicitly erodes the readability of the code. It is a way for the programmer to say: *“Trust me”* in spite of the fact that readers of the code can’t verify what goes on behind the curtain.
+
+**The quirky syntax:** RoleMethods on the other hand, can only be declared `private` when they are created *without* the `} = {` syntax (just leave it out), but then autocompletion won't work. If you prefer autocompletion and use `} = {`, you cannot specify visibility, and the RoleMethods will default to `public`.
 
 ### Accessors: self and this
 
@@ -166,7 +168,7 @@ A RoleMethod is a method with access only to its RolePlayer (through the Role co
 
 ### Adding a constructor
 
-Let's add a constructor to the class (showing off the `self` identifier as well):
+Let's add a constructor to the class (showing off the `self` identifier as well, and public RoleMethods):
 
 ```haxe
 class MoneyTransfer implements dci.Context {
