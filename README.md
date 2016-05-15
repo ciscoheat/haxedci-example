@@ -1,9 +1,11 @@
 # DCI in Haxe
+
 [Haxe](http://haxe.org) is a nice multiplatform language which enables a full compile-time DCI implementation. This repository is a supplement to the [haxedci](https://github.com/ciscoheat/haxedci) library, having a larger example ready for download.
 
 This document is supposed to give you an introduction to DCI, as well as describing the library usage. At the end you'll find multiple DCI resources for further exploration.
 
 ## Short introduction
+
 DCI stands for Data, Context, Interaction. The key aspects of the DCI architecture are:
 
 - Separating what the system *is* (data) from what it *does* (function). Data and function have different rates of change so they should be separated, not as it currently is, put in classes together.
@@ -16,7 +18,8 @@ DCI stands for Data, Context, Interaction. The key aspects of the DCI architectu
 
 Let's take a simple Data class Account with some basic methods:
 
-#### Account.hx
+**Account.hx**
+
 ```haxe
 class Account {
     public var name(default, null) : String;
@@ -156,15 +159,15 @@ Note how we're using the contract method only for the actual data operation, the
 
 ### Visibility (and the quirky syntax)
 
-Contract fields can be declared `public` or `private`, private is default. When they are private, they can only be accessed from the Role's own RoleMethods. This enables the ability to trace the flow of cooperation between Roles, instead of any Role being able to call another Role's interface at all times. It's important for reading and understanding the use-case-level logic of a Context.
+Contract fields can be declared `public` or `private`, private is default. When they are private, they can only be accessed from the Role's own RoleMethods. This enables the ability to trace the flow of cooperation between Roles, instead of any Role being able to call another Role's underlying object at all times. Preventing that helps reading and understanding the use-case-level logic of a Context.
 
-There could be cases when a public contract field is useful, therefore it's allowed, but its presence should be viewed as a compromise measure that explicitly erodes the readability of the code. It is a way for the programmer to say: *“Trust me”* in spite of the fact that readers of the code can’t verify what goes on behind the curtain.
+There could be cases when a public contract field is useful however, therefore it's allowed, but its presence should be viewed as a compromise measure that explicitly erodes the readability of the code. It is a way for the programmer to say: *“Trust me”* in spite of the fact that readers of the code can’t verify what goes on behind the curtain.
 
 **The quirky syntax:** RoleMethods on the other hand, can only be declared `private` when they are created *without* the `} = {` syntax (just leave it out), but then autocompletion won't work. If you prefer autocompletion and use `} = {`, you cannot specify visibility, and the RoleMethods will default to `public`.
 
 ### Accessors: self and this
 
-A RoleMethod is a method with access only to its RolePlayer (through the Role contract) and the current Context. You can access the current RolePlayer through the `self` identifier. `this` is not allowed in RoleMethods, as it can create confusion what it really references, the RolePlayer or the Context. Use `self` and the other Role names when referencing them.
+A RoleMethod is a method with access only to its RolePlayer (through the Role-object contract) and the current Context. You can access the current RolePlayer through the `self` identifier. `this` is not allowed in RoleMethods, as it can create confusion what it really references, the RolePlayer or the Context. Use `self` and the other Role names when referencing them directly.
 
 ### Adding a constructor
 
@@ -181,7 +184,8 @@ class MoneyTransfer implements dci.Context {
 	@role var source : {
 		function decreaseBalance(a : Int);
 
-		public function withdraw() {
+		// Public/private is allowed now, when not using } = {
+		public function withdraw() { 
 			self.decreaseBalance(amount);
 			destination.deposit();
 		}
@@ -198,18 +202,21 @@ class MoneyTransfer implements dci.Context {
 	var amount : Int;
 }
 ```
+
 There's nothing special about the constructor, just assign the Roles as normal instance variables. This is called *Role-binding*, and there are two important things to remember:
 
 1. All Roles *must* be bound in the same function.
-1. A Role should not be left unbound (it can be bound to `null`).
+1. A Role *should not* be left unbound (it can be bound to `null`).
 
 Rebinding individual Roles during executing complicates things, and is hardly supported by any mental model. So put the binding in one place only, you can factorize it out of the constructor to a separate method if you want. The Roles can be rebound before another Interaction in the same Context occurs, which can be useful during recursion for example, but it must always happen in the same function.
 
 ### System Operations
 
-We just mentioned **Interactions**, which is the last part of the DCI acronym. An Interaction is a flow of messages through the Roles in a Context, like the one we have defined based on the mental model. To start an Interaction we need an entrypoint for the Context, a public method in other words. This is called a **System Operation**, and all it should do is to call a RoleMethod, so the Roles start interacting with each other.
+We just mentioned Interactions, which is the last part of the DCI acronym. An **Interaction** is a flow of messages through the Roles in a Context, like the one we have defined now, based on the mental model. To start an Interaction we need an entrypoint for the Context, a public method in other words. This is called a **System Operation**, and all it should do is to call a RoleMethod, so the Roles start interacting with each other.
 
-If you're basing the Context on a use case, there is usually only one System Operations in a Context. Let's call it `transfer`. Avoid using a generic name like "execute", instead give your API meaning by letting every method name carry meaningful information.
+If you're basing the Context on a use case, there is usually only one System Operation in a Context. Let's call it `transfer`. Try not to use a generic name like "execute", instead give your API meaning by letting every method name carry meaningful information.
+
+**MoneyTransfer.hx**
 
 ```haxe
 class MoneyTransfer implements dci.Context {
@@ -219,6 +226,7 @@ class MoneyTransfer implements dci.Context {
 		this.amount = amount;
 	}
 
+	// System Operation
 	public function transfer() {
 		source.withdraw();
 	}
@@ -245,7 +253,7 @@ class MoneyTransfer implements dci.Context {
 ```
 With this System Operation as our entrypoint, the `MoneyTransfer` Context is ready for use! Let's create two accounts and the Context, and finally make the transfer:
 
-#### Main.hx
+**Main.hx**
 
 ```haxe
 class Main {
