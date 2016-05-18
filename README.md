@@ -157,13 +157,15 @@ Note how we're using the contract method only for the actual data operation, the
 };
 ```
 
-### Visibility (and the quirky syntax)
+### Contract field access
 
-Contract fields can be declared `public` or `private`, private is default. When they are private, they can only be accessed from the Role's own RoleMethods. This enables the ability to trace the flow of cooperation between Roles, instead of any Role being able to call another Role's underlying object at all times. Preventing that helps reading and understanding the use-case-level logic of a Context.
+Contract fields should be accessed from the Role's own RoleMethods. This enables the ability to trace the flow of cooperation between Roles, instead of any Role being able to call another Role's underlying object at all times. It's a helpful separation between the local reasoning of how Roles interact locally with their object, and how Roles interact with each other. A goal with DCI is readability, and this helps reading and understanding the use-case-level logic of a Context.
 
-There could be cases when a public contract field is useful however, therefore it's allowed, but its presence should be viewed as a compromise measure that explicitly erodes the readability of the code. It is a way for the programmer to say: *“Trust me”* in spite of the fact that readers of the code can’t verify what goes on behind the curtain.
+There *could* be cases when a calling a contract field from another Role is wanted, therefore it's allowed, but it will emit a compiler warning, and its presence should be viewed as a compromise measure that explicitly erodes the readability of the code. It is a way for the programmer to say: *“Trust me”* in spite of the fact that readers of the code can’t verify what goes on behind the curtain.
 
-**The quirky syntax:** RoleMethods on the other hand, can only be declared `private` when they are created *without* the `} = {` syntax (just leave it out), but then autocompletion won't work. If you prefer autocompletion and use `} = {`, you cannot specify visibility, and the RoleMethods will default to `public`.
+### The quirky syntax
+
+RoleMethods can be declared `private` when they are created *without* the `} = {` syntax (just leave it out). That limits access to within its Role, but then autocompletion won't work. If you prefer autocompletion and use `} = {`, you cannot specify visibility, and the RoleMethods will default to `public`.
 
 ### Accessors: self and this
 
@@ -315,7 +317,12 @@ Some cases don’t lend themselves very well to use cases but are better modeled
 
 ## DCI Resources
 
-**Recommended:** [DCI – How to get ahead in system architecture](http://www.silexlabs.org/wwx2014-speech-andreas-soderlund-dci-how-to-get-ahead-in-system-architecture/) - My latest DCI speech.
+### Videos 
+
+[DCI – How to get ahead in system architecture](http://www.silexlabs.org/wwx2014-speech-andreas-soderlund-dci-how-to-get-ahead-in-system-architecture/)
+['A Glimpse of Trygve: From Class-oriented Programming to Real OO' - Jim Coplien [ ACCU 2016 ]](https://www.youtube.com/watch?v=lQQ_CahFVzw)
+
+### Links
 
 Website - [fulloo.info](http://fulloo.info) <br>
 FAQ - [DCI FAQ](http://fulloo.info/doku.php?id=faq) <br>

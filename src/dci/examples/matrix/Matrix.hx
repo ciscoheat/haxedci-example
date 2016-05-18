@@ -61,7 +61,7 @@ class Matrix implements haxedci.Context
 		var totalToPay = Lambda.fold(bills, function(cr, a) return cr.amountOwed + a, 0.0);
 		var type = this.console.output;
 
-		return type("Current account balance: " + neoAccount.accountBalance())
+		return type("Current account balance: " + neoAccount.balance())
 		.then(type.bind('1 - Pay bills ($totalToPay)'))
 		.then(type.bind('2 - Order some food'));
 	}
@@ -75,7 +75,7 @@ class Matrix implements haxedci.Context
 				try
 				{
 					new PayBills(neoAccount, bills).payBills();
-					console.output("Account balance after paying bills: " + neoAccount.accountBalance());
+					console.output("Account balance after paying bills: " + neoAccount.balance());
 				}
 				catch (e : String)
 				{
@@ -108,7 +108,5 @@ class Matrix implements haxedci.Context
 	@role var neoAccount : {
 		function balance() : Float;
 		function withdraw(amount : Float) : Void;
-	} = {
-		function accountBalance() return balance();
-	}
+	};
 }
