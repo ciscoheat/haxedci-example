@@ -1,6 +1,6 @@
 # DCI in Haxe
 
-[Haxe](http://haxe.org) is a nice multiplatform language which enables a full compile-time DCI implementation. This repository is a supplement to the [haxedci](https://github.com/ciscoheat/haxedci) library, having a larger example ready for download.
+[Haxe](http://haxe.org) is a nice multiplatform language which enables a full compile-time DCI implementation. This repository is a supplement to the [haxedci](https://github.com/ciscoheat/haxedci) library, having a larger example for learning.
 
 This document is supposed to give you an introduction to DCI, as well as describing the library usage. At the end you'll find multiple DCI resources for further exploration.
 
@@ -16,7 +16,242 @@ DCI stands for Data, Context, Interaction. The key aspects of the DCI architectu
 ## Example: A money transfer
 (Thanks to [Marc Grue](https://github.com/marcgrue) for the original money transfer tutorial.)
 
-Let's take a simple Data class Account with some basic methods:
+Let's start with a simple data class called `Account`, containing a few methods:
+
+```haxe
+class Account {
+    public var name(default, null) : String;
+	public var balance(default, null) : Int;
+
+	public function new(name, balance) {
+		this.name = name;
+		this.balance = balance;
+	}
+
+	public function increaseBalance(amount: Int) {
+		balance += amount;
+	}
+
+	public function decreaseBalance(amount: Int) {
+		balance -= amount;
+	}
+}
+```
+This is what we in DCI sometimes call a "dumb" data class. It only "knows" about its own data and how to manipulate that. The concept of a transfer between two accounts is outside its responsibilities and we delegate this to a Context - the `MoneyTransfer` Context class. In this way we can keep the Account class very slim and avoid that it gradually takes on more and more responsibilities for each use case it participates in.
+
+From a users point of view we might think of a money transfer as
+
+- "Move money from one account to another"
+
+and after some more thought specify it further:
+
+- "Withdraw amount from a source account and deposit the amount in a destination account"
+
+That could be our "Mental Model" of a money transfer. Interacting concepts like our "Source" and "Destination" accounts of our mental model we call "Roles" in DCI, and we can define them and what they do to accomplish the money transfer in a DCI Context.
+
+Our source code should map as closely to our mental model as possible so that we can confidently and easily overview and reason about _how the objects will interact at runtime_. We want no surprises at runtime. With DCI we have all runtime interactions right there! No need to look through endless convoluted abstractions, tiers, polymorphism etc to answer the reasonable question _where is it actually happening?!_
+
+## Library usage
+
+Begin with installing the library: `haxelib install haxedci`.
+
+To use haxedci, you need to be able to create Contexts. Lets build the `MoneyTransfer` class step-by-step from scratch:
+
+Start by defining a class and let it implement `dci.Context`.
+
+```haxe
+class MoneyTransfer implements dci.Context {
+}
+```
+
+Remember the mental model of a money transfer? "Withdraw *amount* from a *source* account and deposit the amount in a *destination* account". The three italicized nouns are the Roles that we will use in the Context. Lets put them there. They are defined using the `@role` metadata:
+
+```haxe
+class MoneyTransfer implements dci.Context {
+	@role var source : {}
+	@role var destination : {}
+	@role var amount : {}
+}
+```
+
+Using this syntax, we have now defined three Roles. Having the type `{}` means that these Roles can be played by any object, but we want to be more specific.
+
+### Defining a RoleObjectContract
+In DCI, the type of a Role is called its **RoleObjectContract**, or just **contract**.
+
+The common thinking is to use the already defined classes. The source and destination Roles could be an `Account`.
+
+We're not interested in the whole `Account` however, that is the old, class-oriented thinking. We want to focus on what happens in the Context right now for a specific Role, so all we need for an object to play the *source* Role is a way of decreasing the balance. The `Account` class has a `decreaseBalance` method, which can be useful:
+
+```haxe
+@role var source : {
+	function decreaseBalance(a : Int) : Void;
+}
+```
+
+We're using standard [Haxe class notation](http://haxe.org/manual/struct#class-notation) to define the contract. Let's do the same for the *destination* Role, but it needs to increase the balance instead:
+
+```haxe
+@role var destination : {
+	function increaseBalance(a : Int) : Void;
+}
+```
+
+The *amount* role is special. We're using an `Int` in this example, which means it can't play a Role. No basic types (`Int`, `Bool`, `Float`, `String`) can play Roles, so we can make it an ordinary var, or pass it as a parameter. Let's use a var in this case.
+
+```haxe
+var amount : Int;
+```
+
+(In a more realistic example, *amount* would probably have some `Currency` class behind it, enabling it to play a Role.)
+
+Our `MoneyTransfer` Context now looks like this:
+
+```haxe
+class MoneyTransfer implements dci.Context {
+	@role var source : {
+		function decreaseBalance(a : Int) : Void;
+	}
+
+	@role var destination : {
+		function increaseBalance(a : Int) : Void;
+	}
+
+	var amount : Int;
+}
+```
+
+So what are the advantages of this structural typing? Why not just put the class there and be done with it?
+
+The most obvious advantage is that we're making the Role more generic. Any object fulfilling the type of the RoleObjectContract can now be a money source, not just `Account`.
+
+Another interesting advantage is that when specifying a more compressed contract, we only observe what the Roles can do in the current Context. This is called *"Full OO"*, a powerful concept that you can [read more about here](https://groups.google.com/d/msg/object-composition/umY_w1rXBEw/hyAF-jPgFn4J), but basically, by doing that we don't need to understand `Account`, or essentially anything outside the current Context.
+
+This also affects [locality](http://www.saturnflyer.com/blog/jim/2015/04/21/locality-and-cohesion/), the ability to understand code by looking at only a small portion of it. So plan your public class API, consider what it does, how it's named and why. Then refine your contracts. DCI is as much about clear and readable code as matching a mental model and separating data from function.
+
+### RoleMethods
+
+Now we have the Roles and their contracts for accessing the underlying Data. That's a good start, so lets add the core of a DCI Context: functionality. It is implemented through **RoleMethods**.
+
+Getting back to the mental model again, we know that we want to *"Withdraw amount from a source account and deposit the amount in a destination account"*. So lets model that in a RoleMethod for the `source` Role:
+
+```haxe
+@role var source : {
+	function decreaseBalance(a : Int) : Void;
+
+	public function withdraw() {
+		decreaseBalance(amount);
+		destination.deposit();
+	}
+}
+```
+
+The *withdraw* RoleMethod, created as a function with a body, as opposed to contracts which has no body, is a very close mapping of the mental model to code, which is the goal of DCI. 
+
+Note how we're using the contract method only for the actual data operation, the rest is function, collaboration between Roles through RoleMethods. This collaboration requires a RoleMethod on destination called `deposit`, according to the mental model. Let's define it:
+
+```haxe
+@role var destination : {
+	function increaseBalance(a : Int) : Void;
+
+	public function deposit() {
+		increaseBalance(amount);
+	}
+}
+```
+
+### Role field access
+
+RoleMethods must be declared `public` to allow access outside the Role. Contract fields should only be accessed from the Role's own RoleMethods. This enables the ability to trace the flow of cooperation between Roles, instead of any Role being able to call another Role's underlying object at all times. It's a helpful separation between the local reasoning of how Roles interact locally with their object, and how Roles interact with each other. A goal with DCI is readability, and this helps reading and understanding the use-case-level logic of a Context.
+
+There *could* be cases when a calling a contract field from another Role is wanted, so contract fields can also be declared `public`, but accessing them will emit a compiler warning, and its presence should be viewed as a compromise measure that explicitly erodes the readability of the code. It is a way for the programmer to say: *“Trust me”* in spite of the fact that readers of the code can’t verify what goes on behind the curtain.
+
+### Accessors: self and this
+
+A RoleMethod is a method with access only to its RolePlayer (through the Role-object contract) and the current Context. You can access the current RolePlayer through the `self` identifier. `this` is not allowed in RoleMethods, as it can create confusion what it really references, the RolePlayer or the Context. Use `self` and the other Role names when referencing them directly.
+
+### Adding a constructor
+
+Let's add a constructor to the class (showing off the `self` identifier as well, and public RoleMethods):
+
+```haxe
+class MoneyTransfer implements dci.Context {
+	public function new(source, destination, amount) {
+		this.source = source;
+		this.destination = destination;
+		this.amount = amount;
+	}
+
+	@role var source : {
+		function decreaseBalance(a : Int) : Void;
+
+		public function withdraw() { 
+			self.decreaseBalance(amount);
+			destination.deposit();
+		}
+	}
+
+	@role var destination : {
+		function increaseBalance(a : Int) : Void;
+    
+    	function deposit() {
+			self.increaseBalance(amount) : Void;
+		}
+	}
+
+	var amount : Int;
+}
+```
+
+There's nothing special about the constructor, just assign the Roles as normal instance variables. This is called *Role-binding*, and there are two important things to remember:
+
+1. All Roles *must* be bound in the same function.
+1. A Role *should not* be left unbound (it can be bound to `null`).
+
+Rebinding individual Roles during executing complicates things, and is hardly supported by any mental model. So put the binding in one place only, you can factorize it out of the constructor to a separate method if you want. The Roles can be rebound before another Interaction in the same Context occurs, which can be useful during recursion for example, but it must always happen in the same function.
+
+### System Operations
+
+We just mentioned interactions, which is the last part of the DCI acronym. An **Interaction** is a flow of messages through the Roles in a Context, like the one we have defined now, based on the mental model. To start an Interaction we need an entrypoint for the Context, a public method in other words. This is called a **System Operation**, and all it should do is to call a RoleMethod, so the Roles start interacting with each other.
+
+If you're basing the Context on a use case, there is usually only one System Operation in a Context. Let's call it `transfer`. Try not to use a generic name like "execute", instead give your API meaning by letting every method name carry meaningful information.
+
+**MoneyTransfer.hx**
+
+```haxe
+class MoneyTransfer implements dci.Context {
+	public function new(source, destination, amount) {
+		this.source = source;
+		this.destination = destination;
+		this.amount = amount;
+	}
+
+	// System Operation
+	public function transfer() {
+		source.withdraw();
+	}
+
+	@role var source : {
+		function decreaseBalance(a : Int) : Void;
+
+		public function withdraw() {
+			decreaseBalance(amount);
+			destination.deposit();
+		}
+	}
+
+	@role var destination : {
+		function increaseBalance(a : Int) : Void;
+
+		public function deposit() {
+			increaseBalance(amount);
+		}
+	}
+
+	var amount : Int;
+}
+```
+With this System Operation as our entrypoint, the `MoneyTransfer` Context is ready for use! Let's create two accounts and the Context, and finally make the transfer.
 
 **Account.hx**
 
@@ -39,221 +274,6 @@ class Account {
 	}
 }
 ```
-This is what we in DCI sometimes call a "dumb" data class. It only "knows" about its own data and how to manipulate that. The concept of a transfer between two accounts is outside its responsibilities and we delegate this to a Context - the MoneyTransfer Context class. In this way we can keep the Account class very slim and avoid that it gradually takes on more and more responsibilities for each use case it participates in.
-
-From a users point of view we might think of a money transfer as
-
-- "Move money from one account to another"
-
-and after some more thought specify it further:
-
-- "Withdraw amount from a source account and deposit the amount in a destination account"
-
-That could be our "Mental Model" of a money transfer. Interacting concepts like our "Source" and "Destination" accounts of our mental model we call "Roles" in DCI, and we can define them and what they do to accomplish the money transfer in a DCI Context.
-
-Our source code should map as closely to our mental model as possible so that we can confidently and easily overview and reason about _how the objects will interact at runtime_. We want no surprises at runtime. With DCI we have all runtime interactions right there! No need to look through endless convoluted abstractions, tiers, polymorphism etc to answer the reasonable question _where is it actually happening, goddammit?!_
-
-## Library usage
-To use haxedci, you need to be able to create Contexts. Lets build the `MoneyTransfer` class step-by-step from scratch:
-
-Start by defining a class and let it implement `dci.Context`.
-```haxe
-class MoneyTransfer implements dci.Context {
-}
-```
-Remember the mental model of a money transfer? "Withdraw *amount* from a *source* account and deposit the amount in a *destination* account". The three italicized nouns are the Roles that we will use in the Context. Lets put them there. They are defined using the `@role` metadata:
-```haxe
-class MoneyTransfer implements dci.Context {
-	@role var source : {};
-	@role var destination : {};
-	@role var amount : {};
-}
-```
-Using this syntax, we have now defined three Roles. Having the type `{}` means that these Roles can be played by any object, but we want to be more specific.
-
-### Defining a RoleObjectContract
-In DCI, the type of a Role is called its **RoleObjectContract**, or just **contract**.
-
-The standard thinking is to use the previous types. The source and destination Roles could be an `Account`.
-
-We're not interested in the whole `Account` however, that is the old, class-oriented thinking. We want to focus on what happens in the Context right now for a specific Role, so all we need for an object to play the *source* Role is a way of decreasing the balance. The `Account` class has a `decreaseBalance` method, which can be useful:
-
-```haxe
-@role var source : {
-	function decreaseBalance(a : Int);
-};
-```
-
-We're using standard [Haxe class notation](http://haxe.org/manual/struct#class-notation) to define the contract. Let's do the same for the *destination* Role, but it needs to increase the balance instead:
-
-```haxe
-@role var destination : {
-	function increaseBalance(a : Int);
-};
-```
-
-The *amount* role is special. We're using an `Int` in this example, which means it can't play a Role. No basic types (`Int`, `Bool`, `Float`) can play Roles, so we can make it an ordinary var, or pass it as a parameter. Let's use a var in this case.
-
-```haxe
-var amount : Int;
-```
-
-(An in a more realistic example, *amount* would probably have some `Currency` class behind it, which enables it to play a Role.)
-
-Our `MoneyTransfer` Context now looks like this:
-
-```haxe
-class MoneyTransfer implements dci.Context {
-	@role var source : {
-		function decreaseBalance(a : Int);
-	};
-
-	@role var destination : {
-		function increaseBalance(a : Int);
-	};
-
-	var amount : Int;
-}
-```
-
-So what are the advantages of this structural typing? Why not just put the class there and be done with it?
-
-The most obvious advantage is that we're making the Role more generic. Any object fulfilling the type of the RoleObjectContract can now be a money source, not just `Account`.
-
-Another interesting advantage is that when specifying a more compressed contract, we only observe what the Roles can do in the current Context. This is called *"Full OO"*, a powerful concept that you can [read more about here](https://groups.google.com/d/msg/object-composition/umY_w1rXBEw/hyAF-jPgFn4J), but basically, by doing that we don't need to understand `Account`, or essentially anything outside the current Context.
-
-This also affects [locality](http://www.saturnflyer.com/blog/jim/2015/04/21/locality-and-cohesion/), the ability to understand code by looking at only a small portion of it. So plan your public class API, consider what it does, how it's named and why. Then refine your contracts. DCI is as much about clear and readable code as matching a mental model and separating data from function.
-
-### RoleMethods
-
-Now we have the Roles and their contracts for accessing the underlying Data. That's a good start, so lets add the core of a DCI Context: functionality. It is implemented through **RoleMethods**.
-
-Getting back to the mental model again, we know that we want to *"Withdraw amount from a source account and deposit the amount in a destination account"*. So lets model that in a RoleMethod for the `source` Role:
-
-```haxe
-@role var source : {
-	function decreaseBalance(a : Int);
-} = {
-	function withdraw() {
-		decreaseBalance(amount);
-		destination.deposit();
-	}
-}; // (Remember the semicolon)
-```
-
-The *withdraw* RoleMethod, created as a function with a body, is a very close mapping of the mental model to code, which is the goal of DCI. 
-
-The `} = {` syntax is a bit unfortunate, but it's the only way to get autocompletion working for RoleMethods. More on that in the "Visibility" section below.
-
-Note how we're using the contract method only for the actual data operation, the rest is function, collaboration between Roles through RoleMethods. This collaboration requires a RoleMethod on destination called `deposit`, according to the mental model. Let's define it:
-
-```haxe
-@role var destination : {
-	function increaseBalance(a : Int);
-} = {
-	function deposit() {
-		increaseBalance(amount);
-	}
-};
-```
-
-### Contract field access
-
-Contract fields should be accessed from the Role's own RoleMethods. This enables the ability to trace the flow of cooperation between Roles, instead of any Role being able to call another Role's underlying object at all times. It's a helpful separation between the local reasoning of how Roles interact locally with their object, and how Roles interact with each other. A goal with DCI is readability, and this helps reading and understanding the use-case-level logic of a Context.
-
-There *could* be cases when a calling a contract field from another Role is wanted, therefore it's allowed, but it will emit a compiler warning, and its presence should be viewed as a compromise measure that explicitly erodes the readability of the code. It is a way for the programmer to say: *“Trust me”* in spite of the fact that readers of the code can’t verify what goes on behind the curtain.
-
-### The quirky syntax
-
-RoleMethods can be declared `private` when they are created *without* the `} = {` syntax (just leave it out). That limits access to within its Role, but then autocompletion won't work. If you prefer autocompletion and use `} = {`, you cannot specify visibility, and the RoleMethods will default to `public`.
-
-### Accessors: self and this
-
-A RoleMethod is a method with access only to its RolePlayer (through the Role-object contract) and the current Context. You can access the current RolePlayer through the `self` identifier. `this` is not allowed in RoleMethods, as it can create confusion what it really references, the RolePlayer or the Context. Use `self` and the other Role names when referencing them directly.
-
-### Adding a constructor
-
-Let's add a constructor to the class (showing off the `self` identifier as well, and public RoleMethods):
-
-```haxe
-class MoneyTransfer implements dci.Context {
-	public function new(source, destination, amount) {
-		this.source = source;
-		this.destination = destination;
-		this.amount = amount;
-	}
-
-	@role var source : {
-		function decreaseBalance(a : Int);
-
-		// Public/private is allowed now, when not using } = {
-		public function withdraw() { 
-			self.decreaseBalance(amount);
-			destination.deposit();
-		}
-	};
-
-	@role var destination : {
-		function increaseBalance(a : Int);
-    } = {
-		function deposit() {
-			self.increaseBalance(amount);
-		}
-	};
-
-	var amount : Int;
-}
-```
-
-There's nothing special about the constructor, just assign the Roles as normal instance variables. This is called *Role-binding*, and there are two important things to remember:
-
-1. All Roles *must* be bound in the same function.
-1. A Role *should not* be left unbound (it can be bound to `null`).
-
-Rebinding individual Roles during executing complicates things, and is hardly supported by any mental model. So put the binding in one place only, you can factorize it out of the constructor to a separate method if you want. The Roles can be rebound before another Interaction in the same Context occurs, which can be useful during recursion for example, but it must always happen in the same function.
-
-### System Operations
-
-We just mentioned Interactions, which is the last part of the DCI acronym. An **Interaction** is a flow of messages through the Roles in a Context, like the one we have defined now, based on the mental model. To start an Interaction we need an entrypoint for the Context, a public method in other words. This is called a **System Operation**, and all it should do is to call a RoleMethod, so the Roles start interacting with each other.
-
-If you're basing the Context on a use case, there is usually only one System Operation in a Context. Let's call it `transfer`. Try not to use a generic name like "execute", instead give your API meaning by letting every method name carry meaningful information.
-
-**MoneyTransfer.hx**
-
-```haxe
-class MoneyTransfer implements dci.Context {
-	public function new(source, destination, amount) {
-		this.source = source;
-		this.destination = destination;
-		this.amount = amount;
-	}
-
-	// System Operation
-	public function transfer() {
-		source.withdraw();
-	}
-
-	@role var source : {
-		function decreaseBalance(a : Int);
-    } = {
-		function withdraw() {
-			decreaseBalance(amount);
-			destination.deposit();
-		}
-	};
-
-	@role var destination : {
-		function increaseBalance(a : Int);
-
-		public function deposit() {
-			increaseBalance(amount);
-		}
-	};
-
-	var amount : Int;
-}
-```
-With this System Operation as our entrypoint, the `MoneyTransfer` Context is ready for use! Let's create two accounts and the Context, and finally make the transfer:
 
 **Main.hx**
 
@@ -276,6 +296,8 @@ class Main {
 	}
 }
 ```
+
+With the above three files, you can now build and test the example with `haxe -lib haxedci -x Main`.
 
 ## Fluent interfaces
 
