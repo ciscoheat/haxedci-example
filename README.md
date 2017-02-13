@@ -342,6 +342,7 @@ Some cases don’t lend themselves very well to use cases but are better modeled
 ### Videos 
 
 [DCI – How to get ahead in system architecture](http://www.silexlabs.org/wwx2014-speech-andreas-soderlund-dci-how-to-get-ahead-in-system-architecture/)
+
 ['A Glimpse of Trygve: From Class-oriented Programming to Real OO' - Jim Coplien [ ACCU 2016 ]](https://www.youtube.com/watch?v=lQQ_CahFVzw)
 
 ### Links
