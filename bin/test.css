@@ -4,7 +4,7 @@ html {
 
 #bookshelf {
 	background-color: #eee;
-
+	height: 32px;
 }
 
 #screen {
@@ -69,10 +69,11 @@ html {
 }
 
 #card-reader .box {
-	height:60px;
+	height:54px;
 	border: 2px solid #aaa;
 	background-color: #eee;
-	width: 120px;
+	width: 98px;
+	background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1'><text x='5' y='29' fill='#d55' font-size='18'>Card reader</text></svg>");
 }
 
 .book {

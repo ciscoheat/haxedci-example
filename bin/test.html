@@ -4,6 +4,7 @@
 	<meta charset="utf-8"/>
 	<title>DCI - Library borrowing machine</title>
 	<link rel="stylesheet" href="https://cdn.concisecss.com/concise.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.css">
 	<link rel="stylesheet" href="test.css">
 	<style type="text/css">
 	</style>
@@ -14,6 +15,7 @@
 			<div id="bookshelf">
 				<div class="book">Anna Karenina</div>
 				<div class="book">War and Peace</div>
+				<div class="book">Master and Man</div>
 			</div>
 		</div>
 	</div>
@@ -28,16 +30,14 @@
 		<div column='6'>
 			<div id="screen">
 			<p>				
-			Donut wafer carrot cake gingerbread liquorice cupcake marzipan. Caramels lemon drops gingerbread fruitcake. Tiramisu jelly pastry marshmallow chocolate cake lemon drops. Pie icing jelly beans. Jelly sweet roll chocolate bar cake jelly cupcake ice cream cake.
-			</p>
-			<p> 
-			Cotton candy caramels cake toffee. Cookie lollipop sugar plum carrot cake icing cotton candy jelly-o lollipop. Candy canes macaroon jelly beans pastry muffin dessert.
+			Please insert your library card!
 			</p>
 			</div>
 		</div>
 		<div column='2'>
 			<div id="card-reader">
-				<div class="box"></div>
+				<div class="card-reader box">
+				</div>
 			</div>
 		</div>
 	</div>
@@ -47,11 +47,24 @@
 				<div id="workspace">
 					<img src="card.svg" id="card">
 				</div>
-				<div id="scanner">
-					<div class="book">Anna Karenina</div>
+				<div id="scanner">								
 				</div>
 			</div>
 		</div>
 	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.js"></script>
+	<script>
+		function q(query) { return document.querySelector(query) }
+		dragula([q('#bookshelf'), q('#workspace'), q('#scanner'), q('#card-reader .box')], {
+			accepts: function (el, target, source, sibling) {
+				var isCard = el.id == "card"
+				return (isCard && target.id != "bookshelf") ||
+					   (!isCard && !target.classList.contains("card-reader"))
+			}
+		}).on('drop', function(el, target, source, sibling) {
+			console.log(el)
+			console.log(target)
+		})
+	</script>
 </body>
 </html>
