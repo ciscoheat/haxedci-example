@@ -1,0 +1,91 @@
+html {
+	background: url(white_wall_hash.png);
+}
+
+#bookshelf {
+	background-color: #eee;
+
+}
+
+#screen {
+	border:12px solid #DDD; 
+	background-color: white;
+	padding: 2px;
+	height: 300px;
+}
+
+#table {
+	background-color: #fa8181;
+	display: inline-flex;
+	justify-content: space-between;
+	width: 100%;
+	height: 300px;
+	align-items: center;
+}
+
+#workspace {
+	display: inline-flex;
+	align-items: center;
+	width: 65%;
+	padding: 10px;
+}
+
+#scanner {
+	display: inline-flex;
+	background-color: #f25a5a;
+	width: 35%;
+	height: 100%;
+	align-items: center;
+	justify-content: center;
+}
+
+#printer {
+	display: flex;
+	align-content: center;
+	justify-content: center;
+}
+
+#printer .box {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 140px;
+	border: 2px solid #aaa;
+	background-color: #ddd;
+	width: 75%;
+}
+
+#printer .box .slot {
+	height: 15px;
+	border: 2px solid #aaa;
+	background-color: white;
+	width: 85%;
+}
+
+#card-reader {
+	display: flex;
+	align-content: center;
+	justify-content: center;
+}
+
+#card-reader .box {
+	height:60px;
+	border: 2px solid #aaa;
+	background-color: #eee;
+	width: 120px;
+}
+
+.book {
+	font-size: 14px;
+	color: #eee;
+	display: inline-block;
+	border: 1px solid #0b9d7d;
+	padding: 3px;
+	margin: 1px;
+	background-color: #1eb896;
+    /*transform: rotate(-90deg);*/
+}
+
+#card {
+	height: 50px;
+}
