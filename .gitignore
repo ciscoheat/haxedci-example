@@ -2,3 +2,6 @@ bin/dci.js
 /bin/dcigraphs
 /bin/dci.js.map
 /src/dci-signatures.bin
+/bin/haxedci-example.js
+/bin/haxedci-example.js.map
+/*.sublime-workspace

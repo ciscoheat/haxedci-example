@@ -1,9 +1,9 @@
 html {
-	background: url(white_wall_hash.png);
+	background: url(/images/white_wall_hash.png);
 }
 
 #bookshelf {
-	background-color: #eee;
+	background-color: #ccc;
 	height: 32px;
 }
 

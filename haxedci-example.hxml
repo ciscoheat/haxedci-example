@@ -1,0 +1,15 @@
+-debug
+-D source-map-content
+
+-cp src 
+
+-lib haxedci 
+-lib HaxeContracts
+-lib dataclass
+-lib slambda
+
+-js bin/haxedci-example.js
+-main Main
+
+#--times
+#-D macro-times

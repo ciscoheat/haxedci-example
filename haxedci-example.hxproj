@@ -2,15 +2,15 @@
 <project version="2">
   <!-- Output SWF options -->
   <output>
-    <movie outputType="Application" />
+    <movie outputType="CustomBuild" />
     <movie input="" />
-    <movie path="bin\dci.js" />
+    <movie path="haxedci-example.hxml" />
     <movie fps="0" />
     <movie width="0" />
     <movie height="0" />
-    <movie version="1" />
+    <movie version="0" />
     <movie minorVersion="0" />
-    <movie platform="JavaScript" />
+    <movie platform="hxml" />
     <movie background="#FFFFFF" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
@@ -19,17 +19,19 @@
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="" />
+    <option directives="source-map-content" />
     <option flashStrict="False" />
     <option noInlineOnDebug="False" />
-    <option mainClass="dci.examples.Main" />
+    <option mainClass="Main" />
     <option enabledebug="False" />
-    <option additional="" />
+    <option additional="-debug " />
   </build>
   <!-- haxelib libraries -->
   <haxelib>
     <library name="haxedci" />
-    <library name="jQueryExtern" />
+    <library name="HaxeContracts" />
+    <library name="dataclass" />
+    <library name="slambda" />
   </haxelib>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
@@ -40,14 +42,14 @@
     <hidden path="obj" />
   </hiddenPaths>
   <!-- Executed before build -->
-  <preBuildCommand />
+  <preBuildCommand>cmd /c haxe $(OutputFile)</preBuildCommand>
   <!-- Executed after build -->
   <postBuildCommand alwaysRun="False" />
   <!-- Other project options -->
   <options>
     <option showHiddenPaths="False" />
-    <option testMovie="OpenDocument" />
-    <option testMovieCommand="bin/index.html" />
+    <option testMovie="Custom" />
+    <option testMovieCommand="hxproj_run.bat" />
   </options>
   <!-- Plugin storage -->
   <storage />

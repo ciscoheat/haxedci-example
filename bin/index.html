@@ -2,57 +2,99 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8"/>
-	<title>DCI - Matrix style</title>
-	<style type="text/css">
-		body {
-			background: url(binding_dark.png);
-		}
-		#screen {
-			top: 50%;
-			margin: 10% auto;
-			font-family: Consolas, 'Lucida Console', Monaco, monospace;
-			font-size: 13px;
-			color: #2e2;
-			border: 2px solid #333;
-			background-color: black;
-			height: 400px;
-			width: 600px;
-			-moz-border-radius: 35px;
-			border-radius: 35px;
-			padding: 20px;
-			position: relative;
-		}
-
-		#content {
-			height: 360px;
-			width: 600px;
-			max-height: 360px;
-		}
-
-		#input {
-			font-family: Consolas, 'Lucida Console', Monaco, monospace;
-			font-size: 13px;
-			color: #2e2;
-			border: 1px solid black;
-			background-color: black;
-			width: 560px;
-			outline: none !important;
-			margin-top: -1px;
-			margin-left: -5px;
-		}
-
-		#haxe\:trace {
-			background-color: white;
-		}
-	</style>
+	<title>DCI - Library machine</title>
+	<link rel="stylesheet" href="https://cdn.concisecss.com/concise.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.css">
+	<link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-	<div id="screen">
-		<div id="content"></div>
-		<div><div style="float:left;">C:\&gt;&nbsp;</div><input type="text" id="input"></div>
+	<div grid="bottom">
+		<div column>
+			<div id="bookshelf">
+				
+			</div>
+		</div>
 	</div>
-	<div id="haxe:trace"></div>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-	<script src="dci.js"></script>
+	<div grid="bottom">
+		<div column='3'>
+			<div id="printer">
+				<div class="box">
+					<div class="slot"></div>
+				</div>
+			</div>
+		</div>
+		<div column='6'>
+			<div id="screen">
+			<p>				
+			Please insert your library card!
+			</p>
+			</div>
+		</div>
+		<div column='2'>
+			<div id="card-reader">
+				<div class="card-reader box">
+				</div>
+			</div>
+		</div>
+	</div>
+	<div grid>
+		<div column='8 +2'>
+			<div id="table">
+				<div id="workspace">
+					<img src="/images/card.svg" id="card">
+				</div>
+				<div id="scanner">								
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="https://unpkg.com/mithril/mithril.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.js"></script>
+	<script>
+		/*
+		function q(query) { return document.querySelector(query) }
+
+		function removeFirst(arr, predicate) {
+		    for (var i = 0; i < arr.length; i++) {
+		        if (predicate(arr[i])) {
+		            return arr.splice(i--, 1)[0];
+		        }
+		    }
+		    return null
+		}
+
+		var bookshelf = q('#bookshelf')
+		var booksOnShelf = ['Anna Karenina', 'War and Peace', 'Master and Man']
+		var booksOnWorkspace = []
+
+		dragula([bookshelf, q('#workspace'), q('#scanner'), q('#card-reader .box')], {
+			accepts: function (el, target, source, sibling) {
+				var isCard = el.id == "card"
+				return (isCard && target.id != "bookshelf") ||
+					   (!isCard && !target.classList.contains("card-reader"))
+			}
+		}).on('drop', function(el, target, source, sibling) {
+			console.log(el)
+			console.log(target)
+
+			if(el.classList.contains('book')) {
+				var from = source.id == "workspace" ? booksOnWorkspace : booksOnShelf
+				var to = target.id == "workspace" ? booksOnWorkspace : booksOnShelf
+				to.push(removeFirst(from, function(book) { return book.id == el.innerText }))
+
+				console.log(to)
+			}
+		})
+
+		m.render(bookshelf, booksOnShelf.map(function(book) {
+			return m('.book', book)
+		}))
+		*/
+	</script>
+	<script src="/haxedci-example.js"></script>
+	<script>
+	  document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] +
+	  ':35729/livereload.js?snipver=1"></' + 'script>')
+	</script> 
 </body>
 </html>
