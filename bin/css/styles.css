@@ -5,6 +5,7 @@ html {
 #bookshelf {
 	background-color: #ccc;
 	height: 32px;
+	margin-bottom: 10px;
 }
 
 #screen {
@@ -63,12 +64,6 @@ html {
 }
 
 #card-reader {
-	display: flex;
-	align-content: center;
-	justify-content: center;
-}
-
-#card-reader .box {
 	height:54px;
 	border: 2px solid #aaa;
 	background-color: #eee;

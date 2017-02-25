@@ -1,0 +1,16 @@
+{
+	"name": "haxedci-example",
+	"version": "1.0.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ciscoheat/haxedci-example"
+	},
+	"dependencies": {
+	},
+	"scripts": {
+		"dependencies": "npm install -g npm-run-all livereload http-server",
+		"livereload": "livereload bin",
+		"server": "http-server bin",
+		"start": "npm-run-all --parallel server livereload"
+	}
+}

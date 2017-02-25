@@ -7,6 +7,7 @@
 -lib HaxeContracts
 -lib dataclass
 -lib slambda
+-lib mithril
 
 -js bin/haxedci-example.js
 -main Main

@@ -10,9 +10,7 @@
 <body>
 	<div grid="bottom">
 		<div column>
-			<div id="bookshelf">
-				
-			</div>
+			<div id="bookshelf"></div>
 		</div>
 	</div>
 	<div grid="bottom">
@@ -24,27 +22,19 @@
 			</div>
 		</div>
 		<div column='6'>
-			<div id="screen">
-			<p>				
-			Please insert your library card!
-			</p>
-			</div>
+			<div id="screen"></div>
 		</div>
 		<div column='2'>
-			<div id="card-reader">
-				<div class="card-reader box">
-				</div>
-			</div>
+			<div id="card-reader"></div>
 		</div>
 	</div>
 	<div grid>
 		<div column='8 +2'>
 			<div id="table">
 				<div id="workspace">
-					<img src="/images/card.svg" id="card">
+					<!-- img src="/images/card.svg" id="card" -->
 				</div>
-				<div id="scanner">								
-				</div>
+				<div id="scanner"></div>
 			</div>
 		</div>
 	</div>
@@ -67,7 +57,7 @@
 		var booksOnShelf = ['Anna Karenina', 'War and Peace', 'Master and Man']
 		var booksOnWorkspace = []
 
-		dragula([bookshelf, q('#workspace'), q('#scanner'), q('#card-reader .box')], {
+		dragula([bookshelf, q('#workspace'), q('#scanner'), q('#card-reader')], {
 			accepts: function (el, target, source, sibling) {
 				var isCard = el.id == "card"
 				return (isCard && target.id != "bookshelf") ||
