@@ -1,10 +1,15 @@
 import js.Browser;
 import js.html.HtmlElement;
 
+/**
+ *  Javascript drag'n'drop library, loaded in index.html.
+ */
 typedef Dragula = Dynamic;
 
-// id for unique app elements, represented in html
-@:enum abstract AppElements(String) to String {
+/**
+ *  Id's for unique html elements.
+ */
+@:enum abstract HtmlElements(String) to String {
   var Bookshelf = "bookshelf";
   var Printer = "printer";
   var Screen = "screen";
@@ -14,17 +19,22 @@ typedef Dragula = Dynamic;
   var Card = "card";
 }
 
+/**
+ *  This class handles drag-drop functionality in the browser for HTML elements. 
+ *  
+ *  It is strongly coupled to the browser with both HTML and a
+ *  javascript library, so it doesn't use DCI or any generalizations.
+ */
 class DragDrop implements HaxeContracts
 {
-	static function q(query : String)
-		return Browser.document.querySelector(query);
-
 	public function new() {}
+
+	public static function q(query : String)
+		return Browser.document.querySelector(query);
 
 	public function start() {
 		Contract.requires(Reflect.field(Browser.window, "dragula") != null);
 
-		// Loaded from js in index.html
 		var dragula : Dragula = Reflect.field(Browser.window, "dragula");
 
 		dragula([Bookshelf, Workspace, Scanner, CardReader].map.fn(id => q('#' + id)), {
@@ -46,8 +56,10 @@ class DragDrop implements HaxeContracts
 
 		return switch droppedItem.id {
 			case Card: 
+				// Card can not be dropped on the bookshelf
 				targetElement.id != Bookshelf;
 			case _:
+				// Only the card can be dropped on the card reader
 				targetElement.id != CardReader;
 		}
 	}
