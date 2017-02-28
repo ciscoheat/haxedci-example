@@ -1,5 +1,5 @@
 -debug
--D source-map-content
+#-D source-map-content
 
 -cp src 
 

@@ -1,23 +1,11 @@
 import js.Browser;
 import js.html.HtmlElement;
+import HtmlElements;
 
 /**
  *  Javascript drag'n'drop library, loaded in index.html.
  */
 typedef Dragula = Dynamic;
-
-/**
- *  Id's for unique html elements.
- */
-@:enum abstract HtmlElements(String) to String {
-  var Bookshelf = "bookshelf";
-  var Printer = "printer";
-  var Screen = "screen";
-  var CardReader = "card-reader";
-  var Workspace = "workspace";
-  var Scanner = "scanner";
-  var Card = "card";
-}
 
 /**
  *  This class handles drag-drop functionality in the browser for HTML elements. 
@@ -40,6 +28,8 @@ class DragDrop implements HaxeContracts
 		dragula([Bookshelf, Workspace, Scanner, CardReader].map.fn(id => q('#' + id)), {
 			accepts: acceptsDrop
 		}).on('drop', onDrop);
+
+        trace("Drag'n'drop interface enabled.");
 	}
 	
 	function acceptsDrop(droppedItem : HtmlElement, targetElement : HtmlElement) : Bool {

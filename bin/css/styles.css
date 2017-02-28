@@ -2,18 +2,65 @@ html {
 	background: url(/images/white_wall_hash.png);
 }
 
+/***********************************************/
+
 #bookshelf {
 	background-color: #ccc;
 	height: 32px;
 	margin-bottom: 10px;
 }
 
+/***********************************************/
+
 #screen {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;	
 	border:12px solid #DDD; 
 	background-color: white;
 	padding: 2px;
 	height: 300px;
 }
+
+#screen .content {
+	border: 1px solid #ddd;
+	padding: 2px 10px;
+	margin: 5px 10px;
+	background-color: #eee;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;	
+}
+
+#screen .content p {
+	text-align: center;	
+}
+
+#screen .content.keypad {
+	flex-direction: row;
+	flex-wrap: wrap;
+	width: 30%;
+}
+
+#screen .key {
+	cursor: pointer;
+	background-color: white;
+	padding: 0px 4px;
+	margin: 2px;
+	border: 1px solid #aaa;
+}
+
+#screen .key:hover {
+	background-color: #fa8181;
+}
+
+#screen p {
+	margin-top: initial;
+}
+
+/***********************************************/
 
 #table {
 	background-color: #fa8181;
@@ -24,12 +71,16 @@ html {
 	align-items: center;
 }
 
+/***********************************************/
+
 #workspace {
 	display: inline-flex;
 	align-items: center;
 	width: 65%;
 	padding: 10px;
 }
+
+/***********************************************/
 
 #scanner {
 	display: inline-flex;
@@ -39,6 +90,8 @@ html {
 	align-items: center;
 	justify-content: center;
 }
+
+/***********************************************/
 
 #printer {
 	display: flex;
@@ -63,6 +116,8 @@ html {
 	width: 85%;
 }
 
+/***********************************************/
+
 #card-reader {
 	height:54px;
 	border: 2px solid #aaa;
@@ -70,6 +125,8 @@ html {
 	width: 98px;
 	background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1'><text x='5' y='29' fill='#d55' font-size='18'>Card reader</text></svg>");
 }
+
+/***********************************************/
 
 .book {
 	font-size: 14px;
@@ -81,6 +138,8 @@ html {
 	background-color: #1eb896;
     /*transform: rotate(-90deg);*/
 }
+
+/***********************************************/
 
 #card {
 	height: 50px;
