@@ -9,8 +9,9 @@ class MainView implements Mithril implements Context
 {
     var bookshelf : Array<Data.Book>;
     var screen : ScreenView;
+    var cardReader : CardReader;
 
-    public function new(bookshelf) {
+    public function new(bookshelf, cardReader) {
         this.bookshelf = bookshelf;
         this.screen = new ScreenView();
     }
@@ -33,6 +34,8 @@ class MainView implements Mithril implements Context
         });
 
         M.mount(Screen, screen);
+
+        M.mount(CardReader, null);
     }
 }
 
@@ -55,30 +58,33 @@ class ScreenView implements Mithril
 
     public function view() {
         return switch state {
-            case Welcome: m('.content', [
-                m('p', 'Welcome to the library borrowing machine!'),
-                m('p', 'Insert your card into the reader to get started.')
-            ]);
+            case Welcome: welcome();
             case EnterPin: enterPin();
-            case _: null;
+            case _: 
+                m('.content', {style: "color:red"}, 'View not found: $state');
         }
     }
+
+    function welcome() m('.content', [
+        m('p', 'Welcome to the library borrowing machine!'),
+        m('p', 'Insert your card into the reader to get started.')
+    ]);
 
     function enterPin() [
         m('.content', m('p', 'Enter your 4-digit PIN.')),
         m('.content', m('p', 
-            pinBuffer.length == 0 ? M.trust("&nbsp;") : "", 
-            "".rpad("*", pinBuffer.length)
+            if(pinBuffer.length == 0) M.trust("&nbsp;") 
+            else "".rpad("*", pinBuffer.length)
         )),
         m('.content.keypad', 
             ['1','2','3','4','5','6','7','8','9','0'].map.fn(key => m('.key', {
-                onclick: function(e) keyClicked(Std.parseInt(key))
+                onclick: keyClicked.bind(Std.parseInt(key))
             }, key))
         )
     ];
 
     function keyClicked(key : Int) {
-        trace(key);
+        trace("Pressed " + key);
         pinBuffer.push(key);
     }
 }

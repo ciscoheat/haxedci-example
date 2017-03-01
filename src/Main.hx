@@ -28,10 +28,12 @@ class Main implements Context implements HaxeContracts implements Mithril
 			new Card({rfid: '123456789', name: 'Leo Tolstoy'})
 		];
 
-		new views.MainView(books).mount();
+		var cardReader = new CardReader();
+
+		new views.MainView(books, cardReader).mount();
 
 		// Enable the "physical" equipment
-		new CardReader().start();
+		cardReader.start();
 
 		// Start the app by enabling drag'n'drop functionality
 		new DragDrop().start();
