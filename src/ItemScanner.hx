@@ -1,10 +1,10 @@
 import haxe.ds.Option;
 import Data.Card;
 
-class CardReader implements HaxeContracts
+class ItemScanner implements HaxeContracts
 {
 	var rfidScanner : RfidScanner;
-    public var contents(default, null) : Array<DragDrop.DragDropItem> = [];
+    var currentCard : Card;
 
 	public static function q(query : String)
 		return js.Browser.document.querySelector(query);
@@ -14,9 +14,9 @@ class CardReader implements HaxeContracts
 	}
 
     function detectRfid() {
-        return if(contents.length == 0) None
-        // TODO: Safe casting to Card
-        else Some(cast(contents[0], Card).rfid);
+        var scanner = q('#card-reader');
+        return if(scanner.children.length == 0) None
+        else Some(scanner.children[0].id);
     }
 
     function onRfidChange(rfid) {

@@ -2,6 +2,15 @@ import js.Browser;
 import js.html.HtmlElement;
 import HtmlElements;
 
+using HtmlTools;
+
+interface DragDropItem {}
+
+private interface DragDropSurface 
+{
+    public var contents(default, null) : Array<DragDropItem>;
+}
+
 /**
  *  Javascript drag'n'drop library, loaded in index.html.
  */
@@ -15,19 +24,32 @@ typedef Dragula = Dynamic;
  */
 class DragDrop implements HaxeContracts
 {
-	public function new() {}
+	static function elPos(el : HtmlElement, collection : js.html.HTMLCollection) : Int {
+		for(i in 0...collection.length) {
+			if(collection.item(i) == el) return i;
+		}
+		return -1;
+	}
 
-	public static function q(query : String)
-		return Browser.document.querySelector(query);
+	var surfaces : Map<String, Array<DragDropItem>>;
+	var drake : {cancel: ?Bool -> Void};
+
+	public function new(surfaces : Map<String, Array<DragDropItem>>) {
+		Contract.requires(surfaces != null);
+		this.surfaces = surfaces;
+	}
 
 	public function start() {
 		Contract.requires(Reflect.field(Browser.window, "dragula") != null);
 
 		var dragula : Dragula = Reflect.field(Browser.window, "dragula");
 
-		dragula([Bookshelf, Workspace, Scanner, CardReader].map.fn(id => q('#' + id)), {
+		// Register all surfaces as a drag-drop container
+		drake = dragula([for(id in surfaces.keys()) HtmlTools.q('#$id')], {
 			accepts: acceptsDrop
-		}).on('drop', onDrop);
+		})
+		.on('drag', onDrag)
+		.on('drop', onDrop);
 
         trace("Drag'n'drop interface enabled.");
 	}
@@ -54,20 +76,43 @@ class DragDrop implements HaxeContracts
 		}
 	}
 
-	function onDrop(droppedItem : HtmlElement, targetElement : HtmlElement) {
-		Contract.requires(droppedItem != null);
-		Contract.requires(targetElement.id.length > 0);
-		
-		trace(droppedItem);
-		trace(targetElement);
-		/*
-		if(el.classList.contains('book')) {
-			var from = source.id == "workspace" ? booksOnWorkspace : booksOnShelf
-			var to = target.id == "workspace" ? booksOnWorkspace : booksOnShelf
-			to.push(removeFirst(from, function(book) { return book.id == el.innerText }))
+	var dragData : {source : Array<DragDropItem>, sourcePos : Int};
 
-			console.log(to)
+	function onDrag(el : HtmlElement, sourceEl : HtmlElement) {
+		Contract.requires(el != null);
+		Contract.requires(surfaces.exists(sourceEl.id), "No surface found: " + sourceEl.id);
+		
+		var surface = surfaces.get(sourceEl.id);
+		var pos = sourceEl.children.elPos(el);
+		Contract.assert(pos >= 0, "Item not found in surface " + sourceEl.id);
+
+		dragData = {
+			source: surface,
+			sourcePos: pos
 		}
-		*/
+
+		//trace("Dragging from " + sourceEl.id + '[$pos]');
+	}
+
+	function onDrop(el : HtmlElement, targetEl : HtmlElement, _, sibling : Null<HtmlElement>) {
+		Contract.requires(dragData != null);
+		Contract.requires(el != null);
+		Contract.requires(surfaces.exists(targetEl.id), "No surface found: " + targetEl.id);
+		
+		var target = surfaces.get(targetEl.id);
+		var targetPos = sibling == null 
+			? targetEl.children.length - 1 
+			: targetEl.children.elPos(sibling) - 1;
+
+		// Splice from source to target
+		var removed = dragData.source.splice(dragData.sourcePos, 1);
+		target.insert(targetPos, removed[0]);
+
+		//trace('Dropped ${removed} in ' + targetEl.id + '[$targetPos]');
+
+		dragData = null;		
+		drake.cancel(true);
+
+		mithril.M.redraw();
 	}
 }

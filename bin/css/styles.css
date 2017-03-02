@@ -76,7 +76,10 @@ html {
 #workspace {
 	display: inline-flex;
 	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
 	width: 65%;
+	height: 100%;
 	padding: 10px;
 }
 
@@ -128,19 +131,30 @@ html {
 
 /***********************************************/
 
-.book {
+.cover {
+	cursor: -webkit-grab;
 	font-size: 14px;
 	color: #eee;
 	display: inline-block;
-	border: 1px solid #0b9d7d;
 	padding: 3px;
 	margin: 1px;
-	background-color: #1eb896;
+	min-width: 100px !important;
     /*transform: rotate(-90deg);*/
+}
+
+.book {
+	border: 1px solid #0b9d7d;
+	background-color: #1eb896;
+}
+
+.bluray {
+	border: 1px solid #ab3dbd;
+	background-color: #a551fe;
 }
 
 /***********************************************/
 
 #card {
+	cursor: -webkit-grab;
 	height: 50px;
 }

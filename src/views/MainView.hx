@@ -1,31 +1,36 @@
 package views;
 import mithril.M;
 import HtmlElements;
+import DragDrop.DragDropItem;
 
 /**
  *  Uses the HTML in index.html to display all items
  */
 class MainView implements Mithril implements Context
 {
-    var bookshelf : Array<Data.Book>;
-    var screen : ScreenView;
+    var screenView : ScreenView;
     var cardReader : CardReader;
 
-    public function new(bookshelf, cardReader) {
+    var bookshelf : Array<Data.LoanItem>;
+    var workspace : Array<DragDropItem>;
+    var scanner : Array<DragDropItem>;
+
+    public function new(bookshelf, cardReader, workspace, scanner) {
         this.bookshelf = bookshelf;
-        this.screen = new ScreenView();
+        this.workspace = workspace;
+        this.cardReader = cardReader;
+        this.scanner = scanner;
+
+        this.screenView = new ScreenView();
     }
 
+    /**
+     *  Mount mithril components for the app elements.
+     */
     public function mount() {
-
-
-        // Using the abstract HtmlElements class to refer directly to
+        // Using the abstract HtmlElements class, to refer directly to
         // the HTML element with an enum value:
-		M.mount(Bookshelf, {view: function() 
-            return bookshelf.map(function(book) 
-			    m('.book', book.title)
-            )
-        });
+		M.mount(Bookshelf, {view: bookshelfView});
 
         M.mount(Printer, {view: function()
             m('.box', 
@@ -33,10 +38,39 @@ class MainView implements Mithril implements Context
             )
         });
 
-        M.mount(Screen, screen);
+        M.mount(Screen, screenView);
 
         M.mount(CardReader, null);
+
+        M.mount(Scanner, {view: surfaceView.bind(scanner)});
+        M.mount(Workspace, {view: surfaceView.bind(workspace)});
     }
+
+    function surfaceView(surface : Array<DragDropItem>) return surface.map(function(item) {
+        return switch Type.getClass(item) {
+            case Data.Card: 
+                m('img#card[src=/images/card.svg]');
+            case Data.Book:
+                var item : Data.Book = cast item;
+                m('.book.cover', item.title);
+            case Data.Bluray:
+                var item : Data.Bluray = cast item;
+                m('.bluray.cover', item.title);                
+            case unknown: 
+                m('div', {style:"color:red"}, 'View not found for: ' + Type.getClassName(unknown));
+        }
+    });
+
+    function bookshelfView() return bookshelf.map(function(item)
+        return switch Type.getClass(item) {
+            case Data.Book:
+                m('.book.cover', item.title);
+            case Data.Bluray:
+                m('.bluray.cover', item.title);
+            case unknown:
+                m('div', {style:"color:red"}, 'View not found for: ' + Type.getClassName(unknown));
+        }
+    );
 }
 
 enum ScreenState {
