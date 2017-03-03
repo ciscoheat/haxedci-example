@@ -1,19 +1,13 @@
-import js.Browser;
-import mithril.M;
 import Data.Book;
 import Data.Card;
 import Data.Bluray;
-import Data.LoanItem;
 import DragDrop.DragDropItem;
 
-class Main implements Context implements HaxeContracts implements Mithril
+class Main implements HaxeContracts
 {
 	// Entry point
 	static function main() 
 		new Main().start();
-
-	static function q(query : String)
-		return Browser.document.querySelector(query);
 
 	/////////////////////////////////////////////
 	
@@ -21,35 +15,34 @@ class Main implements Context implements HaxeContracts implements Mithril
 	
 	function start() {
 		// Set up models
-
-		//
-		var bookshelf : Array<LoanItem> = [
-			new Book({ rfid: '787', title: 'Anna Karenina', loanTime: 21}), 
-			new Bluray({ rfid: '788', title: 'War and Peace', loanTime: 21, length: 168}),
-			new Book({ rfid: '789', title: 'Master and Man', loanTime: 14})
+		var bookshelf : Array<DragDropItem> = [
+			new Book({ rfid: 'ITEM787', title: 'Anna Karenina', loanTime: 21}), 
+			new Bluray({ rfid: 'ITEM788', title: 'War and Peace', loanTime: 21, length: 168}),
+			new Book({ rfid: 'ITEM789', title: 'Master and Man', loanTime: 14})
 		];
 
 		var workspace : Array<DragDropItem> = [
-			new Card({rfid: '123456789', name: 'Leo Tolstoy'})
+			new Card({rfid: 'CARD12345', name: 'Leo Tolstoy'})
 		];
 
 		var cardReader = new CardReader();
+		var itemScanner = new ItemScanner();
+		var screen = new views.ScreenView();
+		var printer = {};
 
-		var scanner = [];
+		// Display models in the main view with Mithril
+		new views.MainView(bookshelf, cardReader, workspace, itemScanner, screen).mount();
 
-		new views.MainView(bookshelf, cardReader, workspace, scanner).mount();
-
-		// Enable the "physical" equipment
-		cardReader.start();
-
-		// Start the app by enabling drag'n'drop functionality
+		// Start the browser app by enabling drag'n'drop functionality
 		var surfaces = [
 			HtmlElements.Bookshelf => cast bookshelf,
 			HtmlElements.CardReader => cardReader.contents,
 			HtmlElements.Workspace => workspace,
-			HtmlElements.Scanner => scanner
+			HtmlElements.Scanner => itemScanner.contents
 		];
-		
 		new DragDrop(surfaces).start();
+
+		// Start the Context that will do the actual borrowing
+		new BorrowLibraryItems(itemScanner, cardReader, screen, printer).waitForCard();
 	}
 }

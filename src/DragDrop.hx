@@ -6,13 +6,9 @@ using HtmlTools;
 
 interface DragDropItem {}
 
-private interface DragDropSurface 
-{
-    public var contents(default, null) : Array<DragDropItem>;
-}
-
 /**
  *  Javascript drag'n'drop library, loaded in index.html.
+ *  @see https://github.com/bevacqua/dragula
  */
 typedef Dragula = Dynamic;
 
@@ -24,14 +20,14 @@ typedef Dragula = Dynamic;
  */
 class DragDrop implements HaxeContracts
 {
-	static function elPos(el : HtmlElement, collection : js.html.HTMLCollection) : Int {
-		for(i in 0...collection.length) {
-			if(collection.item(i) == el) return i;
-		}
-		return -1;
-	}
-
+	/**
+	 *  Map of HTML id:s -> Array of drag'n'droppable items
+	 */
 	var surfaces : Map<String, Array<DragDropItem>>;
+	
+	/**
+	 *  Dragula API
+	 */
 	var drake : {cancel: ?Bool -> Void};
 
 	public function new(surfaces : Map<String, Array<DragDropItem>>) {
@@ -60,9 +56,8 @@ class DragDrop implements HaxeContracts
 		
 		switch targetElement.id {
 			// Scanner can only take one item
-			// TODO: Access the real scanner.
-			case Scanner if(targetElement.children.length > 0): 
-				return false;
+			case Scanner:
+				if(surfaces.get(Scanner).length == 1) return false;
 			case _:
 		}
 
@@ -76,6 +71,7 @@ class DragDrop implements HaxeContracts
 		}
 	}
 
+	// Temp data for storing the dragged item
 	var dragData : {source : Array<DragDropItem>, sourcePos : Int};
 
 	function onDrag(el : HtmlElement, sourceEl : HtmlElement) {
@@ -100,6 +96,7 @@ class DragDrop implements HaxeContracts
 		Contract.requires(surfaces.exists(targetEl.id), "No surface found: " + targetEl.id);
 		
 		var target = surfaces.get(targetEl.id);
+
 		var targetPos = sibling == null 
 			? targetEl.children.length - 1 
 			: targetEl.children.elPos(sibling) - 1;
@@ -110,9 +107,9 @@ class DragDrop implements HaxeContracts
 
 		//trace('Dropped ${removed} in ' + targetEl.id + '[$targetPos]');
 
-		dragData = null;		
+		// Cancel the drag so elements won't change, then
+		// redraw with Mithril immediately to update the DOM.
 		drake.cancel(true);
-
 		mithril.M.redraw();
 	}
 }
