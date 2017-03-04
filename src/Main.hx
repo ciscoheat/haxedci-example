@@ -1,6 +1,7 @@
 import Data.Book;
 import Data.Card;
 import Data.Bluray;
+import Data.LoanItem;
 import DragDrop.DragDropItem;
 
 class Main implements HaxeContracts
@@ -15,18 +16,21 @@ class Main implements HaxeContracts
 	
 	function start() {
 		// Set up models
-		var bookshelf : Array<DragDropItem> = [
-			new Book({ rfid: 'ITEM787', title: 'Anna Karenina', loanTime: 21}), 
-			new Bluray({ rfid: 'ITEM788', title: 'War and Peace', loanTime: 21, length: 168}),
-			new Book({ rfid: 'ITEM789', title: 'Master and Man', loanTime: 14})
+		var libraryItems : Array<LoanItem> = [
+			new Book({ rfid: 'ITEM787', title: 'Anna Karenina', loanTimeDays: 21}), 
+			new Bluray({ rfid: 'ITEM788', title: 'War and Peace', loanTimeDays: 14, length: 168}),
+			new Book({ rfid: 'ITEM789', title: 'Master and Man', loanTimeDays: 21})
 		];
 
-		var workspace : Array<DragDropItem> = [
-			new Card({rfid: 'CARD12345', name: 'Leo Tolstoy'})
+		var libraryCards = [
+			new Card({rfid: 'CARD54321', name: 'Leo Tolstoy', pin: '1234'})
 		];
 
-		var cardReader = new CardReader();
-		var itemScanner = new ItemScanner();
+		var workspace : Array<DragDropItem> = cast libraryCards.array();
+		var bookshelf : Array<DragDropItem> = cast libraryItems.array();
+
+		var cardReader = new CardReader(libraryCards);
+		var itemScanner = new ItemScanner(libraryItems);
 		var screen = new views.ScreenView();
 		var printer = {};
 

@@ -12,30 +12,31 @@ interface RfidItem
 interface LoanItem extends DragDropItem extends RfidItem
 {
     public var title(default, set) : String;
-    public var loanTime(default, set) : Int;
+    public var loanTimeDays(default, set) : Int;
 }
 
 ///// LoanItem implementations /////
 
 class Book implements HaxeContracts implements DataClass implements LoanItem
 {
-    public var rfid : String;
-    public var title : String;
-    public var loanTime : Int;
+    @validate(_.length > 0) public var rfid : String;
+    @validate(_.length > 0) public var title : String;
+    @validate(_ > 0) public var loanTimeDays : Int;
 }
 
 class Bluray implements HaxeContracts implements DataClass implements LoanItem
 {
-    public var rfid : String;
-    public var title : String;
-    public var length : Int;
-    public var loanTime : Int;
+    @validate(_.length > 0) public var rfid : String;
+    @validate(_.length > 0) public var title : String;
+    @validate(_ > 0) public var length : Int;
+    @validate(_ > 0) public var loanTimeDays : Int;
 }
 
 ///// Other items /////
 
-class Card implements HaxeContracts implements DataClass implements DragDropItem// implements RfidItem
+class Card implements HaxeContracts implements DataClass implements DragDropItem implements RfidItem
 {
-    public var rfid : String;
-    public var name : String;
+    @validate(_.length > 0) public var rfid : String;
+    @validate(_.length > 0) public var name : String;
+    @validate(~/\d{4}/) public var pin : String;
 }

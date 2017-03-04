@@ -4,7 +4,7 @@ import HtmlElements;
 import DragDrop.DragDropItem;
 
 /**
- *  Uses the HTML in index.html to display all items
+ *  Uses the HTML in index.html to display app elements.
  */
 class MainView implements Mithril
 {

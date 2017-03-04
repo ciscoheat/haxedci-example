@@ -2,6 +2,10 @@ html {
 	background: url(/images/white_wall_hash.png);
 }
 
+.red {
+	color:red;
+}
+
 /***********************************************/
 
 #bookshelf {
@@ -20,7 +24,8 @@ html {
 	border:12px solid #DDD; 
 	background-color: white;
 	padding: 2px;
-	height: 300px;
+	height: 360px;
+	font-size: 90%;
 }
 
 #screen .content {
@@ -42,6 +47,7 @@ html {
 	flex-direction: row;
 	flex-wrap: wrap;
 	width: 30%;
+	max-width: 105px;
 }
 
 #screen .key {
@@ -58,6 +64,18 @@ html {
 
 #screen p {
 	margin-top: initial;
+}
+
+#screen table {
+	font-size: 85%;
+}
+
+#screen button.-success {
+	margin-top: 0.5rem;
+}
+
+#screen tbody tr:nth-child(odd) {
+	background-color: #fafafa;
 }
 
 /***********************************************/
