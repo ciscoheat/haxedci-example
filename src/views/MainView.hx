@@ -9,10 +9,10 @@ import DragDrop.DragDropItem;
 class MainView implements Mithril
 {
     var screenView : ScreenView;
-    var cardReader : CardReader;
+    var cardReader : Array<DragDropItem>;
     var bookshelf : Array<DragDropItem>;
     var workspace : Array<DragDropItem>;
-    var itemScanner : ItemScanner;
+    var itemScanner : Array<DragDropItem>;
 
     public function new(bookshelf, cardReader, workspace, itemScanner, screenView) {
         this.bookshelf = bookshelf;
@@ -28,18 +28,18 @@ class MainView implements Mithril
     public function mount() {
         // Using the abstract HtmlElements class, to refer directly to
         // the HTML element with an enum value:
+        M.mount(Screen, screenView);
+
+		M.mount(Bookshelf, {view: surfaceView.bind(bookshelf)});
+        M.mount(CardReader, {view: surfaceView.bind(cardReader)});
+        M.mount(Scanner, {view: surfaceView.bind(itemScanner)});
+        M.mount(Workspace, {view: surfaceView.bind(workspace)});
+
         M.mount(Printer, {view: function()
             m('.box', 
                 m('.slot')
             )
-        });
-
-        M.mount(Screen, screenView);
-
-		M.mount(Bookshelf, {view: surfaceView.bind(bookshelf)});
-        M.mount(CardReader, {view: surfaceView.bind(cardReader.contents)});
-        M.mount(Scanner, {view: surfaceView.bind(itemScanner.contents)});
-        M.mount(Workspace, {view: surfaceView.bind(workspace)});
+        });        
     }
 
     function surfaceView(surface : Array<DragDropItem>) return surface.map(function(item) {

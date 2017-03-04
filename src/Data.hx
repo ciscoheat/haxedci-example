@@ -1,6 +1,15 @@
 import DragDrop.DragDropItem;
 
-interface Data {}
+/**
+ *  Used as a in-memory database for library items and cards.
+ *  The Main class is used to set up the data, hence the "allow" access
+ *  control for Main.
+ */
+@:allow(Main) class Data 
+{
+    public static var libraryItems(default, null) : Array<LoanItem>;
+    public static var libraryCards(default, null) : Array<Card>;
+}
 
 ///// Interfaces (artefacts that makes sense to the user) /////
 

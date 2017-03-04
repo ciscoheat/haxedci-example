@@ -2,6 +2,7 @@ import Data.Book;
 import Data.Card;
 import Data.Bluray;
 import Data.LoanItem;
+import Data.RfidItem;
 import DragDrop.DragDropItem;
 
 class Main implements HaxeContracts
@@ -15,34 +16,45 @@ class Main implements HaxeContracts
 	function new() {}
 	
 	function start() {
-		// Set up models
-		var libraryItems : Array<LoanItem> = [
+		// Set up data for the system
+		Data.libraryItems = [
 			new Book({ rfid: 'ITEM787', title: 'Anna Karenina', loanTimeDays: 21}), 
 			new Bluray({ rfid: 'ITEM788', title: 'War and Peace', loanTimeDays: 14, length: 168}),
 			new Book({ rfid: 'ITEM789', title: 'Master and Man', loanTimeDays: 21})
 		];
 
-		var libraryCards = [
+		Data.libraryCards = [
 			new Card({rfid: 'CARD54321', name: 'Leo Tolstoy', pin: '1234'})
 		];
 
-		var workspace : Array<DragDropItem> = cast libraryCards.array();
-		var bookshelf : Array<DragDropItem> = cast libraryItems.array();
+		var bookshelf : Array<DragDropItem> = cast Data.libraryItems.array();
+		var workspace : Array<DragDropItem> = cast Data.libraryCards.array();
 
-		var cardReader = new CardReader(libraryCards);
-		var itemScanner = new ItemScanner(libraryItems);
+		var itemScannerContents = [];
+		// A quick'n dirty way of detecting if something is in the item scanner.
+		var itemScanner = new RfidScanner(function() {
+			return try Some(cast(itemScannerContents[0], RfidItem).rfid)
+			catch(e : Dynamic) None;
+		}, 100);
+
+		var cardReaderContents = [];
+		var cardReader = new RfidScanner(function() {
+			return try Some(cast(cardReaderContents[0], RfidItem).rfid)
+			catch(e : Dynamic) None;
+		}, 100);
+
 		var screen = new views.ScreenView();
 		var printer = {};
 
 		// Display models in the main view with Mithril
-		new views.MainView(bookshelf, cardReader, workspace, itemScanner, screen).mount();
+		new views.MainView(bookshelf, cardReaderContents, workspace, itemScannerContents, screen).mount();
 
 		// Start the browser app by enabling drag'n'drop functionality
 		var surfaces = [
 			HtmlElements.Bookshelf => cast bookshelf,
-			HtmlElements.CardReader => cardReader.contents,
+			HtmlElements.CardReader => cardReaderContents,
 			HtmlElements.Workspace => workspace,
-			HtmlElements.Scanner => itemScanner.contents
+			HtmlElements.Scanner => itemScannerContents
 		];
 		new DragDrop(surfaces).start();
 

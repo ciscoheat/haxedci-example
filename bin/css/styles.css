@@ -26,6 +26,7 @@ html {
 	padding: 2px;
 	height: 360px;
 	font-size: 90%;
+	overflow: auto;
 }
 
 #screen .content {

@@ -4,13 +4,16 @@ import HtmlElements;
 
 using HtmlTools;
 
-interface DragDropItem {}
-
 /**
  *  Javascript drag'n'drop library, loaded in index.html.
  *  @see https://github.com/bevacqua/dragula
  */
 typedef Dragula = Dynamic;
+
+/**
+ *  A marker interface for objects that can be drag'n'dropped.
+ */
+interface DragDropItem {}
 
 /**
  *  This class handles drag-drop functionality in the browser for HTML elements. 
@@ -26,7 +29,8 @@ class DragDrop implements HaxeContracts
 	var surfaces : Map<String, Array<DragDropItem>>;
 	
 	/**
-	 *  Dragula API
+	 *  Dragula API, used to cancel the drag-drop operation so
+	 *  Mithril can redraw the DOM based on the updated state.
 	 */
 	var drake : {cancel: ?Bool -> Void};
 
