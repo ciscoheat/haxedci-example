@@ -59,9 +59,9 @@ class DragDrop implements HaxeContracts
 		Contract.requires(targetElement.id.length > 0);
 		
 		switch targetElement.id {
-			// Scanner can only take one item
-			case Scanner:
-				if(surfaces.get(Scanner).length == 1) return false;
+			// Scanner and CardReader can only take one item
+			case Scanner, CardReader:
+				if(surfaces.get(targetElement.id).length == 1) return false;
 			case _:
 		}
 

@@ -7,7 +7,7 @@ using DateTools;
 enum ScreenState {
     Welcome;
     EnterPin(data : {previousAttemptFailed : Bool});
-    DisplayBorrowedItems(items : Array<Data.LoanItem>);
+    DisplayBorrowedItems(items : Iterable<Data.LoanItem>);
     ThankYou;
     InvalidPin;
     AlreadyBorrowed;
@@ -97,7 +97,7 @@ class ScreenView implements Mithril
 
     ///////////////////////////////////////////////////////
 
-    function displayBorrowedItems(items : Array<Data.LoanItem>) {
+    function displayBorrowedItems(items : Iterable<Data.LoanItem>) {
         m('.content', [
             m('p', 'Scan the items you want to borrow on the dark red area.'),
             m('p', [
@@ -110,12 +110,12 @@ class ScreenView implements Mithril
                         [m('th', 'Title'), m('th', 'Return date')]
                     )
                 ),
-                m('tbody', items.map(function(item) {
+                m('tbody', [for(item in items) {
                     var returnDate = Date.now().delta(item.loanTimeDays * 24 * 60 * 60 * 1000);
                     m('tr',
                         [m('td', item.title), m('td', returnDate.format("%Y-%m-%d"))]
                     );
-                }))
+                }])
             ])
         ]);
     }

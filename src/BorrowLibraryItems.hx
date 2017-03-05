@@ -2,7 +2,6 @@ import haxe.ds.Option;
 import views.ScreenView.ScreenState;
 import Data.Card;
 import Data.LoanItem;
-import haxecontracts.Contract.assert;
 
 /**
  *  Use case implementation.
@@ -13,7 +12,6 @@ class BorrowLibraryItems implements dci.Context
     static var maxPinAttempts(default, never) : Int = 3;
 
     var pinAttemptsLeft : Int;
-    var scannedItems : Array<LoanItem>;
 
     public function new(scanner, cardReader, screen, printer) {
         this.scanner = scanner;
@@ -21,6 +19,7 @@ class BorrowLibraryItems implements dci.Context
         this.screen = screen;
         this.printer = printer;
         this.library = Data;
+        this.scannedItems = [];
     }
     
     public function waitForCard() {
@@ -32,7 +31,7 @@ class BorrowLibraryItems implements dci.Context
         
         public function waitForCardChange() {
             pinAttemptsLeft = maxPinAttempts;
-            scannedItems = [];
+            scannedItems.clear();
             self.registerSingleRfidChange(rfidChanged);
         }
 
@@ -59,13 +58,21 @@ class BorrowLibraryItems implements dci.Context
         }
     }
 
+    var screenTimer : haxe.Timer;
+
     @role var screen : {
         var state(default, set) : ScreenState;
         function registerSinglePinCodeEntered(callback : String -> Void) : Void;
         
         public function displayThankYou() {
             self.state = ThankYou;
-            self.waitThenDisplayWelcomeScreen();
+
+            if(screenTimer != null) screenTimer.stop();
+            screenTimer = new haxe.Timer(4000);
+            screenTimer.run = function() {
+                if(self.state.equals(ThankYou)) self.state = Welcome;
+            }
+            cardReader.waitForCardChange();
         }
 
         public function displayEnterPin(card : Card) {
@@ -81,21 +88,6 @@ class BorrowLibraryItems implements dci.Context
         public function displayInvalidPin() {
             self.state = InvalidPin;
         }
-
-        function waitThenDisplayWelcomeScreen() {
-            haxe.Timer.delay(function() {
-                if(self.state.equals(ThankYou)) self.state = Welcome;
-            }, 4000);
-            cardReader.waitForCardChange();
-        }
-    }
-
-    @role var printer : {
-        
-        
-        public function roleMethod() {
-            
-        }
     }
 
     @role var scanner : {
@@ -108,14 +100,35 @@ class BorrowLibraryItems implements dci.Context
         function rfidScanned(rfid : Option<String>) switch rfid {
             case None: self.waitForItem();
             case Some(rfid):
+                trace("Scanned RFID " + rfid);
                 var item = library.items().find(function(item) return item.rfid == rfid);
                 if(item == null)
                     self.waitForItem();
-                else {
-                    scannedItems.push(item);
-                    screen.displayScannedItems();
-                }
+                else if(scannedItems.isAlreadyScanned(rfid))
+                    self.waitForItem();
+                else
+                    scannedItems.addItem(item);
         }
+    }
+
+    @role var scannedItems : {
+        function iterator() : Iterator<LoanItem>;
+        function push(item : LoanItem) : Void;
+        function splice(pos : Int, len : Int) : Iterable<LoanItem>;
+        
+        public function isAlreadyScanned(rfid : String) : Bool
+            return self.exists(function(item) return item.rfid == rfid);
+
+        public function addItem(item : LoanItem) {
+            trace("Borrowed " + item.title);
+            self.push(item);
+            // TODO: Call BorrowLibraryItem Context.
+            screen.displayScannedItems();
+        }
+
+        // TODO: Not leading anywhere
+        public function clear()
+            self.splice(0, -1);
     }
 
     @role var library : {
@@ -125,11 +138,18 @@ class BorrowLibraryItems implements dci.Context
         public function items() : Array<LoanItem> return libraryItems;
         public function cards() : Array<Card> return libraryCards;
     }
+
+    @role var printer : {
+        public function roleMethod() {
+            
+        }
+    }    
 }
 
 /**
  *  For borrowing a single library item.
  */
+ /*
 class BorrowLibraryItem implements dci.Context
 {
     public function new(firstRole, secondRole) {
@@ -157,3 +177,4 @@ class BorrowLibraryItem implements dci.Context
         }
     }
 }
+*/
