@@ -45,6 +45,8 @@ class ScreenView implements Mithril
                 displayBorrowedItems(items);
             case ThankYou:
                 thankYou();
+            case AlreadyBorrowed:
+                alreadyBorrowed();
             case _: 
                 m('.content.red', 'View not found: $state');
         }
@@ -119,6 +121,12 @@ class ScreenView implements Mithril
             ])
         ]);
     }
+
+    ///////////////////////////////////////////////////////
+
+    function alreadyBorrowed() m('.content',
+        m('p', 'Item already borrowed. Please remove it and try another.')
+    );
 
     ///////////////////////////////////////////////////////
 

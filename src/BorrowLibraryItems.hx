@@ -12,6 +12,8 @@ class BorrowLibraryItems implements dci.Context
     static var maxPinAttempts(default, never) : Int = 3;
 
     var pinAttemptsLeft : Int;
+    var scannedItems : Array<LoanItem>;
+    var screenTimer : haxe.Timer;
 
     public function new(scanner, cardReader, screen, printer) {
         this.scanner = scanner;
@@ -31,7 +33,9 @@ class BorrowLibraryItems implements dci.Context
         
         public function waitForCardChange() {
             pinAttemptsLeft = maxPinAttempts;
-            scannedItems.clear();
+            scannedItems = [];
+
+            scanner.stopScanning();
             self.registerSingleRfidChange(rfidChanged);
         }
 
@@ -58,20 +62,12 @@ class BorrowLibraryItems implements dci.Context
         }
     }
 
-    var screenTimer : haxe.Timer;
-
     @role var screen : {
         var state(default, set) : ScreenState;
         function registerSinglePinCodeEntered(callback : String -> Void) : Void;
         
         public function displayThankYou() {
-            self.state = ThankYou;
-
-            if(screenTimer != null) screenTimer.stop();
-            screenTimer = new haxe.Timer(4000);
-            screenTimer.run = function() {
-                if(self.state.equals(ThankYou)) self.state = Welcome;
-            }
+            self.waitThenDisplay(ThankYou, 4000, Welcome);
             cardReader.waitForCardChange();
         }
 
@@ -88,6 +84,22 @@ class BorrowLibraryItems implements dci.Context
         public function displayInvalidPin() {
             self.state = InvalidPin;
         }
+
+        public function displayAlreadyBorrowed() {
+            self.waitThenDisplay(AlreadyBorrowed, 2000, DisplayBorrowedItems(scannedItems));
+            scanner.waitForItem();
+        }
+
+        function waitThenDisplay(display : ScreenState, wait : Int, thenDisplay : ScreenState) {
+            if(screenTimer != null) screenTimer.stop();
+
+            self.state = display;
+
+            screenTimer = new haxe.Timer(wait);
+            screenTimer.run = function() {
+                if(self.state.equals(display)) self.state = thenDisplay;
+            }
+        }
     }
 
     @role var scanner : {
@@ -102,33 +114,20 @@ class BorrowLibraryItems implements dci.Context
             case Some(rfid):
                 trace("Scanned RFID " + rfid);
                 var item = library.items().find(function(item) return item.rfid == rfid);
+
                 if(item == null)
                     self.waitForItem();
-                else if(scannedItems.isAlreadyScanned(rfid))
-                    self.waitForItem();
-                else
-                    scannedItems.addItem(item);
-        }
-    }
-
-    @role var scannedItems : {
-        function iterator() : Iterator<LoanItem>;
-        function push(item : LoanItem) : Void;
-        function splice(pos : Int, len : Int) : Iterable<LoanItem>;
-        
-        public function isAlreadyScanned(rfid : String) : Bool
-            return self.exists(function(item) return item.rfid == rfid);
-
-        public function addItem(item : LoanItem) {
-            trace("Borrowed " + item.title);
-            self.push(item);
-            // TODO: Call BorrowLibraryItem Context.
-            screen.displayScannedItems();
+                else if(scannedItems.exists(function(item) return item.rfid == rfid))
+                    screen.displayAlreadyBorrowed();
+                else {
+                    scannedItems.push(item);
+                    screen.displayScannedItems();
+                }
         }
 
-        // TODO: Not leading anywhere
-        public function clear()
-            self.splice(0, -1);
+        public function stopScanning() {
+            self.registerSingleRfidChange(null);
+        }
     }
 
     @role var library : {
