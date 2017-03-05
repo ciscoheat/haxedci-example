@@ -14,6 +14,7 @@ class BorrowLibraryItems implements dci.Context
     var pinAttemptsLeft : Int;
     var scannedItems : Array<LoanItem>;
     var screenTimer : haxe.Timer;
+    var currentCard : Card;
 
     public function new(scanner, cardReader, screen, printer) {
         this.scanner = scanner;
@@ -21,7 +22,6 @@ class BorrowLibraryItems implements dci.Context
         this.screen = screen;
         this.printer = printer;
         this.library = Data;
-        this.scannedItems = [];
     }
     
     public function waitForCard() {
@@ -34,6 +34,7 @@ class BorrowLibraryItems implements dci.Context
         public function waitForCardChange() {
             pinAttemptsLeft = maxPinAttempts;
             scannedItems = [];
+            currentCard = null;
 
             scanner.stopScanning();
             self.registerSingleRfidChange(rfidChanged);
@@ -41,15 +42,23 @@ class BorrowLibraryItems implements dci.Context
 
         function rfidChanged(data : Option<String>) switch data {
             case None: 
-                screen.displayThankYou();
+                if(currentCard != null)
+                    screen.displayThankYou();
+                else
+                    self.registerSingleRfidChange(rfidChanged);
             case Some(rfid):
                 // Register again immediately to detect remove event across the whole Context.
                 self.registerSingleRfidChange(rfidChanged);
 
+                // If same card, ignore change event.
+                if(currentCard != null && currentCard.rfid == rfid) return;
+
                 var card = library.cards().find(function(card) return card.rfid == rfid);
 
-                if(card != null)
+                if(card != null) {
+                    currentCard = card;
                     screen.displayEnterPin(card);
+                }
         }
 
         public function validatePin(card : Card, pin : String) {
@@ -115,10 +124,8 @@ class BorrowLibraryItems implements dci.Context
                 trace("Scanned RFID " + rfid);
                 var item = library.items().find(function(item) return item.rfid == rfid);
 
-                if(item == null)
+                if(item == null || scannedItems.exists(function(item) return item.rfid == rfid))
                     self.waitForItem();
-                else if(scannedItems.exists(function(item) return item.rfid == rfid))
-                    screen.displayAlreadyBorrowed();
                 else {
                     scannedItems.push(item);
                     screen.displayScannedItems();

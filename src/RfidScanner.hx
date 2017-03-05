@@ -9,8 +9,11 @@ class RfidScanner implements HaxeContracts
 	var detectRfid : Void -> Option<String>;
 	var _onRfidChange : Option<String> -> Void;
 
-	var currentValue : Null<String> = null;
-
+	/**
+	 *  Instantiates a RfidScanner object.
+	 *  @param detectRfid - Scanning function, should return Option<String>.
+	 *  @param interval - Interval in ms between scans.
+	 */
 	public function new(detectRfid, interval) {
 		Contract.requires(interval > 0);
 
@@ -18,8 +21,12 @@ class RfidScanner implements HaxeContracts
 		setupTimer(interval);
 	}
 
+	/**
+	 *  Registers a callback for a single rfid change event.
+	 *  @param event - callback for the event. Pass null to disable last registration.
+	 */
 	public function registerSingleRfidChange(event : Option<String> -> Void) : Void {
-		Contract.requires(event == null || _onRfidChange == null, "onRfidChange event already registered.");
+		Contract.requires(event == null || _onRfidChange == null, "RFID change event already registered.");
 		_onRfidChange = event;
 	}
 
@@ -29,19 +36,13 @@ class RfidScanner implements HaxeContracts
 			if(_onRfidChange == null) return;
 			switch detectRfid() {
 				case Some(rfid):
-					if(currentValue != rfid) {
-						currentValue = rfid;
-						var event = _onRfidChange;
-						_onRfidChange = null;
-						event(Some(rfid));
-					}
+					var event = _onRfidChange;
+					_onRfidChange = null;
+					event(Some(rfid));
 				case None:
-					if(currentValue != null) {
-						currentValue = null;
-						var event = _onRfidChange;
-						_onRfidChange = null;
-						event(None);
-					}
+					var event = _onRfidChange;
+					_onRfidChange = null;
+					event(None);
 			}
 		}
 	}
