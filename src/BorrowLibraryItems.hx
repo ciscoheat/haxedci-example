@@ -25,13 +25,13 @@ class BorrowLibraryItems implements dci.Context
     }
     
     public function waitForCard() {
-        cardReader.waitForCardChange();
+        cardReader.waitForCard();
     }
     
     @role var cardReader : {
         function registerSingleRfidChange(event : Option<String> -> Void) : Void;
         
-        public function waitForCardChange() {
+        public function waitForCard() {
             pinAttemptsLeft = maxPinAttempts;
             scannedItems = [];
             currentCard = null;
@@ -77,7 +77,7 @@ class BorrowLibraryItems implements dci.Context
         
         public function displayThankYou() {
             self.waitThenDisplay(ThankYou, 4000, Welcome);
-            cardReader.waitForCardChange();
+            cardReader.waitForCard();
         }
 
         public function displayEnterPin(card : Card) {
@@ -127,6 +127,7 @@ class BorrowLibraryItems implements dci.Context
                 if(item == null || scannedItems.exists(function(item) return item.rfid == rfid))
                     self.waitForItem();
                 else {
+                    // TODO: Call borrow single library item context.
                     scannedItems.push(item);
                     screen.displayScannedItems();
                 }
@@ -146,41 +147,6 @@ class BorrowLibraryItems implements dci.Context
     }
 
     @role var printer : {
-        public function roleMethod() {
-            
-        }
+        // TODO: Print receipt
     }    
 }
-
-/**
- *  For borrowing a single library item.
- */
- /*
-class BorrowLibraryItem implements dci.Context
-{
-    public function new(firstRole, secondRole) {
-        this.firstRole = firstRole;
-        this.secondRole = secondRole;
-    }
-    
-    public function systemOperation() {
-        firstRole.roleMethod();
-    }
-    
-    @role var firstRole : {
-        function contract() : Void;
-        
-        public function roleMethod() {
-            secondRole.otherRoleMethod();
-        }
-    }
-    
-    @role var secondRole : {
-        function contract() : Void;
-        
-        public function otherRoleMethod() {
-            self.contract();
-        }
-    }
-}
-*/
