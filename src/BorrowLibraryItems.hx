@@ -89,7 +89,6 @@ class BorrowLibraryItems implements dci.Context
                     }
                     else if(card.pin == pin) {
                         authorizedCard = card;
-                        screen.displayScannedItems();
                         scanner.waitForItem();
                     }
                     else if(--pinAttemptsLeft > 0) {
@@ -137,8 +136,10 @@ class BorrowLibraryItems implements dci.Context
         function scanRfid(callback : Option<String> -> Void) : Void;
         function lastScannedRfid() : Option<String>;
 
-        public function waitForItem()
+        public function waitForItem() {
+            screen.displayScannedItems();
             self.scanRfid(self.rfidScanned);
+        }
 
         function rfidScanned(rfid : Option<String>) {
             // If the card is removed, return immediately.
@@ -152,7 +153,6 @@ class BorrowLibraryItems implements dci.Context
                     if(alreadyScanned != null) {
                         scannedItems.remove(alreadyScanned);
                         scannedItems.push(alreadyScanned);
-                        screen.displayScannedItems();
                         self.waitForItem();
                     } else {
                         var item = library.items().find(function(item) return item.rfid == rfid);
@@ -162,7 +162,6 @@ class BorrowLibraryItems implements dci.Context
                         else {
                             // TODO: Call borrow single library item context.
                             scannedItems.push(item);
-                            screen.displayScannedItems();
                             self.waitForItem();
                         }
                     }
