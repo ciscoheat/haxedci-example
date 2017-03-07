@@ -56,18 +56,19 @@ class BorrowLibraryItems implements dci.Context
                 self.waitForCardChange();
 
             case Some(rfid):
-                // New RFID found. Look up current card in library database, display pin screen if valid.
+                // Create a wait loop detecting card removal.
+                self.createCardRemovedWaitLoop();
+
+                // Look up current card in library database, display pin screen if valid.
                 var card = library.cards().find(function(card) return card.rfid == rfid);
-                if(card != null) {
-                    self.createCardRemoveWaitLoop();
-                    keypad.waitForEnterPin(card);
-                } else {
-                    // Card not found, ignore it.
-                    self.waitForCardChange();
-                }
+
+                if(card != null)
+                    keypad.waitForEnterPin();
+                else
+                    screen.displayInvalidCard();
         }
 
-        function createCardRemoveWaitLoop() {
+        function createCardRemovedWaitLoop() {
             var removeCardTimer = new haxe.Timer(50);
             removeCardTimer.run = function() {
                 self.scanRfid(function(data) {
@@ -79,16 +80,27 @@ class BorrowLibraryItems implements dci.Context
             }
         }
 
-        public function validatePin(card : Card, pin : String) {
-            if(card.pin == pin) {
-                authorizedCard = card;
-                screen.displayScannedItems();
-                scanner.waitForItem();
-            }
-            else if(--pinAttemptsLeft > 0)
-                keypad.waitForEnterPin(card);
-            else
-                screen.displayInvalidPin();
+        public function validatePin(pin : String) {
+            self.scanRfid(function(data) switch data {
+                case Some(rfid):
+                    var card = library.cards().find(function(card) return card.rfid == rfid);
+                    if(card == null) {
+                        screen.displayInvalidCard();
+                    }
+                    else if(card.pin == pin) {
+                        authorizedCard = card;
+                        screen.displayScannedItems();
+                        scanner.waitForItem();
+                    }
+                    else if(--pinAttemptsLeft > 0) {
+                        keypad.waitForEnterPin();
+                    }
+                    else
+                        screen.displayTooManyInvalidPin();
+
+                case None:
+                    // Card already removed.
+            });
         }
     }
 
@@ -112,8 +124,12 @@ class BorrowLibraryItems implements dci.Context
             display(DisplayBorrowedItems(scannedItems));
         }
 
-        public function displayInvalidPin() {
-            display(InvalidPin);
+        public function displayTooManyInvalidPin() {
+            display(TooManyInvalidPin);
+        }
+
+        public function displayInvalidCard() {
+            display(InvalidCard);
         }
     };
 
@@ -157,9 +173,9 @@ class BorrowLibraryItems implements dci.Context
     @role var keypad : {
         function onPinCodeEntered(callback : String -> Void) : Void;
 
-        public function waitForEnterPin(card : Card) {
+        public function waitForEnterPin() {
             screen.displayEnterPin();
-            self.onPinCodeEntered(cardReader.validatePin.bind(card));
+            self.onPinCodeEntered(cardReader.validatePin);
         }
     };
 

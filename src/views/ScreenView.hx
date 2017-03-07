@@ -11,14 +11,18 @@ enum ScreenState {
     EnterPin(data : {previousAttemptFailed : Bool});
     DisplayBorrowedItems(items : Iterable<Data.LoanItem>);
     ThankYou;
-    InvalidPin;
+    TooManyInvalidPin;
     RemoveCard;
+    InvalidCard;
 }
 
 class ScreenView implements HaxeContracts implements Mithril
 {
-    var _state : ScreenState;
+    var pinBuffer : String = "";
     var messageTimer : Timer;
+
+    var _onPinCodeEntered : Null<String -> Void>;
+    var _state : ScreenState;
 
     public function display(state : ScreenState) {
         Contract.requires(state != null);
@@ -36,9 +40,6 @@ class ScreenView implements HaxeContracts implements Mithril
         messageTimer.run = display.bind(thenDisplay);
     }
 
-    var pinBuffer : String = "";
-    var _onPinCodeEntered : Null<String -> Void>;
-
     public function new(initialState)
         display(initialState);
 
@@ -52,12 +53,14 @@ class ScreenView implements HaxeContracts implements Mithril
                 welcome();
             case EnterPin(data): 
                 enterPin(data.previousAttemptFailed);
-            case InvalidPin:
-                invalidPin();
+            case TooManyInvalidPin:
+                tooManyInvalidPin();
             case DisplayBorrowedItems(items):
                 displayBorrowedItems(items);
             case ThankYou:
                 thankYou();
+            case InvalidCard:
+                invalidCard();
             case _: 
                 m('.content.red', 'View not found: $_state');
         }
@@ -103,8 +106,8 @@ class ScreenView implements HaxeContracts implements Mithril
 
     ///////////////////////////////////////////////////////
 
-    function invalidPin() m('.content', [
-        m('.red', 'Incorrect PIN 3 times.'),
+    function tooManyInvalidPin() m('.content', [
+        m('.red', 'Incorrect PIN too many times.'),
         m('p', 'Please remove your card before trying again.')
     ]);
 
@@ -132,6 +135,13 @@ class ScreenView implements HaxeContracts implements Mithril
             ])
         ]);
     }
+
+    ///////////////////////////////////////////////////////
+
+    function invalidCard() m('.content', [
+        m('.red', 'Library card not valid.'),
+        m('p', 'Please contact support.')
+    ]);
 
     ///////////////////////////////////////////////////////
 
