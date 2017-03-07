@@ -1,7 +1,6 @@
 import Data.Book;
 import Data.Card;
 import Data.Bluray;
-import Data.LoanItem;
 import Data.RfidItem;
 import DragDrop.DragDropItem;
 
@@ -35,15 +34,15 @@ class Main implements HaxeContracts
 		var itemScanner = new RfidScanner(function() {
 			return try Some(cast(itemScannerContents[0], RfidItem).rfid)
 			catch(e : Dynamic) None;
-		}, 100);
+		});
 
 		var cardReaderContents = [];
 		var cardReader = new RfidScanner(function() {
 			return try Some(cast(cardReaderContents[0], RfidItem).rfid)
 			catch(e : Dynamic) None;
-		}, 100);
+		});
 
-		var screen = new views.ScreenView();
+		var screen = new views.ScreenView(Welcome);
 		var printer = {};
 
 		// Display models in the main view with Mithril
@@ -51,7 +50,7 @@ class Main implements HaxeContracts
 
 		// Start the browser app by enabling drag'n'drop functionality
 		var surfaces = [
-			HtmlElements.Bookshelf => cast bookshelf,
+			HtmlElements.Bookshelf => bookshelf,
 			HtmlElements.CardReader => cardReaderContents,
 			HtmlElements.Workspace => workspace,
 			HtmlElements.Scanner => itemScannerContents
@@ -59,6 +58,6 @@ class Main implements HaxeContracts
 		new DragDrop(surfaces).start();
 
 		// Start the Context that will do the actual borrowing
-		new BorrowLibraryItems(itemScanner, cardReader, screen, printer).waitForCard();
+		new BorrowLibraryItems(itemScanner, cardReader, screen, printer, screen).start();
 	}
 }

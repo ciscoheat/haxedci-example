@@ -1,6 +1,8 @@
 package views;
 
 import mithril.M;
+import haxecontracts.*;
+import haxe.Timer;
 
 using DateTools;
 
@@ -10,31 +12,42 @@ enum ScreenState {
     DisplayBorrowedItems(items : Iterable<Data.LoanItem>);
     ThankYou;
     InvalidPin;
-    AlreadyBorrowed;
     RemoveCard;
 }
 
-class ScreenView implements Mithril
+class ScreenView implements HaxeContracts implements Mithril
 {
-    public var state(default, set) : ScreenState = Welcome;
+    var _state : ScreenState;
+    var messageTimer : Timer;
 
-    function set_state(s : ScreenState) : ScreenState {
-        state = s;
+    public function display(state : ScreenState) {
+        Contract.requires(state != null);
+        if(messageTimer != null) messageTimer.stop();
+        _state = state;
         M.redraw();
-        return state;
+    }
+
+    public function displayMessage(state : ScreenState, waitMs : Int, ?thenDisplay : ScreenState) {
+        if(thenDisplay == null) thenDisplay = state;
+
+        display(state);
+
+        messageTimer = new Timer(waitMs);
+        messageTimer.run = display.bind(thenDisplay);
     }
 
     var pinBuffer : String = "";
-    var onPinCodeEntered : Null<String -> Void>;
+    var _onPinCodeEntered : Null<String -> Void>;
 
-    public function new() {}
+    public function new(initialState)
+        display(initialState);
 
-    public function registerSinglePinCodeEntered(callback : String -> Void) {
-        onPinCodeEntered = callback;
+    public function onPinCodeEntered(callback : String -> Void) {
+        _onPinCodeEntered = callback;
     }
 
     public function view() {
-        return switch state {
+        return switch _state {
             case Welcome: 
                 welcome();
             case EnterPin(data): 
@@ -45,10 +58,8 @@ class ScreenView implements Mithril
                 displayBorrowedItems(items);
             case ThankYou:
                 thankYou();
-            case AlreadyBorrowed:
-                alreadyBorrowed();
             case _: 
-                m('.content.red', 'View not found: $state');
+                m('.content.red', 'View not found: $_state');
         }
     }
 
@@ -83,9 +94,9 @@ class ScreenView implements Mithril
 
         var pin = pinBuffer;
         pinBuffer = "";
-        if(onPinCodeEntered != null) {
-            var callback = onPinCodeEntered;
-            onPinCodeEntered = null;        
+        if(_onPinCodeEntered != null) {
+            var callback = _onPinCodeEntered;
+            _onPinCodeEntered = null;        
             callback(pin);
         }
     }
@@ -121,12 +132,6 @@ class ScreenView implements Mithril
             ])
         ]);
     }
-
-    ///////////////////////////////////////////////////////
-
-    function alreadyBorrowed() m('.content',
-        m('p', 'Item already borrowed. Please remove it and try another.')
-    );
 
     ///////////////////////////////////////////////////////
 

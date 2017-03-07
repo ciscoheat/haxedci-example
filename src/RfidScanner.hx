@@ -6,48 +6,40 @@ import haxe.Timer;
  */
 class RfidScanner implements HaxeContracts
 {
-	var detectRfid : Void -> Option<String>;
-	var _onRfidChange : Option<String> -> Void;
+	var returnRfid : Void -> Option<String>;
+	var lastScanned : Option<String>;
 
 	/**
 	 *  Instantiates a RfidScanner object.
-	 *  @param detectRfid - Scanning function, should return Option<String>.
-	 *  @param interval - Interval in ms between scans.
+	 *  @param returnRfid - Scanning emulation function.
 	 */
-	public function new(detectRfid, interval) {
-		Contract.requires(interval > 0);
-
-		this.detectRfid = detectRfid;
-		setupTimer(interval);
+	public function new(returnRfid) {
+		this.returnRfid = returnRfid;
+		this.lastScanned = None;
 	}
 
 	/**
 	 *  Registers a callback for a single rfid change event.
-	 *  @param event - callback for the event. Pass null to disable last registration.
+	 *  @param event - callback for the event.
 	 */
-	public function registerSingleRfidChange(event : Option<String> -> Void) : Void {
-		Contract.requires(event == null || _onRfidChange == null, "RFID change event already registered.");
-		_onRfidChange = event;
+	public function scanRfid(callback : Option<String> -> Void) : Void {
+		Timer.delay(function() {
+			var scanned = returnRfid();
+			callback(scanned);
+			lastScanned = scanned;
+		}, 0);
 	}
 
-	function setupTimer(interval : Int) {
-		var event = new Timer(interval);
-		event.run = function() {
-			if(_onRfidChange == null) return;
-			switch detectRfid() {
-				case Some(rfid):
-					var event = _onRfidChange;
-					_onRfidChange = null;
-					event(Some(rfid));
-				case None:
-					var event = _onRfidChange;
-					_onRfidChange = null;
-					event(None);
-			}
-		}
+	/**
+	 *  A convenience method, to avoid putting state elsewhere.
+	 *  @return Option<String>
+	 */
+	public function lastScannedRfid() : Option<String> {
+		return lastScanned;
 	}
 
 	@invariants function inv() {
-		Contract.invariant(detectRfid != null);
+		Contract.invariant(returnRfid != null);
+		Contract.invariant(lastScanned != null);
 	}
 }
