@@ -13,7 +13,6 @@ class BorrowLibraryItems implements dci.Context
     static var maxPinAttempts(default, never) : Int = 3;
 
     var pinAttemptsLeft : Int;
-    var scannedItems : Array<LoanItem>;
     var authorizedCard : Card;
 
     public function new(scanner, cardReader, screen, printer, keypad) {
@@ -23,6 +22,7 @@ class BorrowLibraryItems implements dci.Context
         this.printer = printer;
         this.library = Data;
         this.keypad = keypad;
+        this.scannedItems = new Array<LoanItem>();
     }
     
     public function start() {
@@ -39,7 +39,7 @@ class BorrowLibraryItems implements dci.Context
 
     function resetState() {
         pinAttemptsLeft = maxPinAttempts;
-        scannedItems = [];
+        scannedItems.clearItems();
         authorizedCard = null;
     }
 
@@ -47,10 +47,10 @@ class BorrowLibraryItems implements dci.Context
         function scanRfid(callback : Option<String> -> Void) : Void;
 
         public function waitForCardChange() {            
-            self.scanRfid(self.rfidChanged);
+            self.scanRfid(self.rfidScanned);
         }
 
-        function rfidChanged(data : Option<String>) switch data {
+        function rfidScanned(data : Option<String>) switch data {
             case None:
                 // No card, keep waiting
                 self.waitForCardChange();
@@ -103,6 +103,65 @@ class BorrowLibraryItems implements dci.Context
         }
     }
 
+    @role var scanner : {
+        function scanRfid(callback : Option<String> -> Void) : Void;
+        function lastScannedRfid() : Option<String>;
+
+        public function waitForItem() {
+            screen.displayScannedItems();
+            self.scanRfid(self.rfidScanned);
+        }
+
+        function rfidScanned(rfid : Option<String>) {
+            // If the card has been removed, return immediately.
+            if(authorizedCard == null) return;
+            switch rfid {
+                case None: 
+                    self.waitForItem();
+                case Some(rfid):
+                    var alreadyScanned = scannedItems.find(function(item) return item.rfid == rfid);
+
+                    if(alreadyScanned != null) {
+                        scannedItems.moveToBottom(alreadyScanned);
+                        self.waitForItem();
+                    } else {
+                        var item = library.items().find(function(item) return item.rfid == rfid);
+
+                        if(item == null)
+                            self.waitForItem();
+                        else {
+                            // TODO: Call borrow single library item context.
+                            scannedItems.addItem(item);
+                            self.waitForItem();
+                        }
+                    }
+            }
+        }
+    }
+
+    @role var scannedItems : {
+        function iterator() : Iterator<LoanItem>;
+        function push(item : LoanItem) : Int;
+        function indexOf (item : LoanItem, ?fromIndex : Int) : Int;
+        function splice(pos : Int, len : Int) : Iterable<LoanItem>;
+
+        public function moveToBottom(item : LoanItem) {
+            var find = self.indexOf(item);
+            if(find >= 0) {
+                self.splice(find, 1);
+                self.push(item);
+            }
+        }
+
+        public function addItem(item : LoanItem) {
+            self.push(item);
+        }
+
+        public function clearItems() {
+            self.splice(0, -1);
+        }
+    }
+
     @role var screen : {
         function display(s : ScreenState) : Void;
         function displayMessage(state : ScreenState, waitMs : Int, ?thenDisplay : ScreenState) : Void;
@@ -131,43 +190,6 @@ class BorrowLibraryItems implements dci.Context
             display(InvalidCard);
         }
     };
-
-    @role var scanner : {
-        function scanRfid(callback : Option<String> -> Void) : Void;
-        function lastScannedRfid() : Option<String>;
-
-        public function waitForItem() {
-            screen.displayScannedItems();
-            self.scanRfid(self.rfidScanned);
-        }
-
-        function rfidScanned(rfid : Option<String>) {
-            // If the card is removed, return immediately.
-            if(authorizedCard == null) return;
-            switch rfid {
-                case None: 
-                    self.waitForItem();
-                case Some(rfid):
-                    var alreadyScanned = scannedItems.find(function(item) return item.rfid == rfid);
-
-                    if(alreadyScanned != null) {
-                        scannedItems.remove(alreadyScanned);
-                        scannedItems.push(alreadyScanned);
-                        self.waitForItem();
-                    } else {
-                        var item = library.items().find(function(item) return item.rfid == rfid);
-
-                        if(item == null)
-                            self.waitForItem();
-                        else {
-                            // TODO: Call borrow single library item context.
-                            scannedItems.push(item);
-                            self.waitForItem();
-                        }
-                    }
-            }
-        }
-    }
 
     @role var keypad : {
         function onPinCodeEntered(callback : String -> Void) : Void;
