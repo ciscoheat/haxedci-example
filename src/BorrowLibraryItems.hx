@@ -130,9 +130,18 @@ class BorrowLibraryItems implements dci.Context
                         if(item == null)
                             self.waitForItem();
                         else {
-                            // TODO: Call borrow single library item context.
-                            scannedItems.addItem(item);
-                            self.waitForItem();
+                            switch new BorrowLoanItem(item, authorizedCard).borrow() {
+                                case Ok:
+                                    scannedItems.addItem(item);
+                                    self.waitForItem();
+                                case InvalidLoanItem:
+                                    screen.displayInvalidLoanItem();
+                                    self.waitForItem();
+                                case InvalidBorrower:
+                                    screen.displayInvalidCard();
+                                case ItemAlreadyBorrowed:
+                                    screen.displayAlreadyBorrowed();
+                            }
                         }
                     }
             }
@@ -189,6 +198,14 @@ class BorrowLibraryItems implements dci.Context
         public function displayInvalidCard() {
             display(InvalidCard);
         }
+
+        public function displayInvalidLoanItem() {
+            displayMessage(InvalidLoanItem, 3000);
+        }
+
+        public function displayAlreadyBorrowed() {
+            displayMessage(ItemAlreadyBorrowed, 3000);
+        }
     };
 
     @role var keypad : {
@@ -200,7 +217,9 @@ class BorrowLibraryItems implements dci.Context
         }
     };
 
-    @role var printer : {};
+    @role var printer : {
+
+    };
 
     @role var library : {
         public var libraryItems(default, null) : Array<LoanItem>;

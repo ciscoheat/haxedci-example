@@ -15,7 +15,9 @@ class Main implements HaxeContracts
 	function new() {}
 	
 	function start() {
-		// Set up data for the system
+		
+		///// Set up data for the system /////
+
 		Data.libraryItems = [
 			new Book({ rfid: 'ITEM787', title: 'Anna Karenina', loanTimeDays: 21}), 
 			new Bluray({ rfid: 'ITEM788', title: 'War and Peace', loanTimeDays: 14, length: 168}),
@@ -25,6 +27,10 @@ class Main implements HaxeContracts
 		Data.libraryCards = [
 			new Card({rfid: 'CARD54321', name: 'Leo Tolstoy', pin: '1234'})
 		];
+
+		Data.libraryLoans = [];
+
+		///// Set up views /////
 
 		var bookshelf : Array<DragDropItem> = cast Data.libraryItems.array();
 		var workspace : Array<DragDropItem> = cast Data.libraryCards.array();

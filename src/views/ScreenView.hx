@@ -14,6 +14,8 @@ enum ScreenState {
     TooManyInvalidPin;
     RemoveCard;
     InvalidCard;
+    InvalidLoanItem;
+    ItemAlreadyBorrowed;
 }
 
 class ScreenView implements HaxeContracts implements Mithril
@@ -61,6 +63,10 @@ class ScreenView implements HaxeContracts implements Mithril
                 thankYou();
             case InvalidCard:
                 invalidCard();
+            case InvalidLoanItem:
+                invalidLoanItem();
+            case ItemAlreadyBorrowed:
+                itemAlreadyBorrowed();
             case _: 
                 m('.content.red', 'View not found: $_state');
         }
@@ -148,4 +154,18 @@ class ScreenView implements HaxeContracts implements Mithril
     function thankYou() m('.content',
         m('p', 'Thank you for using the automatic borrowing service!')
     );
+
+    ///////////////////////////////////////////////////////
+
+    function invalidLoanItem() m('.content', [
+        m('.red', 'Loan item not valid.'),
+        m('p', 'Please contact support.')
+    ]);
+
+    ///////////////////////////////////////////////////////
+
+    function itemAlreadyBorrowed() m('.content', [
+        m('.red', 'Loan item already borrowed.'),
+        m('p', 'Please contact support.')
+    ]);
 }

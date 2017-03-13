@@ -9,13 +9,14 @@ import DragDrop.DragDropItem;
 {
     public static var libraryItems(default, null) : Array<LoanItem>;
     public static var libraryCards(default, null) : Array<Card>;
+    public static var libraryLoans(default, null) : Array<LibraryLoan>;
 }
 
 ///// Interfaces (artefacts that makes sense to the user) /////
 
 interface RfidItem
 {
-    public var rfid(default, set) : String;    
+    public var rfid(default, set) : String;
 }
 
 interface LoanItem extends DragDropItem extends RfidItem
@@ -41,11 +42,19 @@ class Bluray implements HaxeContracts implements DataClass implements LoanItem
     @validate(_ > 0) public var loanTimeDays : Int;
 }
 
-///// Other items /////
+///// Other data /////
 
 class Card implements HaxeContracts implements DataClass implements DragDropItem implements RfidItem
 {
     @validate(_.length > 0) public var rfid : String;
     @validate(_.length > 0) public var name : String;
     @validate(~/\d{4}/) public var pin : String;
+}
+
+class LibraryLoan implements HaxeContracts implements DataClass
+{
+    @validate(_.length > 0) public var loanItemRfid : String;
+    @validate(_.length > 0) public var borrowerRfid : String;
+    public var created : Date;
+    public var returnDate : Date;
 }
