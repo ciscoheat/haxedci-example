@@ -24,17 +24,18 @@ class ScreenView implements HaxeContracts implements Mithril
     var messageTimer : Timer;
 
     var _onPinCodeEntered : Null<String -> Void>;
-    var _state : ScreenState;
+    var currentState : ScreenState;
 
     public function display(state : ScreenState) {
         Contract.requires(state != null);
         if(messageTimer != null) messageTimer.stop();
-        _state = state;
+        currentState = state;
         M.redraw();
+        //trace('ScreenState change: $state');
     }
 
     public function displayMessage(state : ScreenState, waitMs : Int, ?thenDisplay : ScreenState) {
-        if(thenDisplay == null) thenDisplay = state;
+        if(thenDisplay == null) thenDisplay = currentState;
 
         display(state);
 
@@ -50,7 +51,7 @@ class ScreenView implements HaxeContracts implements Mithril
     }
 
     public function view() {
-        return switch _state {
+        return switch currentState {
             case Welcome: 
                 welcome();
             case EnterPin(data): 
@@ -68,7 +69,7 @@ class ScreenView implements HaxeContracts implements Mithril
             case ItemAlreadyBorrowed:
                 itemAlreadyBorrowed();
             case _: 
-                m('.content.red', 'View not found: $_state');
+                m('.content.red', 'View not found: $currentState');
         }
     }
 
@@ -76,7 +77,7 @@ class ScreenView implements HaxeContracts implements Mithril
 
     function welcome() m('.content', [
         m('p', 'Welcome to the library borrowing machine!'),
-        m('p', 'Insert your card into the reader to get started.')
+        m('p', m('strong', 'Please insert your card into the reader.'))
     ]);
 
     ///////////////////////////////////////////////////////
