@@ -123,37 +123,27 @@ class BorrowLibraryItems implements dci.Context
             switch rfid {
                 case None: 
                     self.waitForItem();
+                    
                 case Some(rfid):
-                    // Test if the item has already been scanned.
-                    // This is to prevent obvious error messages from BorrowLoanItem Context.
-                    var alreadyScanned = scannedItems.find(function(item) return item.rfid == rfid);
+                    if(scannedItems.alreadyScanned(rfid)) return self.waitForItem();
 
-                    if(alreadyScanned != null) {
-                        scannedItems.moveToBottomOfList(alreadyScanned);
-                        screen.displayScannedItems();
-                        self.waitForItem();
-                    } else {
-                        var item = library.item(rfid);
+                    var item = library.item(rfid);
+                    if(item == null) return self.waitForItem();
 
-                        if(item == null)
+                    switch new BorrowLoanItem(item, authorizedCard).borrow() {
+                        case Ok:
+                            scannedItems.addItem(item);
+                            screen.displayScannedItems();                                
                             self.waitForItem();
-                        else {
-                            switch new BorrowLoanItem(item, authorizedCard).borrow() {
-                                case Ok:
-                                    scannedItems.addItem(item);
-                                    screen.displayScannedItems();                                
-                                    self.waitForItem();
-                                case InvalidLoanItem:
-                                    screen.displayInvalidLoanItemMessage();
-                                    self.waitForItem();
-                                case ItemAlreadyBorrowed:
-                                    screen.displayAlreadyBorrowedMessage();
-                                    self.waitForItem();
-                                case InvalidBorrower:
-                                    // Card is invalid, don't wait for another item.
-                                    screen.displayInvalidCard();
-                            }
-                        }
+                        case InvalidLoanItem:
+                            screen.displayInvalidLoanItemMessage();
+                            self.waitForItem();
+                        case ItemAlreadyBorrowed:
+                            screen.displayAlreadyBorrowedMessage();
+                            self.waitForItem();
+                        case InvalidBorrower:
+                            // Card is invalid, don't wait for another item.
+                            screen.displayInvalidCard();
                     }
             }
         }
@@ -162,25 +152,17 @@ class BorrowLibraryItems implements dci.Context
     @role var scannedItems : {
         function iterator() : Iterator<LoanItem>;
         function push(item : LoanItem) : Int;
-        function indexOf(item : LoanItem, ?fromIndex : Int) : Int;
         function splice(pos : Int, len : Int) : Iterable<LoanItem>;
         var length(default, null) : Int;
 
-        public function moveToBottomOfList(item : LoanItem) {
-            var find = self.indexOf(item);
-            if(find >= 0) {
-                self.splice(find, 1);
-                self.push(item);
-            }
-        }
-
-        public function addItem(item : LoanItem) {
+        public function addItem(item : LoanItem)
             self.push(item);
-        }
 
-        public function clearItems() {
+        public function clearItems()
             self.splice(0, self.length);
-        }
+
+        public function alreadyScanned(rfid : String) : Bool
+            return self.exists(function(loanItem) return loanItem.rfid == rfid);
     }
 
     @role var screen : {
