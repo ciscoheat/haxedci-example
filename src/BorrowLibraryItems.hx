@@ -208,8 +208,8 @@ class BorrowLibraryItems implements dci.Context
     }
 
     @role var library : {
-        public var libraryItems(default, null) : Array<LoanItem>;
-        public var libraryCards(default, null) : Array<Card>;
+        var libraryItems(default, null) : Array<LoanItem>;
+        var libraryCards(default, null) : Array<Card>;
 
         public function item(rfid : String) : LoanItem 
             return libraryItems.find(function(loanItem) return loanItem.rfid == rfid);
