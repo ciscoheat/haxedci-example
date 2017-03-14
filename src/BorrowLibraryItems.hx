@@ -118,12 +118,12 @@ class BorrowLibraryItems implements dci.Context
         function rfidScanned(rfid : Option<String>) {
             // If the card has been removed, cancel interaction.
             if(authorizedCard == null) return;
-            if(rfid.equals(lastScannedRfid())) return waitForItem();
+            if(rfid.equals(self.lastScannedRfid())) return self.waitForItem();
 
             switch rfid {
                 case None: 
                     self.waitForItem();
-                    
+
                 case Some(rfid):
                     if(scannedItems.alreadyScanned(rfid)) return self.waitForItem();
 
