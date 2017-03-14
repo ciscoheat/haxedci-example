@@ -187,38 +187,30 @@ class BorrowLibraryItems implements dci.Context
         function display(s : ScreenState) : Void;
         function displayMessage(state : ScreenState, waitMs : Int, ?thenDisplay : ScreenState) : Void;
 
-        public function displayWelcome() {
+        public function displayWelcome()
             display(Welcome);
-        }
         
-        public function displayThankYouMessage() {
+        public function displayThankYouMessage()
             displayMessage(ThankYou, 4000, Welcome);
-        }
 
-        public function displayEnterPin() {
+        public function displayEnterPin()
             display(EnterPin({previousAttemptFailed: pinAttemptsLeft < 3}));
-        }
 
-        public function displayScannedItems() {
+        public function displayScannedItems()
             display(DisplayBorrowedItems(scannedItems));
-        }
 
-        public function displayTooManyInvalidPin() {
+        public function displayTooManyInvalidPin()
             display(TooManyInvalidPin);
-        }
 
-        public function displayInvalidCard() {
+        public function displayInvalidCard()
             display(InvalidCard);
-        }
 
-        public function displayInvalidLoanItemMessage() {
+        public function displayInvalidLoanItemMessage()
             displayMessage(InvalidLoanItem, 3000);
-        }
 
-        public function displayAlreadyBorrowedMessage() {
+        public function displayAlreadyBorrowedMessage()
             displayMessage(ItemAlreadyBorrowed, 3000);
-        }
-    };
+    }
 
     @role var keypad : {
         function onPinCodeEntered(callback : String -> Void) : Void;
@@ -227,11 +219,11 @@ class BorrowLibraryItems implements dci.Context
             screen.displayEnterPin();
             self.onPinCodeEntered(cardReader.validatePin);
         }
-    };
+    }
 
     @role var printer : {
 
-    };
+    }
 
     @role var library : {
         public var libraryItems(default, null) : Array<LoanItem>;
