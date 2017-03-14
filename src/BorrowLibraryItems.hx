@@ -32,7 +32,7 @@ class BorrowLibraryItems implements dci.Context
     }
 
     function restart() {
-        screen.displayThankYou();
+        screen.displayThankYouMessage();
         resetState();
         cardReader.waitForCardChange();
     }
@@ -144,10 +144,10 @@ class BorrowLibraryItems implements dci.Context
                                     screen.displayScannedItems();                                
                                     self.waitForItem();
                                 case InvalidLoanItem:
-                                    screen.displayInvalidLoanItem();
+                                    screen.displayInvalidLoanItemMessage();
                                     self.waitForItem();
                                 case ItemAlreadyBorrowed:
-                                    screen.displayAlreadyBorrowed();
+                                    screen.displayAlreadyBorrowedMessage();
                                     self.waitForItem();
                                 case InvalidBorrower:
                                     // Card is invalid, don't wait for another item.
@@ -191,7 +191,7 @@ class BorrowLibraryItems implements dci.Context
             display(Welcome);
         }
         
-        public function displayThankYou() {
+        public function displayThankYouMessage() {
             displayMessage(ThankYou, 4000, Welcome);
         }
 
@@ -211,11 +211,11 @@ class BorrowLibraryItems implements dci.Context
             display(InvalidCard);
         }
 
-        public function displayInvalidLoanItem() {
+        public function displayInvalidLoanItemMessage() {
             displayMessage(InvalidLoanItem, 3000);
         }
 
-        public function displayAlreadyBorrowed() {
+        public function displayAlreadyBorrowedMessage() {
             displayMessage(ItemAlreadyBorrowed, 3000);
         }
     };
