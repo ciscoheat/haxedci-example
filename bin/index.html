@@ -6,7 +6,7 @@
 	<link rel="stylesheet" href="https://cdn.concisecss.com/concise.css">
 	<link rel="stylesheet" href="https://cdn.concisecss.com/concise-ui/concise-ui.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.css">
-	<link rel="stylesheet" href="/css/styles.css">
+	<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 	<div grid="bottom">
@@ -28,9 +28,7 @@
 	<div grid>
 		<div column='8 +2'>
 			<div id="table">
-				<div id="workspace">
-					<!-- img src="/images/card.svg" id="card" -->
-				</div>
+				<div id="workspace"></div>
 				<div id="scanner"></div>
 			</div>
 		</div>
@@ -78,9 +76,9 @@
 		}))
 		*/
 	</script>
-	<script src="/haxedci-example.js"></script>
+	<script src="haxedci-example.js"></script>
 	<script>
-	  document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] +
+	  if(location.hostname === "localhost") document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] +
 	  ':35729/livereload.js?snipver=1"></' + 'script>')
 	</script> 
 </body>

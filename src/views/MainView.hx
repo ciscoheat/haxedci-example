@@ -45,7 +45,7 @@ class MainView implements Mithril
     function surfaceView(surface : Array<DragDropItem>) return surface.map(function(item) {
         return switch Type.getClass(item) {
             case Data.Card: 
-                m('img#card[src=/images/card.svg]');
+                m('img#card[src=images/card.svg]');
             case Data.Book:
                 var item : Data.Book = cast item;
                 m('.book.cover', item.title);
