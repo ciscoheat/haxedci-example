@@ -2,6 +2,15 @@ import haxecontracts.*;
 import haxe.Constraints;
 import haxe.PosInfos;
 
+/**
+ *  Highly constrained event delegate.
+ *  
+ *  - Can only set one event handler at a time
+ *  - The same event handler can be set multiple times without having to remove it
+ *  - Before setting another event handler, the current event handler must be removed using itself
+ *  - Deregisters automatically after referencing the event handler, so it must be set 
+ *    again after being triggered
+ */
 class SingleEventHandler<T : Function> implements HaxeContracts
 {
     public var trigger(get, never) : T;

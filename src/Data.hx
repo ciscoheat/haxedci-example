@@ -58,3 +58,9 @@ class LibraryLoan implements HaxeContracts implements DataClass
     public var created : Date;
     public var returnDate : Date;
 }
+
+// This is to simplify the example, to avoid adding data references in ScreenView for example.
+typedef ScannedItem = {
+    item: LoanItem,
+    returnDate: Date
+}

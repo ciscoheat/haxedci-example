@@ -3,13 +3,14 @@ package views;
 import mithril.M;
 import haxecontracts.*;
 import haxe.Timer;
+import Data.ScannedItem;
 
 using DateTools;
 
 enum ScreenState {
     Welcome;
     EnterPin(data : {previousAttemptFailed : Bool});
-    DisplayBorrowedItems(items : Iterable<Data.LoanItem>);
+    DisplayBorrowedItems(scannedItems : Iterable<ScannedItem>);
     ThankYou;
     TooManyInvalidPin;
     RemoveCard;
@@ -54,10 +55,6 @@ class ScreenView implements HaxeContracts implements Mithril
         _onPinCodeEntered.set(callback, pos);
     }
 
-    public function removeOnPinCodeEntered(callback : String -> Void) {
-        _onPinCodeEntered.remove(callback);
-    }
-
     public function onFinishWithoutReceiptClicked(callback : Void -> Void, ?pos : haxe.PosInfos) : Void {
         _onFinishWithoutReceiptClicked.set(callback, pos);
     }
@@ -74,8 +71,8 @@ class ScreenView implements HaxeContracts implements Mithril
                 enterPin(data.previousAttemptFailed);
             case TooManyInvalidPin:
                 tooManyInvalidPin();
-            case DisplayBorrowedItems(items):
-                displayBorrowedItems(items);
+            case DisplayBorrowedItems(scannedItems):
+                displayBorrowedItems(scannedItems);
             case ThankYou:
                 thankYou();
             case InvalidCard:
@@ -136,19 +133,21 @@ class ScreenView implements HaxeContracts implements Mithril
 
     ///////////////////////////////////////////////////////
 
-    function displayBorrowedItems(items : Iterable<Data.LoanItem>) {
+    function displayBorrowedItems(scannedItems : Iterable<ScannedItem>) {
         m('.content', [
             m('p', 'Scan the items you want to borrow on the dark red area.'),
             m('p', [
                 m('button.-success', {
-                    style:"margin-right:2px"
+                    style:"margin-right:2px",
+                    onclick: function() {
+                        if(_onFinishWithReceiptClicked.hasEvent())
+                            _onFinishWithReceiptClicked.trigger();
+                    }
                 }, 'Finish with receipt'),
                 m('button.-success', {
                     onclick: function() {
-                        if(_onFinishWithoutReceiptClicked.hasEvent()) {
-                            trace("Finish without receipt.");
+                        if(_onFinishWithoutReceiptClicked.hasEvent())
                             _onFinishWithoutReceiptClicked.trigger();
-                        }
                     }
                 }, 'Finish without receipt'),
             ]),
@@ -158,10 +157,9 @@ class ScreenView implements HaxeContracts implements Mithril
                         [m('th', 'Title'), m('th', 'Return date')]
                     )
                 ),
-                m('tbody', [for(item in items) {
-                    var returnDate = Date.now().delta(item.loanTimeDays * 24 * 60 * 60 * 1000);
+                m('tbody', [for(scanned in scannedItems) {
                     m('tr',
-                        [m('td', item.title), m('td', returnDate.format("%Y-%m-%d"))]
+                        [m('td', scanned.item.title), m('td', scanned.returnDate.format("%Y-%m-%d"))]
                     );
                 }])
             ])

@@ -13,13 +13,15 @@ class MainView implements Mithril
     var bookshelf : Array<DragDropItem>;
     var workspace : Array<DragDropItem>;
     var itemScanner : Array<DragDropItem>;
+    var printer : ReceiptPrinter;
 
-    public function new(bookshelf, cardReader, workspace, itemScanner, screenView) {
+    public function new(bookshelf, cardReader, workspace, itemScanner, screenView, printer) {
         this.bookshelf = bookshelf;
         this.workspace = workspace;
         this.cardReader = cardReader;
         this.itemScanner = itemScanner;
         this.screenView = screenView;
+        this.printer = printer;
     }
 
     /**
@@ -35,11 +37,7 @@ class MainView implements Mithril
         M.mount(Scanner, {view: surfaceView.bind(itemScanner)});
         M.mount(Workspace, {view: surfaceView.bind(workspace)});
 
-        M.mount(Printer, {view: function()
-            m('.box', 
-                m('.slot')
-            )
-        });        
+        M.mount(Printer, printer);
     }
 
     function surfaceView(surface : Array<DragDropItem>) return surface.map(function(item) {

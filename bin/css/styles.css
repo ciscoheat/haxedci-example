@@ -134,8 +134,20 @@ html {
 #printer .box .slot {
 	height: 15px;
 	border: 2px solid #aaa;
-	background-color: white;
+	background-color: #eee;
 	width: 85%;
+}
+
+#printer .paper {
+	background-color: white;
+	position: relative;
+	font-size: 75%;
+	top: 2px;
+	padding: 4px;
+}
+
+#printer .paper * {
+	margin: 0;
 }
 
 /***********************************************/

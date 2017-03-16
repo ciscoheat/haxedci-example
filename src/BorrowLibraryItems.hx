@@ -2,7 +2,11 @@ import haxe.ds.Option;
 import views.ScreenView.ScreenState;
 import Data.Card;
 import Data.LoanItem;
+import Data.LibraryLoan;
+import Data.ScannedItem;
 import haxe.Timer;
+
+using DateTools;
 
 /**
  *  Use case implementation.
@@ -26,7 +30,7 @@ class BorrowLibraryItems implements dci.Context
         this.finishButtons = finishButtons;
 
         this.library = Data;
-        this.scannedItems = new Array<LoanItem>();
+        this.scannedItems = new Array<ScannedItem>();
     }
     
     public function start() {
@@ -129,8 +133,11 @@ class BorrowLibraryItems implements dci.Context
                     if(item == null) return self.waitForItem();
 
                     switch new BorrowLoanItem(item, authorizedCard).borrow() {
-                        case Ok:
-                            scannedItems.addItem(item);
+                        case Ok(loan):
+                            scannedItems.addItem({
+                                item: item,
+                                returnDate: loan.returnDate
+                            });
                             screen.displayScannedItems();                                
                             self.waitForItem();
                         case InvalidLoanItem:
@@ -148,19 +155,19 @@ class BorrowLibraryItems implements dci.Context
     }
 
     @role var scannedItems : {
-        function iterator() : Iterator<LoanItem>;
-        function push(item : LoanItem) : Int;
-        function splice(pos : Int, len : Int) : Iterable<LoanItem>;
+        function iterator() : Iterator<ScannedItem>;
+        function push(item : ScannedItem) : Int;
+        function splice(pos : Int, len : Int) : Iterable<ScannedItem>;
         var length(default, null) : Int;
 
-        public function addItem(item : LoanItem)
+        public function addItem(item : ScannedItem)
             self.push(item);
 
         public function clearItems()
             self.splice(0, self.length);
 
         public function alreadyScanned(rfid : String) : Bool
-            return self.exists(function(loanItem) return loanItem.rfid == rfid);
+            return self.exists(function(scannedItem) return scannedItem.item.rfid == rfid);
     }
 
     @role var screen : {
@@ -203,6 +210,7 @@ class BorrowLibraryItems implements dci.Context
 
         public function waitForFinishClick() {
             onFinishWithoutReceiptClicked(screen.displayDontForgetLibraryCard);
+            onFinishWithReceiptClicked(printer.printReceipt);
         }
     }
 
@@ -216,7 +224,28 @@ class BorrowLibraryItems implements dci.Context
     }
 
     @role var printer : {
+        function print(line : String) : Void;
+        function cutPaper() : Void;
+        
+        public function printReceipt() : Void {
+            var buffer = [Date.now().format("%Y-%m-%d"), ""];
 
+            for(scanned in scannedItems) {
+                buffer.push(scanned.item.title);
+                buffer.push("Return on " + scanned.returnDate.format("%Y-%m-%d"));
+                buffer.push("");
+            }
+
+            var timer = new Timer(100);
+            timer.run = function() {
+                self.print(buffer.pop());
+                if(buffer.length == 0) {
+                    timer.stop();
+                    self.cutPaper();
+                    screen.displayDontForgetLibraryCard();
+                }
+            }
+        }
     }
 
     @role var library : {

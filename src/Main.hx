@@ -49,10 +49,10 @@ class Main implements HaxeContracts
 		});
 
 		var screen = new views.ScreenView(Welcome);
-		var printer = {};
+		var printer = new ReceiptPrinter();
 
 		// Display models in the main view with Mithril
-		new views.MainView(bookshelf, cardReaderContents, workspace, itemScannerContents, screen).mount();
+		new views.MainView(bookshelf, cardReaderContents, workspace, itemScannerContents, screen, printer).mount();
 
 		// Start the browser app by enabling drag'n'drop functionality
 		var surfaces = [

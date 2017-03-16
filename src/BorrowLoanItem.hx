@@ -5,7 +5,7 @@ import Data.Card;
 using DateTools;
 
 enum BorrowLoanItemStatus {
-    Ok;
+    Ok(loan : LibraryLoan);
     ItemAlreadyBorrowed;
     InvalidBorrower;
     InvalidLoanItem;
@@ -40,7 +40,7 @@ class BorrowLoanItem implements dci.Context
                 returnDate: loanItem.returnDateFromToday()
             });
             listOfLoans.addLoan(loan);
-            Ok;
+            Ok(loan);
         }
     }
 
