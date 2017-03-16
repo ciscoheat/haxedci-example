@@ -16,18 +16,22 @@ class LibraryBorrowMachine implements dci.Context
 {
     static var maxPinAttempts(default, never) : Int = 3;
 
+    ///// Non-Role state that supports the Context /////
+
     var pinAttemptsLeft : Int;
     var authorizedCard : LibraryCard;
     var lastScannedRfid : Option<String>;
 
+    ///// Constructor and System interactions /////
+
     public function new(scanner, cardReader, screen, printer, keypad, finishButtons) {
+        // Role binding
         this.scanner = scanner;
         this.cardReader = cardReader;
         this.screen = screen;
         this.printer = printer;
         this.keypad = keypad;
         this.finishButtons = finishButtons;
-
         this.library = Data;
         this.scannedItems = new Array<ScannedItem>();
     }
@@ -50,6 +54,8 @@ class LibraryBorrowMachine implements dci.Context
         authorizedCard = null;
         lastScannedRfid = None;
     }
+
+    ///// Roles /////
 
     @role var cardReader : {
         function scanRfid(callback : Option<String> -> Void) : Void;
