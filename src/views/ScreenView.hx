@@ -16,15 +16,18 @@ enum ScreenState {
     InvalidCard;
     InvalidLoanItem;
     ItemAlreadyBorrowed;
+    DontForgetLibraryCard;
 }
 
 class ScreenView implements HaxeContracts implements Mithril
 {
     var pinBuffer : String = "";
     var messageTimer : Timer;
-
-    var _onPinCodeEntered : Null<String -> Void>;
     var currentState : ScreenState;
+
+    var _onPinCodeEntered = new SingleEventHandler<String -> Void>();
+    var _onFinishWithoutReceiptClicked = new SingleEventHandler<Void -> Void>();
+    var _onFinishWithReceiptClicked = new SingleEventHandler<Void -> Void>();
 
     public function display(state : ScreenState) {
         Contract.requires(state != null);
@@ -43,11 +46,24 @@ class ScreenView implements HaxeContracts implements Mithril
         messageTimer.run = display.bind(thenDisplay);
     }
 
-    public function new(initialState)
+    public function new(initialState) {
         display(initialState);
+    }
 
-    public function onPinCodeEntered(callback : String -> Void) {
-        _onPinCodeEntered = callback;
+    public function onPinCodeEntered(callback : String -> Void, ?pos : haxe.PosInfos) : Void {
+        _onPinCodeEntered.set(callback, pos);
+    }
+
+    public function removeOnPinCodeEntered(callback : String -> Void) {
+        _onPinCodeEntered.remove(callback);
+    }
+
+    public function onFinishWithoutReceiptClicked(callback : Void -> Void, ?pos : haxe.PosInfos) : Void {
+        _onFinishWithoutReceiptClicked.set(callback, pos);
+    }
+
+    public function onFinishWithReceiptClicked(callback : Void -> Void, ?pos : haxe.PosInfos) : Void {
+        _onFinishWithReceiptClicked.set(callback, pos);
     }
 
     public function view() {
@@ -68,6 +84,8 @@ class ScreenView implements HaxeContracts implements Mithril
                 invalidLoanItem();
             case ItemAlreadyBorrowed:
                 itemAlreadyBorrowed();
+            case DontForgetLibraryCard:
+                dontForgetLibraryCard();
             case _: 
                 m('.content.red', 'View not found: $currentState');
         }
@@ -104,10 +122,8 @@ class ScreenView implements HaxeContracts implements Mithril
 
         var pin = pinBuffer;
         pinBuffer = "";
-        if(_onPinCodeEntered != null) {
-            var callback = _onPinCodeEntered;
-            _onPinCodeEntered = null;        
-            callback(pin);
+        if(_onPinCodeEntered.hasEvent()) {
+            _onPinCodeEntered.trigger(pin);
         }
     }
 
@@ -124,8 +140,17 @@ class ScreenView implements HaxeContracts implements Mithril
         m('.content', [
             m('p', 'Scan the items you want to borrow on the dark red area.'),
             m('p', [
-                m('button.-success', {style:"margin-right:2px"}, 'Finish with receipt'),
-                m('button.-success', 'Finish without receipt'),
+                m('button.-success', {
+                    style:"margin-right:2px"
+                }, 'Finish with receipt'),
+                m('button.-success', {
+                    onclick: function() {
+                        if(_onFinishWithoutReceiptClicked.hasEvent()) {
+                            trace("Finish without receipt.");
+                            _onFinishWithoutReceiptClicked.trigger();
+                        }
+                    }
+                }, 'Finish without receipt'),
             ]),
             m('table', [ 
                 m('thead', 
@@ -152,9 +177,15 @@ class ScreenView implements HaxeContracts implements Mithril
 
     ///////////////////////////////////////////////////////
 
-    function thankYou() m('.content',
-        m('p', 'Thank you for using the automatic borrowing service!')
-    );
+    function thankYou() m('.content', [
+        m('p', 'Thank you for using the automatic borrowing service!'),
+    ]);
+
+    ///////////////////////////////////////////////////////
+
+    function dontForgetLibraryCard() m('.content', [
+        m('p', m('strong', "Don't forget your library card!"))
+    ]);
 
     ///////////////////////////////////////////////////////
 

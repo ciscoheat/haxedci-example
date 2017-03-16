@@ -64,6 +64,6 @@ class Main implements HaxeContracts
 		new DragDrop(surfaces).start();
 
 		// Start the Context that will do the actual borrowing
-		new BorrowLibraryItems(itemScanner, cardReader, screen, printer, screen).start();
+		new BorrowLibraryItems(itemScanner, cardReader, screen, printer, screen, screen).start();
 	}
 }

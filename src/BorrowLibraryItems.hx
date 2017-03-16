@@ -14,41 +14,46 @@ class BorrowLibraryItems implements dci.Context
 
     var pinAttemptsLeft : Int;
     var authorizedCard : Card;
+    var lastScannedRfid : Option<String>;
+    var removeCardLoop : Timer;
 
-    public function new(scanner, cardReader, screen, printer, keypad) {
+    public function new(scanner, cardReader, screen, printer, keypad, finishButtons) {
         this.scanner = scanner;
         this.cardReader = cardReader;
         this.screen = screen;
         this.printer = printer;
-        this.library = Data;
         this.keypad = keypad;
+        this.finishButtons = finishButtons;
+
+        this.library = Data;
         this.scannedItems = new Array<LoanItem>();
     }
     
     public function start() {
-        screen.displayWelcome();
         resetState();
+        screen.displayWelcome();
         cardReader.waitForCardChange();
     }
 
     function restart() {
-        screen.displayThankYouMessage();
         resetState();
+        screen.displayThankYouMessage();
         cardReader.waitForCardChange();
     }
 
     function resetState() {
-        pinAttemptsLeft = maxPinAttempts;
+        if(removeCardLoop != null) removeCardLoop.stop();
         scannedItems.clearItems();
+        pinAttemptsLeft = maxPinAttempts;
         authorizedCard = null;
+        lastScannedRfid = None;
     }
 
     @role var cardReader : {
         function scanRfid(callback : Option<String> -> Void) : Void;
 
-        public function waitForCardChange() {            
+        public function waitForCardChange()
             self.scanRfid(self.rfidScanned);
-        }
 
         function rfidScanned(data : Option<String>) switch data {
             case None:
@@ -57,7 +62,13 @@ class BorrowLibraryItems implements dci.Context
 
             case Some(rfid):
                 // Create a wait loop, detecting card removal.
-                self.createCardRemovedWaitLoop();
+                removeCardLoop = new haxe.Timer(50);
+                removeCardLoop.run = function() {
+                    self.scanRfid(function(data) {
+                        // An "equals" test is required because data is an Enum.
+                        if(data.equals(None)) restart();
+                    });
+                }
 
                 // Look up current card in library database, display pin screen if valid.
                 var card = library.card(rfid);
@@ -66,19 +77,6 @@ class BorrowLibraryItems implements dci.Context
                     keypad.waitForEnterPin();
                 else
                     screen.displayInvalidCard();
-        }
-
-        function createCardRemovedWaitLoop() {
-            var removeCardTimer = new haxe.Timer(50);
-            removeCardTimer.run = function() {
-                self.scanRfid(function(data) {
-                    // An "equals" test is required because data is an Enum.
-                    if(data.equals(None)) {
-                        removeCardTimer.stop();
-                        restart();
-                    }
-                });
-            }
         }
 
         public function validatePin(pin : String) {
@@ -109,16 +107,16 @@ class BorrowLibraryItems implements dci.Context
 
     @role var scanner : {
         function scanRfid(callback : Option<String> -> Void) : Void;
-        function lastScannedRfid() : Option<String>;
 
-        public function waitForItem() {
+        public function waitForItem()
             self.scanRfid(self.rfidScanned);
-        }
 
         function rfidScanned(rfid : Option<String>) {
             // If the card has been removed, cancel interaction.
             if(authorizedCard == null) return;
-            if(rfid.equals(self.lastScannedRfid())) return self.waitForItem();
+
+            if(rfid.equals(lastScannedRfid)) return self.waitForItem()
+            else lastScannedRfid = rfid;
 
             switch rfid {
                 case None: 
@@ -178,8 +176,10 @@ class BorrowLibraryItems implements dci.Context
         public function displayEnterPin()
             display(EnterPin({previousAttemptFailed: pinAttemptsLeft < 3}));
 
-        public function displayScannedItems()
+        public function displayScannedItems() {
+            finishButtons.waitForFinishClick();
             display(DisplayBorrowedItems(scannedItems));
+        }
 
         public function displayTooManyInvalidPin()
             display(TooManyInvalidPin);
@@ -192,10 +192,22 @@ class BorrowLibraryItems implements dci.Context
 
         public function displayAlreadyBorrowedMessage()
             displayMessage(ItemAlreadyBorrowed, 3000);
+
+        public function displayDontForgetLibraryCard()
+            display(DontForgetLibraryCard);
+    }
+
+    @role var finishButtons : {
+        function onFinishWithoutReceiptClicked(callback : Void -> Void, ?pos : haxe.PosInfos) : Void;
+        function onFinishWithReceiptClicked(callback : Void -> Void, ?pos : haxe.PosInfos) : Void;
+
+        public function waitForFinishClick() {
+            onFinishWithoutReceiptClicked(screen.displayDontForgetLibraryCard);
+        }
     }
 
     @role var keypad : {
-        function onPinCodeEntered(callback : String -> Void) : Void;
+        function onPinCodeEntered(callback : String -> Void, ?pos : haxe.PosInfos) : Void;
 
         public function waitForEnterPin() {
             screen.displayEnterPin();
