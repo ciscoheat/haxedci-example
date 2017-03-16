@@ -4,6 +4,7 @@
 #-D macro-times
 
 -cp src 
+-cp lib
 
 -lib haxedci 
 -lib HaxeContracts

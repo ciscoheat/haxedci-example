@@ -1,13 +1,13 @@
 import contexts.DragDropMechanics.DragDropItem;
 
 /**
- *  Used as a in-memory database for library items and cards.
+ *  Used as a in-memory database for library items, cards and loans.
  *  The Main class is used to set up the data, hence the "allow" access
  *  control for Main.
  *  
  *  Short "implements" reference for the data classes below:
  *  - HaxeContracts: Design by Contract library
- *  - DataClass: A convenient way of creating simple data objects
+ *  - DataClass: A convenient way of creating and ensuring integrity of data objects
  *  - DragDropItem: A marker interface for objects that can be drag-dropped
  */
 @:allow(Main) class Data 

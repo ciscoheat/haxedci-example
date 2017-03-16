@@ -16,10 +16,16 @@ enum ScreenState {
     DontForgetLibraryCard;
 }
 
+/**
+ *  View for the computer screen on the library borrowing machine.
+ *  
+ *  It also contains events for entering PIN code and clicking the
+ *  "finished" buttons, because it's a touch screen.
+ */
 class ScreenView implements HaxeContracts implements Mithril
 {
     var currentState : ScreenState = Welcome;
-    var messageTimer : Null<Timer>;
+    var messageTimer : Timer = new Timer(1000);
     var pinBuffer : String = "";
 
     var _onPinCodeEntered = new SingleEventHandler<String -> Void>();
@@ -31,7 +37,9 @@ class ScreenView implements HaxeContracts implements Mithril
     public function new() {}
 
     public function display(state : ScreenState) {
-        if(messageTimer != null) messageTimer.stop();
+        // If state is switched, stop current message display,
+        // which could revert the current state otherwise.
+        messageTimer.stop();
         currentState = state;
         M.redraw();
     }
@@ -68,6 +76,7 @@ class ScreenView implements HaxeContracts implements Mithril
     @invariants function inv() {
         Contract.invariant(currentState != null);
         Contract.invariant(pinBuffer != null);
+        Contract.invariant(messageTimer != null);
     }    
 
     ///// View templates /////

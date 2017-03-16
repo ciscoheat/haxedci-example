@@ -2,7 +2,7 @@ package contexts;
 
 import js.Browser;
 import js.html.HtmlElement;
-import HtmlElements;
+import views.HtmlElements;
 
 using HtmlTools;
 

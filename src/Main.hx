@@ -4,6 +4,9 @@ import Data.Bluray;
 import Data.RfidItem;
 import contexts.DragDropMechanics;
 import contexts.LibraryBorrowMachine;
+import views.HtmlElements;
+import gadgets.ReceiptPrinter;
+import gadgets.RfidScanner;
 
 class Main
 {

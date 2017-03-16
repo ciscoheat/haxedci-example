@@ -64,16 +64,7 @@ class LibraryBorrowMachine implements dci.Context
 
             case Some(rfid):
                 // Create a wait loop, detecting card removal.
-                var removeCardLoop = new haxe.Timer(50);
-                removeCardLoop.run = function() {
-                    self.scanRfid(function(data) {
-                        // An "equals" test is required because data is an Enum.
-                        if(data.equals(None)) {
-                            removeCardLoop.stop();
-                            restart();
-                        }
-                    });
-                }
+                self.createWaitLoopForCardRemoval();
 
                 // Look up current card in library database, display pin screen if valid.
                 var card = library.card(rfid);
@@ -82,6 +73,19 @@ class LibraryBorrowMachine implements dci.Context
                     keypad.waitForEnterPin();
                 else
                     screen.displayInvalidCard();
+        }
+
+        function createWaitLoopForCardRemoval() {
+            var removeCardLoop = new haxe.Timer(50);
+            removeCardLoop.run = function() {
+                self.scanRfid(function(data) {
+                    // An "equals" test is required because data is an Enum.
+                    if(data.equals(None)) {
+                        removeCardLoop.stop();
+                        restart();
+                    }
+                });
+            }
         }
 
         public function validatePin(pin : String) {
@@ -237,7 +241,7 @@ class LibraryBorrowMachine implements dci.Context
                 buffer.push("");
             }
 
-            var timer = new Timer(90);
+            var timer = new Timer(80);
             timer.run = function() {
                 self.print(buffer.pop());
                 if(buffer.length == 0) {

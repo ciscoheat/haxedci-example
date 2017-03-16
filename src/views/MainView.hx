@@ -1,7 +1,9 @@
 package views;
+
 import mithril.M;
-import HtmlElements;
+import views.HtmlElements;
 import contexts.DragDropMechanics.DragDropItem;
+import gadgets.ReceiptPrinter;
 
 /**
  *  Uses the HTML in index.html to display app elements.
@@ -28,8 +30,8 @@ class MainView implements Mithril
      *  Mount mithril components for the app elements.
      */
     public function mount() {
-        // Using the abstract HtmlElements class, to refer directly to
-        // the HTML element with an enum value:
+        // Using the abstract HtmlElements enum to refer directly to
+        // the HTML element, as a compiler-checked enum value instead of a string:
         M.mount(Screen, screenView);
 
 		M.mount(Bookshelf, {view: surfaceView.bind(bookshelf)});
@@ -40,6 +42,8 @@ class MainView implements Mithril
         M.mount(Printer, printer);
     }
 
+    // In a larger example, different surfaces would probably have their own view template,
+    // but here the items look the same no matter where they are.
     function surfaceView(surface : Array<DragDropItem>) return surface.map(function(item) {
         return switch Type.getClass(item) {
             case Data.LibraryCard: 

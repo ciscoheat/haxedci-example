@@ -1,8 +1,14 @@
+package gadgets;
+
 import haxe.ds.Option;
 import haxe.Timer;
 
 /**
  *  An emulation of a RFID scanner.
+ *  Uses a callback to test if an RFID string should be returned.
+ *  
+ *  Note that it uses the Option type, which is very useful to
+ *  avoid null values.
  */
 class RfidScanner implements HaxeContracts
 {
