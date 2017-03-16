@@ -8,7 +8,6 @@
   var CardReader = "card-reader";
   var Workspace = "workspace";
   var Scanner = "scanner";
-  var Card = "card";
 
   @:to public function toElement()
       return js.Browser.document.querySelector('#$this');

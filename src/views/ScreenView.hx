@@ -1,11 +1,8 @@
 package views;
 
 import mithril.M;
-import haxecontracts.*;
 import haxe.Timer;
 import Data.ScannedItem;
-
-using DateTools;
 
 enum ScreenState {
     Welcome;
@@ -13,7 +10,6 @@ enum ScreenState {
     DisplayBorrowedItems(scannedItems : Iterable<ScannedItem>);
     ThankYou;
     TooManyInvalidPin;
-    RemoveCard;
     InvalidCard;
     InvalidLoanItem;
     ItemAlreadyBorrowed;
@@ -22,23 +18,26 @@ enum ScreenState {
 
 class ScreenView implements HaxeContracts implements Mithril
 {
+    var currentState : ScreenState = Welcome;
+    var messageTimer : Null<Timer>;
     var pinBuffer : String = "";
-    var messageTimer : Timer;
-    var currentState : ScreenState;
 
     var _onPinCodeEntered = new SingleEventHandler<String -> Void>();
     var _onFinishWithoutReceiptClicked = new SingleEventHandler<Void -> Void>();
     var _onFinishWithReceiptClicked = new SingleEventHandler<Void -> Void>();
 
+    ///////////////////////////////////////////////////////////////////////////
+
+    public function new() {}
+
     public function display(state : ScreenState) {
-        Contract.requires(state != null);
         if(messageTimer != null) messageTimer.stop();
         currentState = state;
         M.redraw();
-        //trace('ScreenState change: $state');
     }
 
     public function displayMessage(state : ScreenState, waitMs : Int, ?thenDisplay : ScreenState) {
+        Contract.requires(waitMs > 0);
         if(thenDisplay == null) thenDisplay = currentState;
 
         display(state);
@@ -47,21 +46,31 @@ class ScreenView implements HaxeContracts implements Mithril
         messageTimer.run = display.bind(thenDisplay);
     }
 
-    public function new(initialState) {
-        display(initialState);
-    }
+    ///// Events /////
 
     public function onPinCodeEntered(callback : String -> Void, ?pos : haxe.PosInfos) : Void {
+        Contract.requires(callback != null);
         _onPinCodeEntered.set(callback, pos);
     }
 
     public function onFinishWithoutReceiptClicked(callback : Void -> Void, ?pos : haxe.PosInfos) : Void {
+        Contract.requires(callback != null);
         _onFinishWithoutReceiptClicked.set(callback, pos);
     }
 
     public function onFinishWithReceiptClicked(callback : Void -> Void, ?pos : haxe.PosInfos) : Void {
+        Contract.requires(callback != null);
         _onFinishWithReceiptClicked.set(callback, pos);
     }
+
+    ///// Contract invariants /////
+
+    @invariants function inv() {
+        Contract.invariant(currentState != null);
+        Contract.invariant(pinBuffer != null);
+    }    
+
+    ///// View templates /////
 
     public function view() {
         return switch currentState {
@@ -83,8 +92,6 @@ class ScreenView implements HaxeContracts implements Mithril
                 itemAlreadyBorrowed();
             case DontForgetLibraryCard:
                 dontForgetLibraryCard();
-            case _: 
-                m('.content.red', 'View not found: $currentState');
         }
     }
 
@@ -107,7 +114,7 @@ class ScreenView implements HaxeContracts implements Mithril
             else "".rpad("*", pinBuffer.length)
         )),
         m('.content.keypad', 
-            ['1','2','3','4','5','6','7','8','9','0'].map.fn(key => m('.key', {
+            ['1','2','3','4','5','6','7','8','9','0'].map(function(key) m('.key', {
                 onclick: enterPinKeyPressed.bind(key)
             }, key))
         )
@@ -134,6 +141,7 @@ class ScreenView implements HaxeContracts implements Mithril
     ///////////////////////////////////////////////////////
 
     function displayBorrowedItems(scannedItems : Iterable<ScannedItem>) {
+        Contract.requires(scannedItems != null);
         m('.content', [
             m('p', 'Scan the items you want to borrow on the dark red area.'),
             m('p', [

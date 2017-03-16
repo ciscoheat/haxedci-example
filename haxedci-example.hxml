@@ -1,16 +1,14 @@
 -debug
 #-D source-map-content
+#--times
+#-D macro-times
 
 -cp src 
 
 -lib haxedci 
 -lib HaxeContracts
 -lib dataclass
--lib slambda
 -lib mithril
 
 -js bin/haxedci-example.js
 -main Main
-
-#--times
-#-D macro-times

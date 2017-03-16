@@ -1,8 +1,8 @@
+package contexts;
+
 import Data.LibraryLoan;
 import Data.LoanItem;
-import Data.Card;
-
-using DateTools;
+import Data.LibraryCard;
 
 enum BorrowLoanItemStatus {
     Ok(loan : LibraryLoan);
@@ -12,8 +12,10 @@ enum BorrowLoanItemStatus {
 }
 
 /**
- *  For borrowing a single loan item.
+ *  Use case for borrowing a single loan item.
  *  Note that this Context can be used in any system, not just BorrowLibraryItems.
+ *  
+ *  @see https://docs.google.com/spreadsheets/d/1TSpjKUhjvP9pMRukt_mInHVbdQWsXHzFjSymQ3VyGmE/edit#gid=1759452953
  */
 class BorrowLoanItem implements dci.Context
 {
@@ -59,7 +61,7 @@ class BorrowLoanItem implements dci.Context
     }
 
     @role var listOfLibraryCards : {
-        public function iterator() : Iterator<Card>;
+        public function iterator() : Iterator<LibraryCard>;
 
         public function hasBorrowerID() : Bool {
             return self.exists(function(card) return card.rfid == borrower.id());

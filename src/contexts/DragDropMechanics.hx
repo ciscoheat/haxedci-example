@@ -1,3 +1,5 @@
+package contexts;
+
 import js.Browser;
 import js.html.HtmlElement;
 import HtmlElements;
@@ -21,7 +23,7 @@ interface DragDropItem {}
  *  It is strongly coupled to the browser with both HTML and a
  *  javascript library, so it doesn't use DCI or any generalizations.
  */
-class DragDrop implements HaxeContracts
+class DragDropMechanics implements HaxeContracts
 {
 	/**
 	 *  Map of HTML id:s -> Array of drag'n'droppable items
@@ -50,28 +52,24 @@ class DragDrop implements HaxeContracts
 		})
 		.on('drag', onDrag)
 		.on('drop', onDrop);
-
-        trace("Drag'n'drop interface enabled.");
 	}
 	
 	function acceptsDrop(droppedItem : HtmlElement, targetElement : HtmlElement) : Bool {
 		Contract.requires(droppedItem != null);
 		Contract.requires(targetElement.id.length > 0);
 		
-		switch targetElement.id {
+		return switch targetElement.id {
 			// Scanner and CardReader can only take one item
 			case Scanner, CardReader:
-				if(surfaces.get(targetElement.id).length == 1) return false;
+				surfaces.get(targetElement.id).length < 1;
 			case _:
-		}
-
-		return switch droppedItem.id {
-			case Card: 
-				// Card can not be dropped on the bookshelf
-				targetElement.id != Bookshelf;
-			case _:
-				// Only the card can be dropped on the card reader
-				targetElement.id != CardReader;
+				if(droppedItem.classList.contains("card")) {
+					// Card can not be dropped on the bookshelf
+					targetElement.id != Bookshelf;
+				} else {
+					// Only the card can be dropped on the card reader
+					targetElement.id != CardReader;
+				}
 		}
 	}
 
@@ -81,7 +79,7 @@ class DragDrop implements HaxeContracts
 	function onDrag(el : HtmlElement, sourceEl : HtmlElement) {
 		Contract.requires(el != null);
 		Contract.requires(surfaces.exists(sourceEl.id), "No surface found: " + sourceEl.id);
-		
+
 		var surface = surfaces.get(sourceEl.id);
 		var pos = sourceEl.children.elPos(el);
 		Contract.assert(pos >= 0, "Item not found in surface " + sourceEl.id);
@@ -108,12 +106,13 @@ class DragDrop implements HaxeContracts
 		// Splice from source to target
 		var removed = dragData.source.splice(dragData.sourcePos, 1);
 		target.insert(targetPos, removed[0]);
+		dragData = null;
 
 		//trace('Dropped ${removed} in ' + targetEl.id + '[$targetPos]');
 
 		// Cancel the drag so elements won't change, then
 		// redraw with Mithril immediately to update the DOM.
-		drake.cancel(true);
+		drake.cancel(true);		
 		mithril.M.redraw();
 	}
 }

@@ -1,9 +1,15 @@
+
 html {
 	background: url(../images/white_wall_hash.jpg);
 }
 
 .red {
 	color:red;
+}
+
+/* Prevent accidental Chrome drag-drop reload gesture */
+#bookshelf, .book, .card, #table {
+	touch-action: none;
 }
 
 /***********************************************/
@@ -48,15 +54,16 @@ html {
 	flex-direction: row;
 	flex-wrap: wrap;
 	width: 30%;
-	max-width: 105px;
+	max-width: 112px;
 }
 
 #screen .key {
 	cursor: pointer;
 	background-color: white;
-	padding: 0px 4px;
+	padding: 0px 6px;
 	margin: 2px;
 	border: 1px solid #aaa;
+	font-size: 20px;
 }
 
 #screen .key:hover {
@@ -141,7 +148,7 @@ html {
 #printer .paper {
 	background-color: white;
 	position: relative;
-	font-size: 75%;
+	font-size: 70%;
 	top: 2px;
 	padding: 4px;
 }
@@ -157,9 +164,13 @@ html {
 	border: 2px solid #aaa;
 	background-color: #eee;
 	width: 98px;
-	background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1'><text x='5' y='29' fill='#d55' font-size='18'>Card reader</text></svg>");
+	background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1'><text x='5' y='29' fill='#d55' font-size='16'>Card reader</text></svg>");
 }
 
+.card {
+	cursor: -webkit-grab;
+	height: 50px;
+}
 /***********************************************/
 
 .cover {
@@ -170,7 +181,6 @@ html {
 	padding: 3px;
 	margin: 1px;
 	min-width: 100px !important;
-    /*transform: rotate(-90deg);*/
 }
 
 .book {
@@ -183,9 +193,3 @@ html {
 	background-color: #a551fe;
 }
 
-/***********************************************/
-
-#card {
-	cursor: -webkit-grab;
-	height: 50px;
-}

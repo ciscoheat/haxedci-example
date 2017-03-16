@@ -1,7 +1,7 @@
 package views;
 import mithril.M;
 import HtmlElements;
-import DragDrop.DragDropItem;
+import contexts.DragDropMechanics.DragDropItem;
 
 /**
  *  Uses the HTML in index.html to display app elements.
@@ -42,8 +42,8 @@ class MainView implements Mithril
 
     function surfaceView(surface : Array<DragDropItem>) return surface.map(function(item) {
         return switch Type.getClass(item) {
-            case Data.Card: 
-                m('img#card[src=images/card.svg]');
+            case Data.LibraryCard: 
+                m('img.card[src=images/card.svg]');
             case Data.Book:
                 var item : Data.Book = cast item;
                 m('.book.cover', item.title);

@@ -1,10 +1,11 @@
 import Data.Book;
-import Data.Card;
+import Data.LibraryCard;
 import Data.Bluray;
 import Data.RfidItem;
-import DragDrop.DragDropItem;
+import contexts.DragDropMechanics;
+import contexts.LibraryBorrowMachine;
 
-class Main implements HaxeContracts
+class Main
 {
 	// Entry point
 	static function main() 
@@ -25,7 +26,7 @@ class Main implements HaxeContracts
 		];
 
 		Data.libraryCards = [
-			new Card({rfid: 'CARD54321', name: 'Leo Tolstoy', pin: '1234'})
+			new LibraryCard({rfid: 'CARD54321', name: 'Leo Tolstoy', pin: '1234'})
 		];
 
 		Data.libraryLoans = [];
@@ -36,8 +37,9 @@ class Main implements HaxeContracts
 		var workspace : Array<DragDropItem> = cast Data.libraryCards.array();
 
 		var itemScannerContents = [];
-		// A quick'n dirty way of detecting if something is in the item scanner.
 		var itemScanner = new RfidScanner(function() {
+			// The RFID scanner needs to return a String if something is in it,
+			// this is a quick'n dirty way of doing that.
 			return try Some(cast(itemScannerContents[0], RfidItem).rfid)
 			catch(e : Dynamic) None;
 		});
@@ -48,7 +50,7 @@ class Main implements HaxeContracts
 			catch(e : Dynamic) None;
 		});
 
-		var screen = new views.ScreenView(Welcome);
+		var screen = new views.ScreenView();
 		var printer = new ReceiptPrinter();
 
 		// Display models in the main view with Mithril
@@ -61,9 +63,9 @@ class Main implements HaxeContracts
 			HtmlElements.Workspace => workspace,
 			HtmlElements.Scanner => itemScannerContents
 		];
-		new DragDrop(surfaces).start();
+		new DragDropMechanics(surfaces).start();
 
 		// Start the Context that will do the actual borrowing
-		new BorrowLibraryItems(itemScanner, cardReader, screen, printer, screen, screen).start();
+		new LibraryBorrowMachine(itemScanner, cardReader, screen, printer, screen, screen).start();
 	}
 }

@@ -1,14 +1,19 @@
-import DragDrop.DragDropItem;
+import contexts.DragDropMechanics.DragDropItem;
 
 /**
  *  Used as a in-memory database for library items and cards.
  *  The Main class is used to set up the data, hence the "allow" access
  *  control for Main.
+ *  
+ *  Short "implements" reference for the data classes below:
+ *  - HaxeContracts: Design by Contract library
+ *  - DataClass: A convenient way of creating simple data objects
+ *  - DragDropItem: A marker interface for objects that can be drag-dropped
  */
 @:allow(Main) class Data 
 {
     public static var libraryItems(default, null) : Array<LoanItem>;
-    public static var libraryCards(default, null) : Array<Card>;
+    public static var libraryCards(default, null) : Array<LibraryCard>;
     public static var libraryLoans(default, null) : Array<LibraryLoan>;
 }
 
@@ -44,7 +49,7 @@ class Bluray implements HaxeContracts implements DataClass implements LoanItem
 
 ///// Other data /////
 
-class Card implements HaxeContracts implements DataClass implements DragDropItem implements RfidItem
+class LibraryCard implements HaxeContracts implements DataClass implements DragDropItem implements RfidItem
 {
     @validate(_.length > 0) public var rfid : String;
     @validate(_.length > 0) public var name : String;

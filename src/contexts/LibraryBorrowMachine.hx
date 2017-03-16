@@ -1,25 +1,24 @@
+package contexts;
+
 import haxe.ds.Option;
 import views.ScreenView.ScreenState;
-import Data.Card;
+import Data.LibraryCard;
 import Data.LoanItem;
 import Data.LibraryLoan;
 import Data.ScannedItem;
 import haxe.Timer;
 
-using DateTools;
-
 /**
  *  Use case implementation.
  *  @see https://docs.google.com/spreadsheets/d/1TSpjKUhjvP9pMRukt_mInHVbdQWsXHzFjSymQ3VyGmE/edit#gid=2
  */
-class BorrowLibraryItems implements dci.Context
+class LibraryBorrowMachine implements dci.Context
 {
     static var maxPinAttempts(default, never) : Int = 3;
 
     var pinAttemptsLeft : Int;
-    var authorizedCard : Card;
+    var authorizedCard : LibraryCard;
     var lastScannedRfid : Option<String>;
-    var removeCardLoop : Timer;
 
     public function new(scanner, cardReader, screen, printer, keypad, finishButtons) {
         this.scanner = scanner;
@@ -46,7 +45,6 @@ class BorrowLibraryItems implements dci.Context
     }
 
     function resetState() {
-        if(removeCardLoop != null) removeCardLoop.stop();
         scannedItems.clearItems();
         pinAttemptsLeft = maxPinAttempts;
         authorizedCard = null;
@@ -66,11 +64,14 @@ class BorrowLibraryItems implements dci.Context
 
             case Some(rfid):
                 // Create a wait loop, detecting card removal.
-                removeCardLoop = new haxe.Timer(50);
+                var removeCardLoop = new haxe.Timer(50);
                 removeCardLoop.run = function() {
                     self.scanRfid(function(data) {
                         // An "equals" test is required because data is an Enum.
-                        if(data.equals(None)) restart();
+                        if(data.equals(None)) {
+                            removeCardLoop.stop();
+                            restart();
+                        }
                     });
                 }
 
@@ -104,7 +105,7 @@ class BorrowLibraryItems implements dci.Context
                     }
 
                 case None:
-                    // Card already removed.
+                    // LibraryCard already removed.
             });
         }
     }
@@ -147,7 +148,7 @@ class BorrowLibraryItems implements dci.Context
                             screen.displayAlreadyBorrowedMessage();
                             self.waitForItem();
                         case InvalidBorrower:
-                            // Card is invalid, don't wait for another item.
+                            // LibraryCard is invalid, don't wait for another item.
                             screen.displayInvalidCard();
                     }
             }
@@ -236,7 +237,7 @@ class BorrowLibraryItems implements dci.Context
                 buffer.push("");
             }
 
-            var timer = new Timer(100);
+            var timer = new Timer(90);
             timer.run = function() {
                 self.print(buffer.pop());
                 if(buffer.length == 0) {
@@ -250,12 +251,12 @@ class BorrowLibraryItems implements dci.Context
 
     @role var library : {
         var libraryItems(default, null) : Array<LoanItem>;
-        var libraryCards(default, null) : Array<Card>;
+        var libraryCards(default, null) : Array<LibraryCard>;
 
         public function item(rfid : String) : LoanItem 
             return libraryItems.find(function(loanItem) return loanItem.rfid == rfid);
 
-        public function card(rfid : String) : Card
+        public function card(rfid : String) : LibraryCard
             return libraryCards.find(function(libraryCard) return libraryCard.rfid == rfid);
     }
 }
