@@ -53,7 +53,7 @@ class LibraryCard implements HaxeContracts implements DataClass implements DragD
 {
     @validate(_.length > 0) public var rfid : String;
     @validate(_.length > 0) public var name : String;
-    @validate(~/\d{4}/) public var pin : String;
+    @validate(~/^\d{4}$/) public var pin : String;
 }
 
 class LibraryLoan implements HaxeContracts implements DataClass

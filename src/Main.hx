@@ -5,8 +5,6 @@ import Data.RfidItem;
 import contexts.DragDropMechanics;
 import contexts.LibraryBorrowMachine;
 import views.HtmlElements;
-import gadgets.ReceiptPrinter;
-import gadgets.RfidScanner;
 
 class Main
 {
@@ -40,7 +38,7 @@ class Main
 		var workspace : Array<DragDropItem> = cast Data.libraryCards.array();
 
 		var itemScannerContents = [];
-		var itemScanner = new RfidScanner(function() {
+		var itemScanner = new gadgets.RfidScanner(function() {
 			// The RFID scanner needs to return a String if something is in it,
 			// this is a quick'n dirty way of doing that.
 			return try Some(cast(itemScannerContents[0], RfidItem).rfid)
@@ -48,13 +46,13 @@ class Main
 		});
 
 		var cardReaderContents = [];
-		var cardReader = new RfidScanner(function() {
+		var cardReader = new gadgets.RfidScanner(function() {
 			return try Some(cast(cardReaderContents[0], RfidItem).rfid)
 			catch(e : Dynamic) None;
 		});
 
 		var screen = new views.ScreenView();
-		var printer = new ReceiptPrinter();
+		var printer = new gadgets.ReceiptPrinter();
 
 		// Display models in the main view with Mithril
 		new views.MainView(bookshelf, cardReaderContents, workspace, itemScannerContents, screen, printer).mount();
