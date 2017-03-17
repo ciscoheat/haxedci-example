@@ -15,7 +15,7 @@ DCI stands for Data, Context, Interaction. The key aspects of the DCI architectu
 
 This repo contains an example of how to use DCI together with MVC to model an automatic library borrowing machine. I'm sure you're eager to see what it looks like, so here's a demo:
 
-**Demo:** [https://ciscoheat.github.io/haxedci](https://ciscoheat.github.io/haxedci) (Including source maps)
+**Demo:** [https://ciscoheat.github.io/haxedci](https://ciscoheat.github.io/haxedci) (PIN code is 1234. Source maps included.)
 
 This example is based on [this use case](https://docs.google.com/spreadsheets/d/1TSpjKUhjvP9pMRukt_mInHVbdQWsXHzFjSymQ3VyGmE/edit#gid=2), which then maps as close as possible to code using a DCI Context.
 
