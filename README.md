@@ -11,7 +11,7 @@ DCI stands for Data, Context, Interaction. The key aspects of the DCI architectu
 - Make system behavior a first class entity.
 - Great code readability with no surprises at runtime.
 
-# The example: A Library borrowing machine
+# The example: A Library borrow machine
 
 This repo contains an example of how to use DCI together with MVC to model an automatic library borrowing machine. I'm sure you're eager to see what it looks like, so here's a demo:
 
@@ -19,7 +19,7 @@ This repo contains an example of how to use DCI together with MVC to model an au
 
 This example is based on [this use case](https://docs.google.com/spreadsheets/d/1TSpjKUhjvP9pMRukt_mInHVbdQWsXHzFjSymQ3VyGmE/edit#gid=2), which then maps as close as possible to code using a DCI Context.
 
-The actual Context is called `LibraryBorrowingMachine`, which we will go through now. Please open [its source code](https://github.com/ciscoheat/haxedci-example/blob/master/src/contexts/LibraryBorrowMachine.hx) in a window next to this document now, so you can follow along.
+The actual Context is called `LibraryBorrowMachine`, which we will go through now. Please open [its source code](https://github.com/ciscoheat/haxedci-example/blob/master/src/contexts/LibraryBorrowMachine.hx) in a window next to this document now, so you can follow along.
 
 The first thing we see in the Context is some state. In larger Contexts, and especially in more interactive ones like this library machine, some state can be required to support the functionality, containing details the use case doesn't concern itself about. It is recommended to keep it to a minimum.
 
