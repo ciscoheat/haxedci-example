@@ -15,7 +15,7 @@ DCI stands for Data, Context, Interaction. The key aspects of the DCI architectu
 
 This repo contains an example of how to use DCI together with MVC to model an automatic library borrowing machine. I'm sure you're eager to see what it looks like, so here's a demo:
 
-**Demo:** [https://ciscoheat.github.io/haxedci](https://ciscoheat.github.io/haxedci)
+**Demo:** [https://ciscoheat.github.io/haxedci](https://ciscoheat.github.io/haxedci) (Including source maps)
 
 This example is based on [this use case](https://docs.google.com/spreadsheets/d/1TSpjKUhjvP9pMRukt_mInHVbdQWsXHzFjSymQ3VyGmE/edit#gid=2), which then maps as close as possible to code using a DCI Context.
 
@@ -25,19 +25,19 @@ The first thing we see in the Context is some state. In larger Contexts, and esp
 
 Then we have the constructor, doing the simplest possible role binding. Note that Haxe allows Role assignment to the `Data` class, enabling static fields to take part in Contexts. Not useful in every case, but pretty nice for this example, creating easy access to the database.
 
-Next are the System Interactions, methods that kicks off the interaction between the Roles. Usually there is only one entry point, simply called `start`. Another, private one is called `restart`, used at the end of the use case.
+Next are the System Interactions, methods that kicks off the interaction between the Roles. Usually there is only one entry point, in this case simply called `start`. Another, private one is called `restart`, used at the end of the use case.
 
 ## Reading the code
 
-One of the primary goals of DCI is readable code, so read the code in the `start` method. It contains calls to RoleMethods, based on the use case that anyone involved should understand. Clearly named RoleMethods lets you grasp what will happen, so you can either skim past obvious things, like `screen.displayWelcome`, or dive into a specific part of the Context.
+One of the primary goals of DCI is readable code, so read the code in the `start` method. After resetting the state it starts calling the RoleMethods, based on the use case that anyone involved in the project should understand, closing the gap quite a bit between users, stakeholders and programmers. 
 
-At the end of a method you'll have to dive in anyway, since the interaction is distributed between the Roles. This is closely connected to how human beings reason about objects. A `cardReader` *does* things, to further the goal of the Context, which is to enable the user to borrow library items. It asks for help from other objects to reach the goal. It passes along some information to another object. And so on, until the problem is solved.
+Clearly named RoleMethods lets you grasp what will happen, so you can either skim past obvious things, like `screen.displayWelcome`, or dive into a specific part of the Context. At the end of a method you'll have to dive in anyway, since the interaction is distributed between the Roles. This is closely connected to how human beings reason about objects. A `cardReader` *does* things, to further the goal of the Context, which is to enable the user to borrow library items. It asks for help from other objects to reach the goal. It passes along some information to another object. And so on, until the problem is solved.
 
 In this case it should wait for a card change. So lets scroll down a little bit to the `cardReader` Role and its `waitForCardChange` RoleMethod.
 
 As you see, the `cardReader` calls itself there, using its contract method `scanRfid`, asking it to scan for an RFID, then call `self.rfidScanned` when it's done.
 
-Using the convenient [Option](http://api.haxe.org/haxe/ds/Option.html) type, we can switch on the result without messing with null references. So if nothing is found, we keep waiting. Otherwise, well, hopefully the code is simple enough to follow and understand. Note how local it is. The `scanRfid` field is similar to an interface definition (though duck-typed in this case), but you can see it directly in the code, no need to look up its definition in another file.
+Using the convenient [Option](http://api.haxe.org/haxe/ds/Option.html) type, we can switch on the result, avoiding null references. So if nothing is found, we keep waiting. Otherwise, well, hopefully the code is simple enough to follow and understand. Note how local it is. The `scanRfid` field is similar to an interface definition (though duck-typed in this case), but you can see it directly in the code, no need to look up its definition in another file.
 
 Also notice how rare it is for a RoleMethod to return something. The Roles interact more through message passing than the old procedural approach with return values. This makes the system more object-oriented, and it also becomes easier to "rewire" the Context when the functionality evolves. Return values have a tendency to centralize the algorithm, eventually losing the idea of "who does what", which is important for building a mental model of the Context.
 
@@ -83,13 +83,13 @@ The DCI Context describes a network of communicating objects, making *system beh
 
 **Data.hx**
 
-As you see, the underlying data for the Context is so simple that in requires almost no explanation. An interesting thing is that the user doesn't really concern itself about `Book` and `Bluray`. Because the goal is to borrow whatever interesting items were found at the library, the `LoanItem` interface is closer to how the user thinks about those items. 
+As you see, the underlying data for the Context is so simple that it requires almost no explanation. An interesting thing is that the user doesn't really concern itself about `Book` and `Bluray`. Since the goal is to borrow whatever interesting items were found at the library, the `LoanItem` interface is closer to how the user thinks about those items.
 
 This moves us closer to a better use for interfaces, compared to the endless levels of abstractions created by the engineers, partitioning the system in a very improper way compared to Contexts, which encapsulates actual system functionality.
 
 **Main.hx**
 
-Maybe it's time to see how the system is created and started? [Main.hx](https://github.com/ciscoheat/haxedci-example/blob/master/src/Main.hx) contains the entry point. It fills the `Data` class with the data objects above, then proceeds to create the objects used in the `LibraryBorrowMachine` Context. After a few "gadgets", simulations of the physical objects used in the real machine, some MVC View objects are created.
+Maybe it's time to see how the system is created and started? [Main.hx](https://github.com/ciscoheat/haxedci-example/blob/master/src/Main.hx) contains the entry point. It fills the `Data` class with the above data objects, then proceeds to create the objects used in the `LibraryBorrowMachine` Context. After a few "gadgets", simulations of the physical objects used in the real machine, some MVC View objects are created.
 
 After the `MainView` object is created to display everything in the browser, the Contexts are instantiated and their respective System Operation is called. Up until now the system contained only inactive data, but now it comes to life through the functionality in the Contexts!
 
@@ -97,7 +97,7 @@ After the `MainView` object is created to display everything in the browser, the
 
 Events are quite disruptive to the interaction in a Context. They are similar to a GOTO, you can end up anywhere in the program when it is triggered, even outside the Context, which is very much against the readability goal of DCI. 
 
-Therefore it's preferred to keep as few active event handlers as possible, ideally only registering an event handler when it's supposed to be used in the Context, and removing it directly afterwards, moving the mindset from "set and forget", a.k.a "plug and pray", to a more explicit event management.
+Therefore it's preferred to keep as few active event handlers as possible, ideally only registering an event handler when it's supposed to be used in the Context, and removing it directly afterwards, moving the mindset from "set and forget" (which can become "plug and pray"), to a more explicit event management.
 
 The `lib` folder (on the same level as `src`, not in a subdirectory) contains a `SingleEventHandler` class that manages this for you. It's not as advanced as a Promise, but for simple events with little error handling, it works quite well. A usage example is in `src/views/ScreenView.hx`.
 
