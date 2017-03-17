@@ -19,19 +19,19 @@ This repo contains an example of how to use DCI together with MVC to model an au
 
 This example is based on [this use case](https://docs.google.com/spreadsheets/d/1TSpjKUhjvP9pMRukt_mInHVbdQWsXHzFjSymQ3VyGmE/edit#gid=2), which then maps as close as possible to code using a DCI Context.
 
-The actual Context is called `LibraryBorrowingMachine`, which we will go through now. Please open [its source code]() in a window next to this document now, so you can follow along.
+The actual Context is called `LibraryBorrowingMachine`, which we will go through now. Please open [its source code](https://github.com/ciscoheat/haxedci-example/blob/master/src/contexts/LibraryBorrowMachine.hx) in a window next to this document now, so you can follow along.
 
-The first thing we see in the Context is some state. In larger Contexts, and especially in more interactive ones like this library machine, some state can be required to support the functionality, by containing details the use case doesn't concern itself about. It is recommended to keep it to a minimum.
+The first thing we see in the Context is some state. In larger Contexts, and especially in more interactive ones like this library machine, some state can be required to support the functionality, containing details the use case doesn't concern itself about. It is recommended to keep it to a minimum.
 
 Then we have the constructor, doing the simplest possible role binding. Note that Haxe allows Role assignment to the `Data` class, enabling static fields to take part in Contexts. Not useful in every case, but pretty nice for this example, creating easy access to the database.
 
-Next are the System Interactions, methods that kicks off the interaction between the Roles. Usually there is only one entrypoint, simply called `start`. Another, private one is called `restart`, used at the end of the use case.
+Next are the System Interactions, methods that kicks off the interaction between the Roles. Usually there is only one entry point, simply called `start`. Another, private one is called `restart`, used at the end of the use case.
 
 ## Reading the code
 
-A primary goal of DCI is readable code, so read the code in the `start` method. It contains calls to RoleMethods, being modelled after the use case that anyone involved should understand, lets you grasp what will happen, so you can either skim past obvious things, like `screen.displayWelcome`, or dive into that specific part of the Context.
+One of the primary goals of DCI is readable code, so read the code in the `start` method. It contains calls to RoleMethods, based on the use case that anyone involved should understand. Clearly named RoleMethods lets you grasp what will happen, so you can either skim past obvious things, like `screen.displayWelcome`, or dive into a specific part of the Context.
 
-At the end of the methods you'll have to dive in anyway, since the interaction is distributed between the Roles. This is closely connected to how human beings reason about objects. The `cardReader` *does* things, to further the goal of the Context: Enabling the user to borrow library items. It asks for help from other objects to reach the goal. It passes along some information to another object. And so on, until the problem is solved.
+At the end of a method you'll have to dive in anyway, since the interaction is distributed between the Roles. This is closely connected to how human beings reason about objects. A `cardReader` *does* things, to further the goal of the Context, which is to enable the user to borrow library items. It asks for help from other objects to reach the goal. It passes along some information to another object. And so on, until the problem is solved.
 
 In this case it should wait for a card change. So lets scroll down a little bit to the `cardReader` Role and its `waitForCardChange` RoleMethod.
 
@@ -79,7 +79,7 @@ Note how the Roles are reflected in the use case, interacting to solve the speci
 
 ## Other parts of the system
 
-The DCI Context describes a network of communicating objects, making *system behavior* a first-class entity, for the first time in computer history. It requires support from other objects however, mainly simple, reliable Data classes. The [Data.hx]() module contains the Data we're using in the Library borrowing machine. Open it up next to this document.
+The DCI Context describes a network of communicating objects, making *system behavior* a first-class entity, for the first time in computer history. It requires support from other objects however, mainly simple, reliable Data classes. The [Data.hx](https://github.com/ciscoheat/haxedci-example/blob/master/src/Data.hx) module contains the Data we're using in the Library borrowing machine. Open it up next to this document.
 
 **Data.hx**
 
@@ -89,7 +89,7 @@ This moves us closer to a better use for interfaces, compared to the endless lev
 
 **Main.hx**
 
-Maybe it's time to see how the system is created and started? [Main.hx]() contains the entry point. It fills the `Data` class with the data objects above, then proceeds to create the objects used in the `LibraryBorrowMachine` Context. After a few "gadgets", simulations of the physical objects used in the real machine, some MVC View objects are created.
+Maybe it's time to see how the system is created and started? [Main.hx](https://github.com/ciscoheat/haxedci-example/blob/master/src/Main.hx) contains the entry point. It fills the `Data` class with the data objects above, then proceeds to create the objects used in the `LibraryBorrowMachine` Context. After a few "gadgets", simulations of the physical objects used in the real machine, some MVC View objects are created.
 
 After the `MainView` object is created to display everything in the browser, the Contexts are instantiated and their respective System Operation is called. Up until now the system contained only inactive data, but now it comes to life through the functionality in the Contexts!
 
@@ -109,7 +109,7 @@ I have plans for a more interactive debugging experience too, but for now I hope
 
 # Building the example
 
-After installing [Haxe](https://haxe.org) and cloning this repo (or [downloading the ZIP]()), the build process is very simple:
+After installing [Haxe](https://haxe.org) and cloning this repo (or [downloading the ZIP](https://github.com/ciscoheat/haxedci-example/archive/master.zip)), the build process is very simple:
 
 `haxe haxedci-example.hxml`
 
