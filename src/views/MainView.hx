@@ -33,13 +33,12 @@ class MainView implements Mithril
         // Using the abstract HtmlElements enum to refer directly to
         // the HTML element, as a compiler-checked enum value instead of a string:
         M.mount(Screen, screenView);
+        M.mount(Printer, printer);
 
 		M.mount(Bookshelf, {view: surfaceView.bind(bookshelf)});
         M.mount(CardReader, {view: surfaceView.bind(cardReader)});
         M.mount(Scanner, {view: surfaceView.bind(itemScanner)});
         M.mount(Workspace, {view: surfaceView.bind(workspace)});
-
-        M.mount(Printer, printer);
     }
 
     // In a larger example, different surfaces would probably have their own view template,

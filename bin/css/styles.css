@@ -189,7 +189,10 @@ html {
 }
 
 .bluray {
-	border: 1px solid #ab3dbd;
-	background-color: #a551fe;
+	border: 1px solid #01509B;
+	background-color: #2F79BA;
+	background-image: url(../images/bluray-logo.svg);
+	background-position: 2px;
+	padding-left: 32px;
 }
 

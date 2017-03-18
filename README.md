@@ -63,11 +63,11 @@ function rfidScanned(data : Option<String>) switch data {
 }
 ```
 
-`rfidScanned` is a private RoleMethod, meaning that only the `cardReader` can call it. It's very useful since `rfidScanned` is a continuation of `waitForCardChange`.
+`rfidScanned` is a private RoleMethod, meaning that only the `cardReader` can call it. It's useful since `rfidScanned` is a continuation of `waitForCardChange`, that no other Role should call.
 
-Using the convenient [Option](http://api.haxe.org/haxe/ds/Option.html) type, we can switch on the result, avoiding null references. So if nothing is found, we keep waiting. Otherwise, well, hopefully the code is simple enough to follow and understand. Note how local it is. The `scanRfid` field is similar to an interface definition (though duck-typed in this case), but you can see it directly in the code, no need to look up its definition in another file.
+Using the convenient [Option](http://api.haxe.org/haxe/ds/Option.html) type, we can switch on the result, avoiding null references. So if nothing is found, we keep waiting. Otherwise, well, hopefully the code is simple enough to follow and understand. Note how local it is. The `scanRfid` field is similar to an interface definition (though duck-typed in this case), but you can see it directly in the code, no need to look up its definition in another file. With DCI we want to focus on objects and Roles, not classes.
 
-Also notice how rare it is for a RoleMethod to return something. The Roles interact more through message passing than the old procedural approach with return values. This makes the system more object-oriented, and it also becomes easier to "rewire" the Context when the functionality evolves. Return values have a tendency to centralize the algorithm, eventually losing the idea of "who does what", which is important for building a mental model of the Context.
+Also notice how rare it is for a RoleMethod to return something. The Roles interact more through message passing than the old procedural approach with return values. This makes the system more object-oriented, and it also becomes easier to "rewire" the Context when the functionality evolves. Return values have a tendency to centralize the algorithm, eventually losing the idea of "who does what", which is important for building a mental model of the problem we're trying to solve.
 
 ## Role explanations
 
@@ -147,17 +147,31 @@ new LibraryBorrowMachine(scanner, cardReader, screen, printer, keypad, finishBut
 
 Before instantiating a Context, the system consisted only of this simple, inactive data, but now it comes to life through the functionality specified in the Context!
 
-## Event handling
+### Together with MVC
+
+DCI and MVC complements each other, and if you've read my [Rediscovering MVC](https://github.com/ciscoheat/mithril-hx/wiki/Rediscovering-MVC) article, you know that an object can be any combination of M, V and C. 
+
+There are only two View objects in this app, in the [src/views](https://github.com/ciscoheat/haxedci-example/tree/master/src/views) folder, which could sound a bit constrained if you're used to the usual "decoupling at any cost" way of designing MVC applications. This doesn't make much sense though, after Rediscovering MVC. Instead of thinking of every Role in the `LibraryBorrowMachine` Context as a View, we primarily want to maintain the illusion that the user is directly manipulating the data, or the Model as it's called in MVC, bridging the gap between the human mental model and the digital model.
+
+Also note that in the Views, we (or actually, the users of the app) are *thinking* about the Data. In the `LibraryBorrowMachine` the user is *doing* things, turning `Bluray` and `Book` into a `LoanItem`. But not when viewing and thinking about the Data. There is no ongoing functionality, and no Roles either. Thinking is MVC, doing is DCI.
+
+So back to upholding that illusion. It's simply done by a `MainView` that displays the data, together with some non-Context things like a bookshelf. A drag'n'drop library supports the real-time manipulation, but then we're back in functionality again, and if you look at [DragDropMechanics.hx](https://github.com/ciscoheat/haxedci-example/blob/master/src/contexts/DragDropMechanics.hx), you can see that the focus is now on `DragDropItem` and surfaces, not books and Blu-Rays.
+
+The other view is `ScreenView`, which was distinct and intricate enough, containing events for keypad and finish buttons, and nine display states, to be separated into its own View.
+
+The javascript framework [Mithril](http://mithril.js.org/) is used to display the app, and I'm giving it my highest recommendation since it keeps itself in the background, so the focus can be on the architecture, not the structure imposed by frameworks in general. Using it with Haxe is very simple with [mithril-hx](https://github.com/ciscoheat/mithril-hx).
+
+### Event handling
 
 Events are quite disruptive to the interaction in a Context. They are similar to a GOTO, you can end up anywhere in the program when an event is triggered, even outside the Context, which goes against the readability goal of DCI.
 
 Therefore it's preferred to keep as few active event handlers as possible, ideally only registering an event handler when it's supposed to be used in the Context, and removing it directly afterwards, so they become a part of the message flow, moving the mindset from "set and forget" (which can become "plug and pray"), to a more explicit event management.
 
-The `lib` folder (on the same level as `src`, not in a subdirectory) contains a `SingleEventHandler` class that manages this for you. It's not as advanced as a Promise, but for simple events with little error handling, it works quite well. A usage example is in `src/views/ScreenView.hx`.
+The `lib` folder (on the same level as `src`, not in a subdirectory) contains a `SingleEventHandler` class that manages this for you. It's not as powerful as a Promise, but for simple events with little error handling, it works quite well. [ScreenView.hx](https://github.com/ciscoheat/haxedci-example/blob/master/src/views/ScreenView.hx) is using it, if you want to see how it's done.
 
 ## Final notes
 
-I've taken a small liberty putting `DragDropFunctionality` in the `contexts` folder even though it's not a real DCI Context. It does a good job encapsulating functionality however, so I'm trying to show that being somewhat flexible can help the architecture of a system.
+I've taken a small liberty putting `DragDropFunctionality` in the `contexts` folder even though it's not a real DCI Context. It does a good job encapsulating functionality however, so I'm trying to show that being a bit flexible can help the architecture of a system.
 
 I have plans for a more interactive debugging experience, but for now I hope you will explore the rest of the code and moving on to building it yourself!
 
