@@ -37,11 +37,11 @@ class Main
 		var bookshelf : Array<DragDropItem> = cast Data.libraryItems.array();
 		var workspace : Array<DragDropItem> = cast Data.libraryCards.array();
 
-		var itemScannerContents = [];
-		var itemScanner = new gadgets.RfidScanner(function() {
+		var scannerContents = [];
+		var scanner = new gadgets.RfidScanner(function() {
 			// The RFID scanner needs to return a String if something is in it,
 			// this is a quick'n dirty way of doing that.
-			return try Some(cast(itemScannerContents[0], RfidItem).rfid)
+			return try Some(cast(scannerContents[0], RfidItem).rfid)
 			catch(e : Dynamic) None;
 		});
 
@@ -51,22 +51,24 @@ class Main
 			catch(e : Dynamic) None;
 		});
 
-		var screen = new views.ScreenView();
 		var printer = new gadgets.ReceiptPrinter();
+		var screen = new views.ScreenView();
+		var keypad = screen;
+		var finishButtons = screen;
 
 		// Display models in the main view with Mithril
-		new views.MainView(bookshelf, cardReaderContents, workspace, itemScannerContents, screen, printer).mount();
+		new views.MainView(bookshelf, cardReaderContents, workspace, scannerContents, screen, printer).mount();
 
 		// Start the browser app by enabling drag'n'drop functionality
 		var surfaces = [
 			HtmlElements.Bookshelf => bookshelf,
 			HtmlElements.CardReader => cardReaderContents,
 			HtmlElements.Workspace => workspace,
-			HtmlElements.Scanner => itemScannerContents
+			HtmlElements.Scanner => scannerContents
 		];
 		new DragDropMechanics(surfaces).start();
 
 		// Start the Context that will do the actual borrowing
-		new LibraryBorrowMachine(itemScanner, cardReader, screen, printer, screen, screen).start();
+		new LibraryBorrowMachine(scanner, cardReader, screen, printer, keypad, finishButtons).start();
 	}
 }

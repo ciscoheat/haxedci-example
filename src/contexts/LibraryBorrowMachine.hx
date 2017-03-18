@@ -1,12 +1,11 @@
 package contexts;
 
 import haxe.ds.Option;
+import haxe.Timer;
 import views.ScreenView.ScreenState;
 import Data.LibraryCard;
 import Data.LoanItem;
-import Data.LibraryLoan;
 import Data.ScannedItem;
-import haxe.Timer;
 
 /**
  *  Use case implementation.
@@ -76,7 +75,7 @@ class LibraryBorrowMachine implements dci.Context
                 var card = library.card(rfid);
 
                 if(card != null)
-                    keypad.waitForEnterPin();
+                    screen.displayEnterPin();
                 else
                     screen.displayInvalidCard();
         }
@@ -103,12 +102,14 @@ class LibraryBorrowMachine implements dci.Context
                         screen.displayInvalidCard();
                     }
                     else if(card.pin == pin) {
+                        // PIN ok, authorize card and move to
+                        // scanning of items.
                         authorizedCard = card;
                         screen.displayScannedItems();
                         scanner.waitForItem();
                     }
                     else if(--pinAttemptsLeft > 0) {
-                        keypad.waitForEnterPin();
+                        screen.displayEnterPin();
                     }
                     else {
                         screen.displayTooManyInvalidPin();
@@ -123,8 +124,9 @@ class LibraryBorrowMachine implements dci.Context
     @role var scanner : {
         function scanRfid(callback : Option<String> -> Void) : Void;
 
-        public function waitForItem()
+        public function waitForItem() {
             self.scanRfid(self.rfidScanned);
+        }
 
         function rfidScanned(rfid : Option<String>) {
             // If the card has been removed, cancel interaction.
@@ -149,7 +151,7 @@ class LibraryBorrowMachine implements dci.Context
                                 item: item,
                                 returnDate: loan.returnDate
                             });
-                            screen.displayScannedItems();                                
+                            screen.displayScannedItems();
                             self.waitForItem();
                         case InvalidLoanItem:
                             screen.displayInvalidLoanItemMessage();
@@ -191,10 +193,14 @@ class LibraryBorrowMachine implements dci.Context
         public function displayThankYouMessage()
             displayMessage(ThankYou, 4000, Welcome);
 
-        public function displayEnterPin()
+        public function displayEnterPin() {
+            // Listen to keypad event
+            keypad.waitForEnterPin();
             display(EnterPin({previousAttemptFailed: pinAttemptsLeft < 3}));
+        }
 
         public function displayScannedItems() {
+            // Listen to finish button events
             finishButtons.waitForFinishClick();
             display(DisplayBorrowedItems(scannedItems));
         }
@@ -220,8 +226,8 @@ class LibraryBorrowMachine implements dci.Context
         function onFinishWithReceiptClicked(callback : Void -> Void, ?pos : haxe.PosInfos) : Void;
 
         public function waitForFinishClick() {
-            onFinishWithoutReceiptClicked(screen.displayDontForgetLibraryCard);
-            onFinishWithReceiptClicked(printer.printReceipt);
+            self.onFinishWithoutReceiptClicked(screen.displayDontForgetLibraryCard);
+            self.onFinishWithReceiptClicked(printer.printReceipt);
         }
     }
 
@@ -229,7 +235,6 @@ class LibraryBorrowMachine implements dci.Context
         function onPinCodeEntered(callback : String -> Void, ?pos : haxe.PosInfos) : Void;
 
         public function waitForEnterPin() {
-            screen.displayEnterPin();
             self.onPinCodeEntered(cardReader.validatePin);
         }
     }
