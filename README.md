@@ -63,7 +63,7 @@ function rfidScanned(data : Option<String>) switch data {
 }
 ```
 
-`rfidScanned` is a private RoleMethod, meaning that only the `cardReader` can call it. It's usefulin this case since `rfidScanned` is a continuation of `waitForCardChange`, that no other Role should call.
+`rfidScanned` is a private RoleMethod, meaning that only the `cardReader` can call it. It's useful in this case since `rfidScanned` is a continuation of `waitForCardChange`, that no other Role should call.
 
 Using the convenient [Option](http://api.haxe.org/haxe/ds/Option.html) type, we can switch on the result, avoiding null references. So if nothing is found, we keep waiting. Otherwise, well, hopefully the code is simple enough to follow and understand. Note how local it is. The `scanRfid` field is similar to an interface definition (though duck-typed in this case), but you can see it directly in the code, no need to look up its definition in another file. With DCI we want to focus on objects and Roles, not classes.
 
@@ -153,13 +153,13 @@ Before instantiating a Context, the system consisted only of this simple, inacti
 
 DCI and MVC complements each other, and if you've read my [Rediscovering MVC](https://github.com/ciscoheat/mithril-hx/wiki/Rediscovering-MVC) article, you know that an object can be any combination of M, V and C. 
 
-There are only two View objects in this app, in the [src/views](https://github.com/ciscoheat/haxedci-example/tree/master/src/views) folder, which could sound a bit constrained if you're used to the usual "decoupling at any cost" way of designing MVC applications. This decoupling doesn't make much sense though, after Rediscovering MVC. Instead of thinking of every Role in the `LibraryBorrowMachine` Context as a separate View, we simply want to maintain the illusion that the user is directly manipulating the data, or the Model as it's called in MVC, bridging the gap between the human mental model and the digital model.
+There are only two View objects in this app, in the [src/views](https://github.com/ciscoheat/haxedci-example/tree/master/src/views) folder, which could sound a bit constrained if you're used to the usual "decoupling at any cost" way of designing MVC applications. This decoupling doesn't make much sense though, after Rediscovering MVC. Instead of thinking of every Role in the `LibraryBorrowMachine` Context as a separate View, we simply want to maintain the illusion that the user is directly manipulating the data, or the Model as it's called in MVC, bridging the gap between the human mental Model and the digital Model.
 
-Also note that in the Views, we (or actually, the users of the app) are *thinking* about the Data. In the `LibraryBorrowMachine` the user is *doing* things, turning `Bluray` and `Book` into a `LoanItem`. But not when viewing and thinking about the Data. Then there is no ongoing functionality, and no Roles either. Thinking is MVC, doing is DCI.
+Also note that in the Views, we (or actually, the users of the app) are *thinking* about the Data. In the `LibraryBorrowMachine` the user is *doing* things, turning `Bluray` and `Book` into a `LoanItem`. But not when viewing and thinking about the Data. Then there is no ongoing functionality, and in a sense no Roles either, things become what they are. Thinking is MVC, doing is DCI.
 
 So back to upholding that illusion. It's simply done by a `MainView` that displays the data, together with some non-Context things like a bookshelf. A drag'n'drop library supports the real-time manipulation, but then we're back in functionality again, and if you look at [DragDropMechanics.hx](https://github.com/ciscoheat/haxedci-example/blob/master/src/contexts/DragDropMechanics.hx), you can see that the focus is now on `DragDropItem` and surfaces, not books and Blu-Rays.
 
-The other view is `ScreenView`, which was distinct and intricate enough, containing events for keypad and finish buttons, and nine display states, to be separated into its own View. That kind of decision should be the basis for decoupling, not seeing it as a rule or standard.
+The other view is `ScreenView`, which was distinct and intricate enough, containing events for keypad and finish buttons, and nine display states, to be separated into its own View. That kind of reasoning should be the basis for decoupling, not seeing it as a rule or standard.
 
 The javascript framework [Mithril](http://mithril.js.org/) is used to display the app, and I'm giving it my highest recommendation since it keeps itself in the background, so the focus can be on the architecture, not the structure imposed by frameworks in general. Using it with Haxe is very simple with [mithril-hx](https://github.com/ciscoheat/mithril-hx).
 
