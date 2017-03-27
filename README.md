@@ -163,6 +163,12 @@ The other view is `ScreenView`, which was distinct and intricate enough, contain
 
 The javascript framework [Mithril](http://mithril.js.org/) is used to display the app, and I'm giving it my highest recommendation since it keeps itself in the background, so the focus can be on the architecture, not the structure imposed by frameworks in general. Using it with Haxe is very simple with [mithril-hx](https://github.com/ciscoheat/mithril-hx).
 
+### Nested Contexts
+
+In [LibraryBorrowMachine.hx](https://github.com/ciscoheat/haxedci-example/blob/master/src/contexts/LibraryBorrowMachine.hx), `scanner.rfidScanned`, there is a call to a [BorrowLoanItem.hx](https://github.com/ciscoheat/haxedci-example/blob/master/src/contexts/BorrowLoanItem.hx) Context, which contains the functionality for borrowing a single `LoanItem`.
+
+Calling a Context inside another is called Nested Contexts, an important concept since it's finally about slicing behaviour in the right layers; where it makes sense to the user, instead of the current state of affairs, behaviour being sliced (spread out) in classes and behind abstractions, decided by, again, engineers who prefers structure rather than a user-focused archictecture.
+
 ### Event handling
 
 Events are quite disruptive to the interaction in a Context. They are similar to a GOTO, you can end up anywhere in the program when an event is triggered, even outside the Context, which goes against the readability goal of DCI.
