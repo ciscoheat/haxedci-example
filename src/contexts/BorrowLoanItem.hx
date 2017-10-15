@@ -28,18 +28,19 @@ class BorrowLoanItem implements dci.Context
     }
     
     public function borrow() : BorrowLoanItemStatus {
-        return if(!listOfItems.hasLoanItem())
-            InvalidLoanItem;
-        else if(!listOfLibraryCards.hasBorrowerID())
+        return if(!listOfLibraryCards.hasBorrowerID())
             InvalidBorrower;
-        else if(listOfLoans.hasBorrowedLoanItem())
+        else if(!listOfItems.hasLoanItem())
+            InvalidLoanItem;
+        else if(listOfLoans.hasLoanItemAlready())
             ItemAlreadyBorrowed;
         else {
+            var loanTime = loanItem.loanTime();
             var loan = new LibraryLoan({
                 borrowerRfid: borrower.id(),
                 loanItemRfid: loanItem.id(),
                 created: Date.now(),
-                returnDate: loanItem.returnDateFromToday()
+                returnDate: Date.now().delta(loanTime * 24 * 60 * 60 * 1000)
             });
             listOfLoans.addLoan(loan);
             Ok(loan);
@@ -50,7 +51,7 @@ class BorrowLoanItem implements dci.Context
         public function iterator() : Iterator<LibraryLoan>;
         public function push(loan : LibraryLoan) : Int;
 
-        public function hasBorrowedLoanItem() : Bool {
+        public function hasLoanItemAlready() : Bool {
             return self.exists(function(loan) {
                 return loan.loanItemRfid == loanItem.id() && loan.returnDate.getTime() > Date.now().getTime();
             });
@@ -82,9 +83,9 @@ class BorrowLoanItem implements dci.Context
 
         public function id() 
             return rfid;
-        
-        public function returnDateFromToday() 
-            return Date.now().delta(self.loanTimeDays * 24 * 60 * 60 * 1000);
+
+        public function loanTime()
+            return loanTimeDays;        
     }
 
     @role var borrower : {

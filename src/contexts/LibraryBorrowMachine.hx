@@ -21,7 +21,7 @@ class LibraryBorrowMachine implements dci.Context
     var authorizedCard : LibraryCard;
     var lastScannedRfid : Option<String>;
 
-    ///// Constructor and System interactions /////
+    ///// Constructor and System Operations /////
 
     public function new(scanner, cardReader, screen, printer, keypad, finishButtons) {
         // Role binding
