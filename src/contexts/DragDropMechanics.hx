@@ -84,7 +84,7 @@ class DragDropMechanics implements HaxeContracts
 		var pos = sourceEl.children.elPos(el);
 		Contract.assert(pos >= 0, "Item not found in surface " + sourceEl.id);
 
-		dragData = {
+		this.dragData = {
 			source: surface,
 			sourcePos: pos
 		}
@@ -93,7 +93,7 @@ class DragDropMechanics implements HaxeContracts
 	}
 
 	function onDrop(el : HtmlElement, targetEl : HtmlElement, _, sibling : Null<HtmlElement>) {
-		Contract.requires(dragData != null);
+		Contract.requires(this.dragData != null);
 		Contract.requires(el != null);
 		Contract.requires(surfaces.exists(targetEl.id), "No surface found: " + targetEl.id);
 		
@@ -104,9 +104,9 @@ class DragDropMechanics implements HaxeContracts
 			: targetEl.children.elPos(sibling) - 1;
 
 		// Splice from source to target
-		var removed = dragData.source.splice(dragData.sourcePos, 1);
+		var removed = this.dragData.source.splice(this.dragData.sourcePos, 1);
 		target.insert(targetPos, removed[0]);
-		dragData = null;
+		this.dragData = null;
 
 		//trace('Dropped ${removed} in ' + targetEl.id + '[$targetPos]');
 
