@@ -135,9 +135,7 @@ class ScreenView implements HaxeContracts implements Mithril
 
         var pin = pinBuffer;
         pinBuffer = "";
-        if(_onPinCodeEntered.hasEvent()) {
-            _onPinCodeEntered.trigger(pin);
-        }
+        _onPinCodeEntered.trigger(pin);
     }
 
     ///////////////////////////////////////////////////////
@@ -156,17 +154,11 @@ class ScreenView implements HaxeContracts implements Mithril
             m('p', [
                 m('button.-success', {
                     style:"margin-right:2px",
-                    onclick: function() {
-                        if(_onFinishWithReceiptClicked.hasEvent())
-                            _onFinishWithReceiptClicked.trigger();
-                    }
+                    onclick: function() _onFinishWithReceiptClicked.trigger()
                 }, 'Finish with receipt'),
                 m('button.-success', {
-                    onclick: function() {
-                        if(_onFinishWithoutReceiptClicked.hasEvent())
-                            _onFinishWithoutReceiptClicked.trigger();
-                    }
-                }, 'Finish without receipt'),
+                    onclick: function() _onFinishWithoutReceiptClicked.trigger()
+                }, 'Finish without receipt')
             ]),
             m('table', [ 
                 m('thead', 

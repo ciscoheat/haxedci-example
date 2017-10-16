@@ -55,8 +55,8 @@ class SingleEventHandler<T : Function> implements HaxeContracts
         this.removePos = pos;
     }
 
-    public function hasEvent() 
-        return this._trigger != null;
+    //public function hasEvent() 
+    //    return this._trigger != null;
 
     function posStr(p : PosInfos)
         return p.fileName + ":" + p.lineNumber;        
