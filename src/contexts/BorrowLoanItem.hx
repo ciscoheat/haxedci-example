@@ -48,8 +48,8 @@ class BorrowLoanItem implements dci.Context
     }
 
     @role var listOfLoans : {
-        public function iterator() : Iterator<LibraryLoan>;
-        public function push(loan : LibraryLoan) : Int;
+        function iterator() : Iterator<LibraryLoan>;
+        function push(loan : LibraryLoan) : Int;
 
         public function hasLoanItemAlready() : Bool {
             return self.exists(function(loan) {
@@ -62,7 +62,7 @@ class BorrowLoanItem implements dci.Context
     }
 
     @role var listOfLibraryCards : {
-        public function iterator() : Iterator<LibraryCard>;
+        function iterator() : Iterator<LibraryCard>;
 
         public function hasBorrowerID() : Bool {
             return self.exists(function(card) return card.rfid == borrower.id());
@@ -70,7 +70,7 @@ class BorrowLoanItem implements dci.Context
     }
 
     @role var listOfItems : {
-        public function iterator() : Iterator<LoanItem>;
+        function iterator() : Iterator<LoanItem>;
 
         public function hasLoanItem() : Bool {
             return self.exists(function(item) return item.rfid == loanItem.id());
@@ -78,8 +78,8 @@ class BorrowLoanItem implements dci.Context
     }    
     
     @role var loanItem : {
-        public var rfid(default, set) : String;
-        public var loanTimeDays(default, set) : Int;
+        var rfid(default, set) : String;
+        var loanTimeDays(default, set) : Int;
 
         public function id() 
             return rfid;
@@ -89,7 +89,7 @@ class BorrowLoanItem implements dci.Context
     }
 
     @role var borrower : {
-        public var rfid(default, set) : String;
+        var rfid(default, set) : String;
 
         public function id() 
             return rfid;
