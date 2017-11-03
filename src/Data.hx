@@ -2,13 +2,7 @@ import contexts.DragDropMechanics.DragDropItem;
 
 /**
  *  Used as a in-memory database for library items, cards and loans.
- *  The Main class is used to set up the data, hence the "allow" access
- *  control for Main.
- *  
- *  Short "implements" reference for the data classes below:
- *  - HaxeContracts: Design by Contract library
- *  - DataClass: A convenient way of creating and ensuring integrity of data objects
- *  - DragDropItem: A marker interface for objects that can be drag-dropped
+ *  The Main class is used to set up the data, hence the "allow" access control for Main.
  */
 @:allow(Main) class Data 
 {
@@ -17,29 +11,44 @@ import contexts.DragDropMechanics.DragDropItem;
     public static var libraryLoans(default, null) : Array<LibraryLoan>;
 }
 
-///// Interfaces (artefacts that makes sense to the user) /////
+///// Interfaces (artefacts that makes sense to the user in a context) /////
 
 interface RfidItem
 {
-    public var rfid(default, set) : String;
+    var rfid(default, set) : String;
 }
 
-interface LoanItem extends DragDropItem extends RfidItem
+interface LoanItem extends RfidItem
 {
-    public var title(default, set) : String;
-    public var loanTimeDays(default, set) : Int;
+    var title(default, set) : String;
+    var loanTimeDays(default, set) : Int;
 }
 
-///// LoanItem implementations /////
+interface ScannedItem
+{
+    var item(default, null) : LoanItem;
+    var returnDate(default, null) : Date;
+}
 
-class Book implements HaxeContracts implements DataClass implements LoanItem
+///// Data classes (what the system is) /////
+
+/**
+ *  Some additional interfaces are used for the data classes:
+ *  - HaxeContracts: Design by Contract library
+ *  - DataClass: A convenient way of creating and ensuring integrity of data objects
+ *  - DragDropItem: A marker interface for objects that can be drag-dropped
+ */
+
+class Book implements HaxeContracts implements DataClass implements DragDropItem 
+implements LoanItem
 {
     @validate(_.length > 0) public var rfid : String;
     @validate(_.length > 0) public var title : String;
     @validate(_ > 0) public var loanTimeDays : Int;
 }
 
-class Bluray implements HaxeContracts implements DataClass implements LoanItem
+class Bluray implements HaxeContracts implements DataClass implements DragDropItem 
+implements LoanItem
 {
     @validate(_.length > 0) public var rfid : String;
     @validate(_.length > 0) public var title : String;
@@ -47,9 +56,8 @@ class Bluray implements HaxeContracts implements DataClass implements LoanItem
     @validate(_ > 0) public var loanTimeDays : Int;
 }
 
-///// Other data /////
-
-class LibraryCard implements HaxeContracts implements DataClass implements DragDropItem implements RfidItem
+class LibraryCard implements HaxeContracts implements DataClass implements DragDropItem 
+implements RfidItem
 {
     @validate(_.length > 0) public var rfid : String;
     @validate(_.length > 0) public var name : String;
@@ -64,8 +72,19 @@ class LibraryLoan implements HaxeContracts implements DataClass
     public var returnDate : Date;
 }
 
-// This is to simplify the example, to avoid adding data references in ScreenView for example.
-typedef ScannedItem = {
-    item: LoanItem,
-    returnDate: Date
+class ReceiptItem implements HaxeContracts 
+implements ScannedItem
+{
+    public var item(default, null) : LoanItem;
+    public var returnDate(default, null) : Date;
+
+    public function new(item, returnDate) {
+        this.item = item;
+        this.returnDate = returnDate;
+    }
+
+    @invariants function invariants() {
+        Contract.invariant(this.item != null);
+        Contract.invariant(this.returnDate != null);
+    }
 }

@@ -6,6 +6,7 @@ import views.ScreenView.ScreenState;
 import Data.LibraryCard;
 import Data.LoanItem;
 import Data.ScannedItem;
+import Data.ReceiptItem;
 
 /**
  *  Use case implementation.
@@ -147,10 +148,7 @@ class LibraryBorrowMachine implements dci.Context
 
                     switch new BorrowLoanItem(item, authorizedCard).borrow() {
                         case Ok(loan):
-                            scannedItems.addItem({
-                                item: item,
-                                returnDate: loan.returnDate
-                            });
+                            scannedItems.addItem(new ReceiptItem(item, loan.returnDate));
                             screen.displayScannedItems();
                             self.waitForItem();
                         case InvalidLoanItem:
