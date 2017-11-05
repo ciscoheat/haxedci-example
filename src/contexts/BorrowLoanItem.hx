@@ -25,16 +25,33 @@ class BorrowLoanItem implements dci.Context
         this.listOfLoans = Data.libraryLoans;
         this.loanItem = loanItem;
         this.borrower = borrower;
+        this.librarian = this;
     }
     
     public function borrow() : BorrowLoanItemStatus {
-        return if(!listOfLibraryCards.hasBorrowerID())
-            InvalidBorrower;
-        else if(!listOfItems.hasLoanItem())
-            InvalidLoanItem;
-        else if(listOfLoans.hasLoanItemAlready())
-            ItemAlreadyBorrowed;
-        else {
+        return librarian.checkBorrowerId();
+    }
+
+    @role var librarian : {
+        public function checkBorrowerId() {
+            var id = borrower.id();
+            return if(!listOfLibraryCards.hasBorrowerId(id))
+                InvalidBorrower;
+            else
+                checkLoanItemId();
+        }
+
+        function checkLoanItemId() {
+            var id = loanItem.id();
+            return if(!listOfItems.hasLoanItem(id))
+                InvalidLoanItem;
+            else if(listOfLoans.hasLoanItemAlready(id))
+                ItemAlreadyBorrowed;
+            else 
+                addLoan();
+        }
+
+        function addLoan() {
             var loanTime = loanItem.loanTime();
             var loan = new LibraryLoan({
                 borrowerRfid: borrower.id(),
@@ -43,7 +60,7 @@ class BorrowLoanItem implements dci.Context
                 returnDate: Date.now().delta(loanTime * 24 * 60 * 60 * 1000)
             });
             listOfLoans.addLoan(loan);
-            Ok(loan);
+            return Ok(loan);
         }
     }
 
@@ -51,9 +68,9 @@ class BorrowLoanItem implements dci.Context
         function iterator() : Iterator<LibraryLoan>;
         function push(loan : LibraryLoan) : Int;
 
-        public function hasLoanItemAlready() : Bool {
+        public function hasLoanItemAlready(id) : Bool {
             return self.exists(function(loan) {
-                return loan.loanItemRfid == loanItem.id() && loan.returnDate.getTime() > Date.now().getTime();
+                return loan.loanItemRfid == id && loan.returnDate.getTime() > Date.now().getTime();
             });
         }
         
@@ -64,16 +81,16 @@ class BorrowLoanItem implements dci.Context
     @role var listOfLibraryCards : {
         function iterator() : Iterator<LibraryCard>;
 
-        public function hasBorrowerID() : Bool {
-            return self.exists(function(card) return card.rfid == borrower.id());
+        public function hasBorrowerId(id) : Bool {
+            return self.exists(function(card) return card.rfid == id);
         }
     }
 
     @role var listOfItems : {
         function iterator() : Iterator<LoanItem>;
 
-        public function hasLoanItem() : Bool {
-            return self.exists(function(item) return item.rfid == loanItem.id());
+        public function hasLoanItem(id) : Bool {
+            return self.exists(function(item) return item.rfid == id);
         }
     }    
     
