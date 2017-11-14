@@ -126,10 +126,10 @@ class LibraryBorrowMachine implements dci.Context
         function scanRfid(callback : Option<String> -> Void) : Void;
 
         public function waitForItem() {
-            self.scanRfid(self.rfidScanned);
+            self.scanRfid(self.readLoanItem);
         }
 
-        function rfidScanned(rfid : Option<String>) {
+        function readLoanItem(rfid : Option<String>) {
             // If the card has been removed, cancel interaction.
             if(authorizedCard == null) return;
 

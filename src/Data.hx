@@ -11,7 +11,7 @@ import contexts.DragDropMechanics.DragDropItem;
     public static var libraryLoans(default, null) : Array<LibraryLoan>;
 }
 
-///// Interfaces (artefacts that makes sense to the user in a context) /////
+///// Interfaces (artefacts that makes sense to a user in a context) /////
 
 interface RfidItem
 {
@@ -39,7 +39,8 @@ interface ScannedItem
  *  - DragDropItem: A marker interface for objects that can be drag-dropped
  */
 
-class Book implements HaxeContracts implements DataClass implements DragDropItem 
+class Book implements HaxeContracts implements DataClass 
+implements DragDropItem 
 implements LoanItem
 {
     @validate(_.length > 0) public var rfid : String;
@@ -47,7 +48,8 @@ implements LoanItem
     @validate(_ > 0) public var loanTimeDays : Int;
 }
 
-class Bluray implements HaxeContracts implements DataClass implements DragDropItem 
+class Bluray implements HaxeContracts implements DataClass 
+implements DragDropItem 
 implements LoanItem
 {
     @validate(_.length > 0) public var rfid : String;
@@ -56,7 +58,8 @@ implements LoanItem
     @validate(_ > 0) public var loanTimeDays : Int;
 }
 
-class LibraryCard implements HaxeContracts implements DataClass implements DragDropItem 
+class LibraryCard implements HaxeContracts implements DataClass 
+implements DragDropItem 
 implements RfidItem
 {
     @validate(_.length > 0) public var rfid : String;

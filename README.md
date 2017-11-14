@@ -37,7 +37,7 @@ public function start() {
 }
 ```
 
-After resetting the state it starts calling the RoleMethods, based on the use case that anyone involved in the project should understand, closing the gap between users, stakeholders and programmers.
+After the Context has reset its state, it starts calling the RoleMethods, based on the use case that anyone involved in the project should understand, closing the gap between users, stakeholders and programmers.
 
 Clearly named RoleMethods lets you grasp what will happen, so you can either skim past obvious things, like `screen.displayWelcome`, or dive into a specific part of the Context. At the end of a method you'll have to dive in anyway, since the interaction is distributed between the Roles. This is closely connected to how human beings reason about objects. A `cardReader` *does* things, to further the goal of the Context, which is to enable the user to borrow library items. It asks for help from other objects to reach the goal. It passes along some information to another object. And so on, until the problem is solved.
 
@@ -89,7 +89,7 @@ Is used by the other Roles to display what's happening. Played by an MVC View ob
 
 **finishButtons** 
 
-Is technically not a part of the Context as a Role, but since there is a close mapping of the *"Borrower indicates that ..."* part in the use case, they are included as a Role. This is an example of how the use case level and detail makes it difficult to create a perfect match between itself and the code.
+Is technically not a part of the Context as a Role, but since there is a close mapping of the *"Borrower indicates that borrowing is finished..."* part in the use case, they are included as a Role. This is an example of how the use case level and detail makes it difficult to create a perfect match between itself and the code.
 
 **keypad** 
 
@@ -155,11 +155,11 @@ DCI and MVC complements each other, and if you've read my [Rediscovering MVC](ht
 
 There are only two View objects in this app, in the [src/views](https://github.com/ciscoheat/haxedci-example/tree/master/src/views) folder, which could sound a bit constrained if you're used to the usual "decoupling at any cost" way of designing MVC applications. This decoupling doesn't make much sense though, after Rediscovering MVC. Instead of thinking of every Role in the `LibraryBorrowMachine` Context as a separate View, we simply want to maintain the illusion that the user is directly manipulating the data, or the Model as it's called in MVC, bridging the gap between the human mental Model and the digital Model.
 
-Also note that in the Views, we (or actually, the users of the app) are *thinking* about the Data. In the `LibraryBorrowMachine` the user is *doing* things, turning `Bluray` and `Book` into a `LoanItem`. But not when viewing and thinking about the Data. Then there is no ongoing functionality, and in a sense no Roles either, things become what they are. Thinking is MVC, doing is DCI.
+Also note that in the Views, we (or actually, the users of the app) are *thinking* about the Data. In the `LibraryBorrowMachine` the user is *doing* things, turning `Bluray` and `Book` into a `LoanItem`. But not when simply viewing and thinking about the Data. When there is no ongoing functionality, things become what they are. Thinking is MVC, doing is DCI.
 
-So back to upholding that illusion. It's simply done by a `MainView` that displays the data, together with some non-Context things like a bookshelf. A drag'n'drop library supports the real-time manipulation, but then we're back in functionality again, and if you look at [DragDropMechanics.hx](https://github.com/ciscoheat/haxedci-example/blob/master/src/contexts/DragDropMechanics.hx), you can see that the focus is now on `DragDropItem` and surfaces, not books and Blu-Rays.
+So back to upholding that illusion. It's done by a `MainView`, which is not a part of a Context and therefore we're viewing the data directly. A drag'n'drop library supports the real-time manipulation, but then we're back in functionality again, and if you look at [DragDropMechanics.hx](https://github.com/ciscoheat/haxedci-example/blob/master/src/contexts/DragDropMechanics.hx), you can see that the focus is now on `DragDropItem` and surfaces, not books and Blu-Rays.
 
-The other view is `ScreenView`, which was distinct and intricate enough, containing events for keypad and finish buttons, and nine display states, to be separated into its own View. That kind of reasoning should be the basis for decoupling, not seeing it as a rule or standard.
+The other view is `ScreenView`, which was distinct and intricate enough, containing events for keypad and finish buttons, and nine display states, to be separated into its own View. That kind of reasoning should be the basis for decoupling, not seeing it as a rule or standard. And when the screen takes part in the `LibraryBorrowMachine` Context, you can see that `ScannedItem` is used, an interface, not exactly what object was scanned.
 
 The javascript framework [Mithril](http://mithril.js.org/) is used to display the app, and I'm giving it my highest recommendation since it keeps itself in the background, so the focus can be on the architecture, not the structure imposed by frameworks in general. Using it with Haxe is very simple with [mithril-hx](https://github.com/ciscoheat/mithril-hx).
 
