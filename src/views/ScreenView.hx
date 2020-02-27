@@ -108,7 +108,8 @@ class ScreenView implements HaxeContracts implements Mithril
 
     function welcome() m('.content', [
         m('p', 'Welcome to the library borrowing machine!'),
-        m('p', m('strong', 'Please insert your card into the reader.'))
+        m('p', m('strong', 'Please drag your card to the reader.')),
+        m('p', 'Books are available on the top shelf.')
     ]);
 
     ///////////////////////////////////////////////////////
