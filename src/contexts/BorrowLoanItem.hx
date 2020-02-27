@@ -95,8 +95,8 @@ class BorrowLoanItem implements dci.Context
     }    
     
     @role var loanItem : {
-        var rfid(default, set) : String;
-        var loanTimeDays(default, set) : Int;
+        final rfid : String;
+        final loanTimeDays : Int;
 
         public function id() 
             return rfid;
@@ -106,7 +106,7 @@ class BorrowLoanItem implements dci.Context
     }
 
     @role var borrower : {
-        var rfid(default, set) : String;
+        final rfid : String;
 
         public function id() 
             return rfid;

@@ -36,13 +36,13 @@ class MainView implements Mithril
         M.mount(Printer, printer);
 
 		M.mount(Bookshelf, {view: surfaceView.bind(bookshelf)});
-        M.mount(CardReader, {view: surfaceView.bind(cardReader)});
+        M.mount(CardReader, {view: cardReaderView});
         M.mount(Scanner, {view: surfaceView.bind(itemScanner)});
         M.mount(Workspace, {view: surfaceView.bind(workspace)});
     }
 
     // In a larger example, different surfaces would probably have their own view template,
-    // but here the items look the same no matter where they are.
+    // but here the loan items look the same no matter where they are.
     function surfaceView(surface : Array<DragDropItem>) return surface.map(function(item) {
         return switch Type.getClass(item) {
             case Data.LibraryCard: 
@@ -52,9 +52,20 @@ class MainView implements Mithril
                 m('.book.cover', item.title);
             case Data.Bluray:
                 var item : Data.Bluray = cast item;
-                m('.bluray.cover', item.title);                
+                m('.bluray.cover', item.title);
             case unknown: 
                 m('div', {style:"color:red"}, 'View not found for: ' + Type.getClassName(unknown));
         }
     });
+
+    function cardReaderView() 
+        return if(cardReader.length == 0)
+            m('div', 'Card reader');
+        else
+            switch Type.getClass(cardReader[0]) {
+                case Data.LibraryCard: 
+                    m('img.card[src=images/card.svg]');
+                case unknown:
+                    m('div', {style:"color:red"}, 'View not found for: ' + Type.getClassName(unknown));
+            };
 }

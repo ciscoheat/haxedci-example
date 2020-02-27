@@ -6,6 +6,7 @@
 	<link rel="stylesheet" href="https://cdn.concisecss.com/concise.css">
 	<link rel="stylesheet" href="https://cdn.concisecss.com/concise-ui/concise-ui.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.css">
+	<link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -35,51 +36,10 @@
 	</div>
 	<script src="https://unpkg.com/mithril/mithril.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.js"></script>
-	<script>
-		/*
-		function q(query) { return document.querySelector(query) }
-
-		function removeFirst(arr, predicate) {
-		    for (var i = 0; i < arr.length; i++) {
-		        if (predicate(arr[i])) {
-		            return arr.splice(i--, 1)[0];
-		        }
-		    }
-		    return null
-		}
-
-		var bookshelf = q('#bookshelf')
-		var booksOnShelf = ['Anna Karenina', 'War and Peace', 'Master and Man']
-		var booksOnWorkspace = []
-
-		dragula([bookshelf, q('#workspace'), q('#scanner'), q('#card-reader')], {
-			accepts: function (el, target, source, sibling) {
-				var isCard = el.id == "card"
-				return (isCard && target.id != "bookshelf") ||
-					   (!isCard && !target.classList.contains("card-reader"))
-			}
-		}).on('drop', function(el, target, source, sibling) {
-			console.log(el)
-			console.log(target)
-
-			if(el.classList.contains('book')) {
-				var from = source.id == "workspace" ? booksOnWorkspace : booksOnShelf
-				var to = target.id == "workspace" ? booksOnWorkspace : booksOnShelf
-				to.push(removeFirst(from, function(book) { return book.id == el.innerText }))
-
-				console.log(to)
-			}
-		})
-
-		m.render(bookshelf, booksOnShelf.map(function(book) {
-			return m('.book', book)
-		}))
-		*/
-	</script>
 	<script src="haxedci-example.js"></script>
-	<script>
-	  if(location.hostname === "localhost" || location.hostname.indexOf('192.168') === 0) document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] +
-	  ':35729/livereload.js?snipver=1"></' + 'script>')
-	</script> 
+    <script>
+        if (["localhost", "127.0.0.1", ""].indexOf(location.hostname) != -1 || location.hostname.indexOf('.local') != -1)
+            document.write('<script src="https://ciscoheat.github.io/cdn/js/live.js"></' + 'script>')
+	</script>
 </body>
 </html>

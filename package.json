@@ -8,9 +8,8 @@
 	"dependencies": {
 	},
 	"scripts": {
-		"dependencies": "npm install -g npm-run-all livereload http-server",
-		"livereload": "livereload bin",
-		"server": "http-server bin",
-		"start": "npm-run-all --parallel server livereload"
+		"dependencies": "npm install -g npm-run-all http-server",
+		"server": "http-server bin -c-1 -o",
+		"start": "npm-run-all --parallel server"
 	}
 }

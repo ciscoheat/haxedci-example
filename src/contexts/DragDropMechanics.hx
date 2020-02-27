@@ -60,8 +60,10 @@ class DragDropMechanics implements HaxeContracts
 		
 		return switch targetElement.id {
 			// Scanner and CardReader can only take one item
-			case Scanner, CardReader:
+			case Scanner:
 				surfaces.get(targetElement.id).length < 1;
+			case CardReader:
+				surfaces.get(targetElement.id).length < 1 && droppedItem.classList.contains("card");
 			case _:
 				if(droppedItem.classList.contains("card")) {
 					// Card can not be dropped on the bookshelf

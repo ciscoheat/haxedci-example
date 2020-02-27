@@ -1,6 +1,7 @@
 
 html {
 	background: url(../images/white_wall_hash.jpg);
+	font-family: 'Roboto';
 }
 
 .red {
@@ -28,7 +29,7 @@ html {
 	align-items: center;
 	justify-content: center;	
 	border:12px solid #DDD; 
-	background-color: white;
+	background-color: #f9f9f9;
 	padding: 2px;
 	height: 360px;
 	font-size: 90%;
@@ -54,7 +55,7 @@ html {
 	flex-direction: row;
 	flex-wrap: wrap;
 	width: 30%;
-	max-width: 112px;
+	max-width: 100px;
 }
 
 #screen .key {
@@ -148,7 +149,7 @@ html {
 #printer .paper {
 	background-color: white;
 	position: relative;
-	font-size: 70%;
+	font-size: 90%;
 	top: 2px;
 	padding: 4px;
 }
@@ -162,9 +163,17 @@ html {
 #card-reader {
 	height:54px;
 	border: 2px solid #aaa;
-	background-color: #eee;
+	background-color: #ddd;
 	width: 98px;
-	background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1'><text x='5' y='29' fill='#d55' font-size='16'>Card reader</text></svg>");
+	position: relative;
+}
+
+#card-reader > div {
+	color:red;
+	text-align:center;
+	position:absolute;
+	width: 100%;
+	top: 17px;
 }
 
 .card {
@@ -192,7 +201,8 @@ html {
 	border: 1px solid #01509B;
 	background-color: #2F79BA;
 	background-image: url(../images/bluray-logo.svg);
-	background-position: 2px;
+	background-repeat: no-repeat;
+	background-position: 5px;
 	padding-left: 32px;
 }
 

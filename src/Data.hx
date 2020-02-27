@@ -15,13 +15,13 @@ import contexts.DragDropMechanics.DragDropItem;
 
 interface RfidItem
 {
-    var rfid(default, set) : String;
+    final rfid : String;
 }
 
 interface LoanItem extends RfidItem
 {
-    var title(default, set) : String;
-    var loanTimeDays(default, set) : Int;
+    final title : String;
+    final loanTimeDays : Int;
 }
 
 interface ScannedItem
@@ -34,45 +34,51 @@ interface ScannedItem
 
 /**
  *  Some additional interfaces are used for the data classes:
+ * 
+ *  - @:publicFields metadata - making all class fields public
  *  - HaxeContracts: Design by Contract library
  *  - DataClass: A convenient way of creating and ensuring integrity of data objects
  *  - DragDropItem: A marker interface for objects that can be drag-dropped
+ *
  */
-
+ @:publicFields
 class Book implements HaxeContracts implements DataClass 
 implements DragDropItem 
 implements LoanItem
 {
-    @validate(_.length > 0) public var rfid : String;
-    @validate(_.length > 0) public var title : String;
-    @validate(_ > 0) public var loanTimeDays : Int;
+    @:validate(_.length > 0) final rfid : String;
+    @:validate(_.length > 0) final title : String;
+    @:validate(_ > 0) final loanTimeDays : Int;
 }
 
+@:publicFields
 class Bluray implements HaxeContracts implements DataClass 
 implements DragDropItem 
 implements LoanItem
 {
-    @validate(_.length > 0) public var rfid : String;
-    @validate(_.length > 0) public var title : String;
-    @validate(_ > 0) public var length : Int;
-    @validate(_ > 0) public var loanTimeDays : Int;
+    @:validate(_.length > 0) final rfid : String;
+    @:validate(_.length > 0) final title : String;
+    @:validate(_ > 0) final length : Int;
+    @:validate(_ > 0) final loanTimeDays : Int;
 }
 
+@:publicFields
 class LibraryCard implements HaxeContracts implements DataClass 
 implements DragDropItem 
 implements RfidItem
 {
-    @validate(_.length > 0) public var rfid : String;
-    @validate(_.length > 0) public var name : String;
-    @validate(~/^\d{4}$/) public var pin : String;
+    @:validate(_.length > 0) final rfid : String;
+    @:validate(_.length > 0) final name : String;
+    @:validate(~/^\d{4}$/) final pin : String;
 }
 
+@:publicFields
 class LibraryLoan implements HaxeContracts implements DataClass
 {
-    @validate(_.length > 0) public var loanItemRfid : String;
-    @validate(_.length > 0) public var borrowerRfid : String;
-    public var created : Date;
-    public var returnDate : Date;
+    @:validate(_.length > 0) final loanItemRfid : String;
+    @:validate(_.length > 0) final borrowerRfid : String;
+    final created : Date;
+    final returnDate : Date;
 }
 
 class ReceiptItem implements HaxeContracts 
