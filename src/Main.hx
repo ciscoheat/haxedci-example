@@ -36,6 +36,7 @@ class Main
 
 		var bookshelf : Array<DragDropItem> = cast Data.libraryItems.array();
 		var workspace : Array<DragDropItem> = cast Data.libraryCards.array();
+		//.concat([new LibraryCard({rfid: 'FAKE', name: 'Fake name', pin: '1111'})]);
 
 		var scannerContents = [];
 		var scanner = new gadgets.RfidScanner(function() {

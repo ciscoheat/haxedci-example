@@ -4,6 +4,10 @@ html {
 	font-family: 'Roboto';
 }
 
+body {
+	max-width: 800px;
+}
+
 .red {
 	color:red;
 }

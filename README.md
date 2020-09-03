@@ -179,7 +179,7 @@ The `lib` folder contains a `SingleEventHandler` class that manages this for you
 
 ## Final notes
 
-I've taken a small liberty putting `DragDropFunctionality` in the `contexts` folder even though it's not a real DCI Context. It does a good job encapsulating functionality however, so I'm trying to show that being a bit flexible can help the architecture of a system.
+I've taken a small liberty putting `DragDropMechanics` in the `contexts` folder even though it's not a real DCI Context. It does a good job encapsulating functionality however, so I'm trying to show that being a bit flexible can help the architecture of a system.
 
 I have plans for a more interactive debugging experience, but for now I hope you will explore the rest of the code and moving on to building it yourself!
 
@@ -198,6 +198,8 @@ Node is used only as a build tool, so as a first step, run `npm run dependencies
 Thanks for reading! If you have ideas, thoughts, anything, just open up an issue. Finishing with some useful resources, since this is just a little dip into DCI.
 
 # Resources
+
+[SnakeDCI](https://github.com/ciscoheat/SnakeDCI) - The classic Snake game, using DCI and immutable data in combination with a game framework.
 
 ## Videos 
 

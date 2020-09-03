@@ -8,32 +8,38 @@ import Data.LoanItem;
 import Data.ScannedItem;
 import Data.ReceiptItem;
 
+@:publicFields private class State
+{
+    var pinAttemptsRemaining = LibraryBorrowMachine.maxPinAttempts;
+    var authorizedCard : Null<LibraryCard>;
+    final scannedItems : Array<ScannedItem> = [];
+
+    public function new() {}
+}
+
 /**
  *  Use case implementation.
  *  @see https://docs.google.com/spreadsheets/d/1TSpjKUhjvP9pMRukt_mInHVbdQWsXHzFjSymQ3VyGmE/edit#gid=2
  */
 class LibraryBorrowMachine implements dci.Context
 {
-    static var maxPinAttempts(default, never) : Int = 3;
+    public static final maxPinAttempts = 3;
 
-    ///// Non-Role state that supports the Context /////
-
-    var pinAttemptsLeft : Int;
-    var authorizedCard : LibraryCard;
-    var lastScannedRfid : Option<String>;
+    final state : State;
 
     ///// Constructor and System Operations /////
 
     public function new(scanner, cardReader, screen, printer, keypad, finishButtons) {
-        // Role binding
         this.scanner = scanner;
         this.cardReader = cardReader;
         this.screen = screen;
         this.printer = printer;
         this.keypad = keypad;
         this.finishButtons = finishButtons;
+
+        this.state = new State();
+        this.scannedItems = state.scannedItems;
         this.library = Data;
-        this.scannedItems = new Array<ScannedItem>();
     }
     
     public function start() {
@@ -49,15 +55,14 @@ class LibraryBorrowMachine implements dci.Context
     }
 
     function resetState() {
-        scannedItems.clearItems();
-        pinAttemptsLeft = maxPinAttempts;
-        authorizedCard = null;
-        lastScannedRfid = None;
+        state.scannedItems.splice(0, state.scannedItems.length);
+        state.pinAttemptsRemaining = maxPinAttempts;
+        state.authorizedCard = null;
     }
 
     ///// Roles /////
 
-    @role var cardReader : {
+    @role final cardReader : {
         function scanRfid(callback : Option<String> -> Void) : Void;
 
         public function waitForCardChange()
@@ -73,16 +78,16 @@ class LibraryBorrowMachine implements dci.Context
                 self.createWaitLoopForCardRemoval();
 
                 // Look up current card in library database, display pin screen if valid.
-                var card = library.card(rfid);
-
-                if(card != null)
-                    screen.displayEnterPin();
-                else
-                    screen.displayInvalidCard();
+                switch library.card(rfid) {
+                    case None:
+                        screen.displayInvalidCard();
+                    case Some(card):
+                        screen.displayEnterPin();
+                }
         }
 
         function createWaitLoopForCardRemoval() {
-            var removeCardLoop = new haxe.Timer(50);
+            final removeCardLoop = new haxe.Timer(50);
             removeCardLoop.run = function() {
                 self.scanRfid(function(data) {
                     // An "equals" test is required because data is an Enum.
@@ -96,24 +101,28 @@ class LibraryBorrowMachine implements dci.Context
 
         public function validatePin(pin : String) {
             self.scanRfid(function(data) switch data {
-                case Some(rfid):
-                    var card = library.card(rfid);
+                case Some(rfid): 
+                    switch library.card(rfid) {
+                        case None:
+                            screen.displayInvalidCard();
+                            
+                        case Some(card):
+                            if(card.pin == pin) {
+                                // PIN ok, authorize card and move to scanning of items.
+                                state.authorizedCard = card;
+                                screen.displayScannedItems();
+                                scanner.waitForItem();
+                            }
+                            else {
+                                state.pinAttemptsRemaining--;
 
-                    if(card == null) {
-                        screen.displayInvalidCard();
-                    }
-                    else if(card.pin == pin) {
-                        // PIN ok, authorize card and move to
-                        // scanning of items.
-                        authorizedCard = card;
-                        screen.displayScannedItems();
-                        scanner.waitForItem();
-                    }
-                    else if(--pinAttemptsLeft > 0) {
-                        screen.displayEnterPin();
-                    }
-                    else {
-                        screen.displayTooManyInvalidPin();
+                                if(state.pinAttemptsRemaining > 0) {
+                                    screen.displayEnterPin();
+                                }
+                                else {
+                                    screen.displayTooManyInvalidPin();
+                                }
+                            }
                     }
 
                 case None:
@@ -122,50 +131,58 @@ class LibraryBorrowMachine implements dci.Context
         }
     }
 
-    @role var scanner : {
+    @role final scanner : {
         function scanRfid(callback : Option<String> -> Void) : Void;
 
-        public function waitForItem() {
+        public function waitForItem()
             self.scanRfid(self.readLoanItem);
-        }
 
         function readLoanItem(rfid : Option<String>) {
-            // If the card has been removed, cancel interaction.
-            if(authorizedCard == null) return;
-
-            if(rfid.equals(lastScannedRfid)) return self.waitForItem()
-            else lastScannedRfid = rfid;
+            if(state.authorizedCard == null) return;
 
             switch rfid {
-                case None: 
-                    self.waitForItem();
-
-                case Some(rfid):
-                    if(scannedItems.alreadyScanned(rfid)) return self.waitForItem();
-
-                    var item = library.item(rfid);
-                    if(item == null) return self.waitForItem();
-
-                    switch new BorrowLoanItem(item, authorizedCard).borrow() {
-                        case Ok(loan):
-                            scannedItems.addItem(new ReceiptItem(item, loan.returnDate));
-                            screen.displayScannedItems();
-                            self.waitForItem();
-                        case InvalidLoanItem:
+                case Some(rfid) if(!scannedItems.alreadyScanned(rfid)):
+                    switch library.item(rfid) {
+                        case None:
                             screen.displayInvalidLoanItemMessage();
                             self.waitForItem();
-                        case ItemAlreadyBorrowed:
-                            screen.displayAlreadyBorrowedMessage();
-                            self.waitForItem();
-                        case InvalidBorrower:
-                            // LibraryCard is invalid, don't wait for another item.
-                            screen.displayInvalidCard();
+
+                        case Some(item):
+                            self.borrowLoanItem(item);
                     }
+
+                case _:
+                    self.waitForItem();
             }
+        }
+
+        function borrowLoanItem(item : LoanItem) {
+            if(state.authorizedCard == null) return;
+
+            switch new BorrowLoanItem(item, state.authorizedCard).borrow() {
+                case Ok(loan):
+                    // Emulate a short database connection delay
+                    Timer.delay(function() {
+                        scannedItems.addItem(new ReceiptItem(item, loan.returnDate));
+                        screen.displayScannedItems();
+                        self.waitForItem();
+                    }, Std.random(400) + 100);
+                    return;
+                case InvalidLoanItem:
+                    screen.displayInvalidLoanItemMessage();
+                case ItemAlreadyBorrowed:
+                    screen.displayAlreadyBorrowedMessage();
+                case InvalidBorrower:
+                    // LibraryCard is invalid, don't wait for another item.
+                    screen.displayInvalidCard();
+                    return;
+            }
+
+            self.waitForItem();
         }
     }
 
-    @role var scannedItems : {
+    @role final scannedItems : {
         function iterator() : Iterator<ScannedItem>;
         function push(item : ScannedItem) : Int;
         function splice(pos : Int, len : Int) : Iterable<ScannedItem>;
@@ -181,7 +198,7 @@ class LibraryBorrowMachine implements dci.Context
             return self.exists(function(scannedItem) return scannedItem.item.rfid == rfid);
     }
 
-    @role var screen : {
+    @role final screen : {
         function display(s : ScreenState) : Void;
         function displayMessage(state : ScreenState, waitMs : Int, ?thenDisplay : ScreenState) : Void;
 
@@ -194,7 +211,9 @@ class LibraryBorrowMachine implements dci.Context
         public function displayEnterPin() {
             // Listen to keypad event
             keypad.waitForEnterPin();
-            display(EnterPin({previousAttemptFailed: pinAttemptsLeft < 3}));
+            display(EnterPin({
+                previousAttemptFailed: state.pinAttemptsRemaining < maxPinAttempts
+            }));
         }
 
         public function displayScannedItems() {
@@ -210,7 +229,7 @@ class LibraryBorrowMachine implements dci.Context
             display(InvalidCard);
 
         public function displayInvalidLoanItemMessage()
-            displayMessage(InvalidLoanItem, 3000);
+            displayMessage(InvalidLoanItem, 100, DisplayBorrowedItems(scannedItems));
 
         public function displayAlreadyBorrowedMessage()
             displayMessage(ItemAlreadyBorrowed, 3000);
@@ -219,7 +238,7 @@ class LibraryBorrowMachine implements dci.Context
             display(DontForgetLibraryCard);
     }
 
-    @role var finishButtons : {
+    @role final finishButtons : {
         function onFinishWithoutReceiptClicked(callback : Void -> Void, ?pos : haxe.PosInfos) : Void;
         function onFinishWithReceiptClicked(callback : Void -> Void, ?pos : haxe.PosInfos) : Void;
 
@@ -229,7 +248,7 @@ class LibraryBorrowMachine implements dci.Context
         }
     }
 
-    @role var keypad : {
+    @role final keypad : {
         function onPinCodeEntered(callback : String -> Void, ?pos : haxe.PosInfos) : Void;
 
         public function waitForEnterPin() {
@@ -237,7 +256,7 @@ class LibraryBorrowMachine implements dci.Context
         }
     }
 
-    @role var printer : {
+    @role final printer : {
         function print(line : String) : Void;
         function cutPaper() : Void;
         
@@ -252,24 +271,30 @@ class LibraryBorrowMachine implements dci.Context
 
             var timer = new Timer(80);
             timer.run = function() {
-                self.print(buffer.pop());
-                if(buffer.length == 0) {
+                final current = buffer.pop();
+                if(current == null) {
                     timer.stop();
                     self.cutPaper();
                     screen.displayDontForgetLibraryCard();
+                } else {
+                    self.print(current);
                 }
             }
         }
     }
 
-    @role var library : {
+    @role final library : {
         var libraryItems(default, null) : Array<LoanItem>;
         var libraryCards(default, null) : Array<LibraryCard>;
 
-        public function item(rfid : String) : LoanItem 
-            return libraryItems.find(function(loanItem) return loanItem.rfid == rfid);
+        public function item(rfid : String) : Option<LoanItem> {
+            final libraryItem = self.libraryItems.find(loanItem -> loanItem.rfid == rfid);
+            return libraryItem == null ? None : Some(libraryItem);
+        }
 
-        public function card(rfid : String) : LibraryCard
-            return libraryCards.find(function(libraryCard) return libraryCard.rfid == rfid);
+        public function card(rfid : String) : Option<LibraryCard> {
+            final libraryCard = libraryCards.find(libraryCard -> libraryCard.rfid == rfid);
+            return libraryCard == null ? None : Some(libraryCard);
+        }
     }
 }

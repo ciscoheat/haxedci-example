@@ -13,3 +13,5 @@
 
 -js bin/haxedci-example.js
 -main Main
+
+--macro nullSafety('contexts')

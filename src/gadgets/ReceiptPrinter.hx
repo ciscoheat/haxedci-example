@@ -33,7 +33,9 @@ class ReceiptPrinter implements HaxeContracts implements Mithril
 	public function view()
 		m('.box', 
 			m('.slot',
-				m('.paper', [for(s in receipt)
+				m('.paper', {
+					onclick: () -> if(paperIsCut) buffer.splice(0, buffer.length)
+				}, [for(s in receipt)
 					m('p', if(s == "") M.trust("&nbsp;") else s)
 				])
 			)

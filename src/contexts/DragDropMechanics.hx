@@ -23,7 +23,7 @@ interface DragDropItem {}
  *  It is strongly coupled to the browser with both HTML and a
  *  javascript library, so it doesn't use DCI or any generalizations.
  */
-class DragDropMechanics implements HaxeContracts
+@:nullSafety(Off) class DragDropMechanics implements HaxeContracts
 {
 	/**
 	 *  Map of HTML id:s -> Array of drag'n'droppable items
